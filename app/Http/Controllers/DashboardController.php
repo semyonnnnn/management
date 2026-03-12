@@ -11,13 +11,10 @@ use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class MainController extends Controller
+class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        if (!Auth::user()) {
-            return Inertia::render('Auth/Login');
-        }
-        return Inertia::render('Main/Auth');
+        return Inertia::render('Dashboard/Index');
     }
 }

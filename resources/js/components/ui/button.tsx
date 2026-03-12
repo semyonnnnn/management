@@ -23,6 +23,7 @@ const buttonVariants = cva(
         link:
           "text-primary underline-offset-4 hover:underline cursor-pointer dark:backdrop-blur-sm dark:text-white dark:bg-transparent",
         main_menu: "bg-black text-white text-primary-foreground shadow hover:bg-primary/90 cursor-pointer dark:bg-white dark:text-black",
+        white: "border border-input shadow-sm bg-white text-black hover:bg-black hover:text-white cursor-pointer"
       },
       size: {
         default: "h-9 px-4 py-2",
