@@ -66,3 +66,16 @@ export interface RadioListProps {
     checked: boolean;
     onChange: (user: User) => void;
 }
+
+export interface LoadItem {
+    id: string;
+    percent: number;
+    label: string;
+    value: number | string;
+    color: string;
+}
+
+export interface TotalLoadCardProps {
+    loads: LoadItem[];
+    printProtocol: () => void;
+}
