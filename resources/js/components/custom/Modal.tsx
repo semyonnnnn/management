@@ -38,7 +38,7 @@ export default function Modal({
                 as="div"
                 id="modal"
                 className="fixed backdrop-blur-sm inset-0 flex transform items-center overflow-y-auto px-4 py-6 transition-all sm:px-0"
-                onClose={close}
+                onClose={() => { }}
             >
                 <TransitionChild
                     enter="ease-out duration-300"
@@ -60,7 +60,7 @@ export default function Modal({
                     leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                     leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
-                    <DialogPanel
+                    <DialogPanel onClick={(e) => e.stopPropagation()}
                         className={`mb-6 z-50 transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full dark:bg-gray-800 ${maxWidthClass}`}
                     >
                         {children}

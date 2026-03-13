@@ -79,3 +79,68 @@ export interface TotalLoadCardProps {
     loads: LoadItem[];
     printProtocol: () => void;
 }
+export interface DeptData {
+    id: string;
+    name: string;
+    territory: 'ekb' | 'kg';
+    territoryLabel: string;
+    staff: number;
+    totalLoad: number;
+    avgLoad: number;
+    levelPercent: number;
+    levelClass: 'low' | 'medium' | 'high';
+    forms: DeptForm[];
+}
+
+interface DeptForm {
+    id: string;
+    form: string;
+    indicators: number;
+    reports: number;
+    coeff: number;
+    calc: number;
+}
+
+export interface DeptTableProps {
+    departments: DeptData[];
+    toggleEditMode: () => void;
+    printProtocol: () => void;
+    openDeptDetail: (id: string) => void;
+    changeStaff: (id: string, value: number) => void;
+}
+
+export interface ModalDetailsProps {
+    showModal: boolean;
+    setShowModal: (showModal: boolean) => void;
+}
+
+export interface ModalDetailsProps {
+    showModal: boolean;
+    setShowModal: (val: boolean) => void;
+    departmentName: string;
+    territory: string;
+    staffCount: number;
+    totalLoad: number;
+    loadPerStaff: number;
+    forms: FormData[];
+}
+
+interface FormData {
+    id: string;
+    form: string;
+    indicators: number;
+    reports: number;
+    coeff: number;
+    calc: number;
+}
+
+export interface Version {
+    name: string;
+    date: string;
+}
+
+export interface STVersionsCardProps {
+    applyShrVersion: () => void;
+    printProtocol: () => void;
+    versions: Version[];
+}
