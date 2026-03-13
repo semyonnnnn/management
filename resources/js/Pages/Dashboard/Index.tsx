@@ -86,7 +86,7 @@ const LoadAndModifyModule: React.FC = () => {
     const loads: LoadItem[] = [
         { id: "all", label: "По Управлению", value: 123456, percent: 75, color: "bg-green-500" },
         { id: "ekb", label: "Екатеринбург", value: 65432, percent: 60, color: "bg-yellow-500" },
-        { id: "krg", label: "Курган", value: 58000, percent: 40, color: "bg-blue-500" },
+        { id: "krg", label: "Курган", value: 58000, percent: 25, color: "bg-blue-500" },
     ];
 
     // ! should be dynamically generated

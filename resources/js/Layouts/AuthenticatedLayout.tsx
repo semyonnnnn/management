@@ -26,7 +26,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                         {/* <NavButtonsMenu /> */}
                         <div className="flex flex-col" >
                             <div className="flex justify-center shrink-0 items-center h-full">
-                                <Link href="/">
+                                <Link href="/main">
                                     <ApplicationLogo />
                                 </Link>
                             </div>

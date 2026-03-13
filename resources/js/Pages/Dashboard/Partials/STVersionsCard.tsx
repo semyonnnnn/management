@@ -21,7 +21,8 @@ const STVersionsCard: React.FC<STVersionsCardProps> = ({ applyShrVersion, printP
                 className="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-thin scrollbar-thumb-rounded-md scrollbar-track-rounded-md"
                 id="version-selector"
                 style={{
-                    scrollbarColor: "#a2bffe", // Firefox: thumb color #7a3b1f, track color #1f1f1f
+                    scrollbarColor: "#a2bffe #1f2937", // Firefox (thumb track)
+                    scrollbarWidth: "thin",
                 }}
             >
                 {versions.map((v, idx) => (
