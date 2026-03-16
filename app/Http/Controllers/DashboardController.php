@@ -17,4 +17,8 @@ class DashboardController extends Controller
     {
         return Inertia::render('Dashboard/Index');
     }
+    public function uploadFiles(Request $request)
+    {
+        dd($request);
+    }
 }
