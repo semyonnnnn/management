@@ -2,23 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\Http\Request;
+///////////////////////
+use App\Services\UploadService;
 
 class DashboardController extends Controller
 {
+    protected UploadService $uploadService;
+
+    public function __construct(UploadService $uploadService)
+    {
+        $this->uploadService = $uploadService;
+    }
     public function index(Request $request)
     {
         return Inertia::render('Dashboard/Index');
     }
     public function uploadFiles(Request $request)
     {
-        dd($request);
+        $this->uploadService->handle($request);
     }
 }

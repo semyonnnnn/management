@@ -185,12 +185,7 @@ const LoadAndModifyModule: React.FC = () => {
             <div className="container mx-auto p-3 space-y-3">
                 <HeaderPanel />
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <DataUploadCard
-                        handleFormsUpload={handleFormsUpload}
-                        handleMatrixUpload={handleMatrixUpload}
-                        handleShrUpload={handleShrUpload}
-                        saveShrVersion={saveShrVersion}
-                    />
+                    <DataUploadCard />
                     <STVersionsCard
                         versions={versions}
                         applyShrVersion={applyShrVersion}
