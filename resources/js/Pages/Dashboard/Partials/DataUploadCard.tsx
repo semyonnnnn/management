@@ -5,7 +5,6 @@ const DataUploadCard: React.FC = () => {
     const { data, setData, post, processing, errors, setError, clearErrors, reset } = useForm({
         matrix: null as File | null,
         forms: null as File | null,
-        shr: null as File | null,
         version: "",
     });
 
@@ -18,10 +17,6 @@ const DataUploadCard: React.FC = () => {
 
         if (!data.forms) {
             setError("forms", "Файл справочника обязателен");
-        }
-
-        if (!data.shr) {
-            setError("shr", "Файл штатного расписания обязателен");
         }
 
         if (!data.version.trim()) {
@@ -54,7 +49,6 @@ const DataUploadCard: React.FC = () => {
 
             <div className="p-3 flex-1 space-y-4">
 
-                {/* Matrix */}
                 <div>
                     <label className="block font-semibold mb-1">Матрица (СтатНагрузка)</label>
                     <input
@@ -73,7 +67,6 @@ const DataUploadCard: React.FC = () => {
                     {errors.matrix && <p className="text-red-400 text-sm mt-1">{errors.matrix}</p>}
                 </div>
 
-                {/* Forms */}
                 <div>
                     <label className="block font-semibold mb-1">Справочник форм</label>
                     <input
@@ -90,25 +83,6 @@ const DataUploadCard: React.FC = () => {
                         }}
                     />
                     {errors.forms && <p className="text-red-400 text-sm mt-1">{errors.forms}</p>}
-                </div>
-
-                {/* SHR */}
-                <div>
-                    <label className="block font-semibold mb-1">Штатное расписание</label>
-                    <input
-                        type="file"
-                        accept=".xlsx,.xls"
-                        className="w-full border rounded-md px-2 py-1 bg-gray-800 text-gray-100 border-[#e0a28a]"
-                        onChange={e => {
-                            const file = e.target.files?.[0] || null;
-                            setData("shr", file);
-
-                            const err = validateExcelFile(file);
-                            if (err) setError("shr", err);
-                            else clearErrors("shr");
-                        }}
-                    />
-                    {errors.shr && <p className="text-red-400 text-sm mt-1">{errors.shr}</p>}
                 </div>
 
                 <div className="flex gap-2 mt-3 items-start">

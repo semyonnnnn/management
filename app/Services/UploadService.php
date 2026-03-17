@@ -24,6 +24,9 @@ class UploadService
             'matrix.required' => 'Файл матрицы обязателен',
             'matrix.file' => 'Файл матрицы должен быть корректным файлом',
             'matrix.mimes' => 'Файл матрицы должен быть формата .xlsx',
+            'forms.required' => 'Файл справочника обязателен',
+            'forms.file' => 'Файл справочника должен быть корректным файлом',
+            'forms.mimes' => 'Файл справочника должен быть формата .xlsx',
         ];
 
         $validator = Validator::make(
@@ -31,6 +34,7 @@ class UploadService
             [
                 'version' => ['required', 'string'],
                 'matrix' => ['required', 'file', 'mimes:xlsx'],
+                'forms' => ['required', 'file', 'mimes:xlsx'],
             ],
             $messages
         );
@@ -44,14 +48,17 @@ class UploadService
     {
         $files = [
             'matrix' => $request->file('matrix'),
+            'forms' => $request->file('forms'),
         ];
 
         $requiredSheets = [
             'matrix' => ['КО', 'СО'],
+            'forms' => ['Справочник'],
         ];
 
         $fileNames = [
             'matrix' => 'файле матрицы',
+            'forms' => 'файле справочника',
         ];
 
         $errors = [];
