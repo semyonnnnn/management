@@ -4,18 +4,21 @@ namespace App\Services;
 
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as XlsxReader;
-use PhpOffice\PhpSpreadsheet\Reader\IReadFilter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class UploadService
 {
     public function handle(Request $request)
     {
         $this->validateUpload($request);
-        $this->validateSheets($request);
-        dd($request->all());
+        $this->validateSheetNames($request);
+        $data = $this->getData($request);
+
+        dd($data);
     }
+
 
     public function validateUpload(Request $request): void
     {
@@ -45,7 +48,7 @@ class UploadService
         }
     }
 
-    protected function validateSheets(Request $request): void
+    protected function validateSheetNames(Request $request): void
     {
         $files = [
             'matrix' => $request->file('matrix'),
@@ -65,31 +68,12 @@ class UploadService
         $errors = [];
 
         foreach ($requiredSheets as $key => $sheets) {
-            /** @var \Illuminate\Http\UploadedFile $file */
             $file = $files[$key];
 
             try {
                 $reader = new XlsxReader();
                 $reader->setReadDataOnly(true);
                 $reader->setLoadSheetsOnly($sheets);
-                $reader->setReadFilter(
-                    new class ($sheets, 5000) implements \PhpOffice\PhpSpreadsheet\Reader\IReadFilter {
-                    private array $sheets;
-                    private int $maxRow;
-
-                    public function __construct(array $sheets, int $maxRow)
-                    {
-                        $this->sheets = $sheets;
-                        $this->maxRow = $maxRow;
-                    }
-
-                    // Correct signature
-                    public function readCell(string $column, int $row, ?string $worksheetName = null): bool
-                    {
-                        return in_array($worksheetName, $this->sheets) && $row <= $this->maxRow;
-                    }
-                    }
-                );
 
                 $spreadsheet = $reader->load($file->getPathname());
                 $sheetNames = $spreadsheet->getSheetNames();
@@ -101,12 +85,127 @@ class UploadService
                 }
 
             } catch (\Throwable $e) {
-                $errors[$key][] = "Не удалось прочитать {$fileNames[$key]}. Проверьте, что файл является корректным Excel-файлом.";
+                $errors[$key][] = "Не удалось прочитать {$fileNames[$key]}. Проверьте файл.";
             }
         }
 
         if (!empty($errors)) {
             throw ValidationException::withMessages($errors);
         }
+    }
+
+    /**
+     * Detect “real” data bounds dynamically
+     * - Scans columns first, allows gaps up to $maxGap
+     * - Then scans rows within detected columns, allows gaps
+     */
+    protected function detectDataBounds($sheet, int $maxGap = 10, int $maxRowsLimit = 20, int $maxColumnsList = 10): array
+    {
+        $activeColumns = [];
+        $emptyStreak = 0;
+        $col = 1;
+
+        // --- Scan columns dynamically ---
+        while (true) {
+            $columnLetter = Coordinate::stringFromColumnIndex($col);
+            $hasData = false;
+            $row = 1;
+            $rowEmptyStreak = 0;
+
+            // Check column for any data (gap-tolerant)
+            while (true) {
+                $value = $sheet->getCell($columnLetter . $row)->getValue();
+                if (!is_null($value) && trim((string) $value) !== '') {
+                    $hasData = true;
+                    $rowEmptyStreak = 0;
+                } else {
+                    $rowEmptyStreak++;
+                    if ($rowEmptyStreak > $maxGap) {
+                        break;
+                    }
+                }
+                $row++;
+
+                if ($row > $maxRowsLimit) {
+                    throw ValidationException::withMessages([
+                        'matrix' => ["Превышено максимальное количество строк ({$maxRowsLimit}) в колонке {$columnLetter}."],
+                        'forms' => ["Превышено максимальное количество строк ({$maxRowsLimit}) в колонке {$columnLetter}."]
+                    ]);
+                }
+            }
+
+            if ($hasData) {
+                $activeColumns[] = $col;
+                $emptyStreak = 0;
+            } else {
+                $emptyStreak++;
+                if ($emptyStreak > $maxGap) {
+                    break;
+                }
+            }
+
+            $col++;
+            if ($row > $maxColumnsList) {
+                throw ValidationException::withMessages([
+                    'matrix' => ["Превышено максимальное количество столбцов ($maxColumnsList)."]
+                ]);
+            }
+        }
+
+        // --- Scan rows based on detected columns ---
+        $activeRows = [];
+        $emptyStreak = 0;
+        $row = 1;
+
+        while (true) {
+            $hasData = false;
+
+            foreach ($activeColumns as $col) {
+                $columnLetter = Coordinate::stringFromColumnIndex($col);
+                $value = $sheet->getCell($columnLetter . $row)->getValue();
+
+                if (!is_null($value) && trim((string) $value) !== '') {
+                    $hasData = true;
+                    break;
+                }
+            }
+
+            if ($hasData) {
+                $activeRows[] = $row;
+                $emptyStreak = 0;
+            } else {
+                $emptyStreak++;
+                if ($emptyStreak > $maxGap) {
+                    break;
+                }
+            }
+
+            $row++;
+
+            // Hard stop for extremely long sheets
+            if ($row > 100000) {
+                throw new \RuntimeException("Excel file has more than 100,000 rows. Aborting scan.");
+            }
+        }
+
+        return [$activeColumns, $activeRows];
+    }
+
+    protected function getData(Request $request)
+    {
+        $file = $request->file('matrix');
+
+        $reader = new XlsxReader();
+        $reader->setReadDataOnly(true);
+
+        $spreadsheet = $reader->load($file->getPathname());
+        $sheet = $spreadsheet->getActiveSheet();
+
+        [$columns, $rows] = $this->detectDataBounds($sheet);
+
+        return ([
+            'columns' => $columns,
+            'rows' => $rows,
+        ]);
     }
 }
