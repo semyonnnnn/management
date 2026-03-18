@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as XlsxReader;
+use PhpOffice\PhpSpreadsheet\Reader\IReadFilter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -70,6 +71,26 @@ class UploadService
             try {
                 $reader = new XlsxReader();
                 $reader->setReadDataOnly(true);
+                $reader->setLoadSheetsOnly($sheets);
+                $reader->setReadFilter(
+                    new class ($sheets, 5000) implements \PhpOffice\PhpSpreadsheet\Reader\IReadFilter {
+                    private array $sheets;
+                    private int $maxRow;
+
+                    public function __construct(array $sheets, int $maxRow)
+                    {
+                        $this->sheets = $sheets;
+                        $this->maxRow = $maxRow;
+                    }
+
+                    // Correct signature
+                    public function readCell(string $column, int $row, ?string $worksheetName = null): bool
+                    {
+                        return in_array($worksheetName, $this->sheets) && $row <= $this->maxRow;
+                    }
+                    }
+                );
+
                 $spreadsheet = $reader->load($file->getPathname());
                 $sheetNames = $spreadsheet->getSheetNames();
 
