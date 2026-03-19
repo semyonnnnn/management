@@ -9,6 +9,7 @@ export const CalculationCard: React.FC<Props> = ({
     recalcAndRender,
     loadDemoData,
 }) => {
+
     return (
         <div className="bg-white shadow rounded-md h-full flex flex-col">
             <div className="bg-gray-100 p-3 rounded-t-md">
@@ -56,9 +57,11 @@ export const CalculationCard: React.FC<Props> = ({
 
                 <div className="flex flex-col gap-2">
                     <button
-                        className="bg-green-600 text-white py-2 rounded-md flex items-center justify-center gap-1"
+                        className="bg-green-600 cursor-pointer text-white py-2 rounded-md flex items-center justify-center gap-1"
                         id="calculate-btn"
-                        onClick={recalcAndRender}
+                        onClick={() => {
+                            recalcAndRender();
+                        }}
                     >
                         <i className="bi bi-play-circle"></i>
                         Рассчитать нагрузку

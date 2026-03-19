@@ -13,10 +13,10 @@ class UploadService
     public function handle(Request $request)
     {
         $this->validateUpload($request);
-        $this->validateSheetNames($request);
-        $data = $this->getData($request);
+        // $this->validateSheetNames($request);
+        // $data = $this->getData($request);
 
-        dd($data);
+        // dd($data);
     }
 
 

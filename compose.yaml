@@ -60,6 +60,17 @@ services:
             - mariadb
         networks:
             - sail
+    python:
+        image: python:3.12-slim
+        container_name: sail-python
+        working_dir: /var/www/html
+        volumes:
+            - ./:/var/www/html
+        networks:
+            - sail
+        # This installs your tools once when the container starts
+        command: >
+            sh -c "pip install pandas openpyxl python-docx mysql-connector-python && tail -f /dev/null"
 
 networks:
     sail:
