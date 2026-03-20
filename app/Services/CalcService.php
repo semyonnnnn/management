@@ -3,38 +3,41 @@
 namespace App\Services;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 class CalcService
 {
+    /**
+     * Handle the matrix calculation by sending the file path to the Python microservice.
+     */
     public function handle(Request $request)
     {
-        // 1. Store the file and get the relative path
+        // 1. Store the file (Default disk is 'local')
+        // In Laravel 11, this goes to: storage/app/private/uploads/
         $path = $request->file('matrix')->store('uploads');
 
-        // 2. Get the absolute path that the Docker container understands
-        // storage_path('app/' . $path) points to /var/www/html/storage/app/uploads/...
-        $absolutePath = storage_path('app/' . $path);
+        // 2. Get the absolute path using the Storage facade
+        // This ensures the /private/ segment is included in the path
+        $absolutePath = Storage::disk('local')->path($path);
 
-        $scriptPath = '/var/www/html/app/Python/hello.py';
+        // 3. Send a POST request to the Python container
+        // Ensure your docker-compose service name is 'python'
+        $response = Http::timeout(60)
+            ->post('http://python:5000/process-matrix', [
+                'file_path' => $absolutePath,
+            ]);
 
-        $payload = [
-            'file_path' => $absolutePath,
-        ];
-
-        // 3. Execute Python
-        $result = Process::run("python3 $scriptPath " . escapeshellarg(json_encode($payload)));
-
-        if ($result->successful()) {
-            $output = json_decode($result->output(), true);
-
-            // For now, let's dd to verify the Python output
-            dd($output);
-
-            return $output;
+        // 4. Handle the response
+        if ($response->successful()) {
+            return $response->json();
         }
 
-        throw new \Exception("Python Error: " . $result->errorOutput());
+        // 5. Cleanup the file if Python failed (optional)
+        // Storage::delete($path);
+
+        throw new \Exception(
+            "Python Service Error (" . $response->status() . "): " . $response->body()
+        );
     }
 }
