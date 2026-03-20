@@ -61,16 +61,15 @@ services:
         networks:
             - sail
     python:
-        image: python:3.12-slim
+        build:
+            context: .
+            dockerfile: python.Dockerfile
         container_name: sail-python
         working_dir: /var/www/html
         volumes:
             - ./:/var/www/html
         networks:
             - sail
-        # This installs your tools once when the container starts
-        command: >
-            sh -c "pip install pandas openpyxl python-docx mysql-connector-python && tail -f /dev/null"
 
 networks:
     sail:
