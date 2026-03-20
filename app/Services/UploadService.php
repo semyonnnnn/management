@@ -19,7 +19,6 @@ class UploadService
         dd($data);
     }
 
-
     public function validateUpload(Request $request): void
     {
         $messages = [
@@ -73,8 +72,7 @@ class UploadService
             try {
                 $reader = new XlsxReader();
                 $reader->setReadDataOnly(true);
-                $reader->setLoadSheetsOnly($sheets);
-
+                
                 $spreadsheet = $reader->load($file->getPathname());
                 $sheetNames = $spreadsheet->getSheetNames();
 
@@ -95,117 +93,140 @@ class UploadService
     }
 
     /**
-     * Detect “real” data bounds dynamically
-     * - Scans columns first, allows gaps up to $maxGap
-     * - Then scans rows within detected columns, allows gaps
+     * Detect "real" data bounds dynamically
      */
-    protected function detectDataBounds($sheet, int $maxGap = 10, int $maxRowsLimit = 20, int $maxColumnsList = 10): array
+    protected function detectDataBounds($sheet, int $maxEmptyRows = 1000): array
     {
+        $highestRow = $sheet->getHighestRow();
+        $highestColumn = $sheet->getHighestColumn();
+        $highestColumnIndex = Coordinate::columnIndexFromString($highestColumn);
+    
         $activeColumns = [];
-        $emptyStreak = 0;
-        $col = 1;
-
-        // --- Scan columns dynamically ---
-        while (true) {
-            $columnLetter = Coordinate::stringFromColumnIndex($col);
-            $hasData = false;
-            $row = 1;
-            $rowEmptyStreak = 0;
-
-            // Check column for any data (gap-tolerant)
-            while (true) {
-                $value = $sheet->getCell($columnLetter . $row)->getValue();
-                if (!is_null($value) && trim((string) $value) !== '') {
-                    $hasData = true;
-                    $rowEmptyStreak = 0;
-                } else {
-                    $rowEmptyStreak++;
-                    if ($rowEmptyStreak > $maxGap) {
-                        break;
-                    }
-                }
-                $row++;
-
-                if ($row > $maxRowsLimit) {
-                    throw ValidationException::withMessages([
-                        'matrix' => ["Превышено максимальное количество строк ({$maxRowsLimit}) в колонке {$columnLetter}."],
-                        'forms' => ["Превышено максимальное количество строк ({$maxRowsLimit}) в колонке {$columnLetter}."]
-                    ]);
-                }
-            }
-
-            if ($hasData) {
-                $activeColumns[] = $col;
-                $emptyStreak = 0;
-            } else {
-                $emptyStreak++;
-                if ($emptyStreak > $maxGap) {
-                    break;
-                }
-            }
-
-            $col++;
-            if ($row > $maxColumnsList) {
-                throw ValidationException::withMessages([
-                    'matrix' => ["Превышено максимальное количество столбцов ($maxColumnsList)."]
-                ]);
-            }
-        }
-
-        // --- Scan rows based on detected columns ---
         $activeRows = [];
-        $emptyStreak = 0;
-        $row = 1;
-
-        while (true) {
-            $hasData = false;
-
-            foreach ($activeColumns as $col) {
+    
+        // Track empty streaks for early exit
+        $emptyRowStreak = 0;
+    
+        for ($row = 1; $row <= $highestRow; $row++) {
+            $rowHasData = false;
+    
+            for ($col = 1; $col <= $highestColumnIndex; $col++) {
+                // Convert column index to letter for getCell()
                 $columnLetter = Coordinate::stringFromColumnIndex($col);
-                $value = $sheet->getCell($columnLetter . $row)->getValue();
-
-                if (!is_null($value) && trim((string) $value) !== '') {
-                    $hasData = true;
-                    break;
+                $cell = $sheet->getCell($columnLetter . $row);
+                $value = $cell->getValue();
+                
+                if (!is_null($value) && trim((string)$value) !== '') {
+                    $rowHasData = true;
+                    $activeColumns[$col] = true;
                 }
             }
-
-            if ($hasData) {
+    
+            if ($rowHasData) {
                 $activeRows[] = $row;
-                $emptyStreak = 0;
+                $emptyRowStreak = 0;
             } else {
-                $emptyStreak++;
-                if ($emptyStreak > $maxGap) {
+                $emptyRowStreak++;
+                if ($emptyRowStreak >= $maxEmptyRows) {
                     break;
                 }
-            }
-
-            $row++;
-
-            // Hard stop for extremely long sheets
-            if ($row > 100000) {
-                throw new \RuntimeException("Excel file has more than 100,000 rows. Aborting scan.");
             }
         }
-
+    
+        $activeColumns = array_keys($activeColumns);
+        
+        // If no active columns found, default to first column
+        if (empty($activeColumns)) {
+            $activeColumns = [1];
+        }
+        
+        // If no active rows found, default to first row
+        if (empty($activeRows)) {
+            $activeRows = [1];
+        }
+    
         return [$activeColumns, $activeRows];
     }
 
-    protected function getData(Request $request)
+    /**
+     * Extract data from a specific sheet with bounds detection
+     */
+    protected function extractSheetData($sheet): array
     {
-        $file = $request->file('matrix');
-
-        $reader = new XlsxReader();
-        $reader->setReadDataOnly(true);
-
-        $spreadsheet = $reader->load($file->getPathname());
-        $sheet = $spreadsheet->getActiveSheet();
-
         [$columns, $rows] = $this->detectDataBounds($sheet);
+        
+        $data = [];
+        
+        foreach ($rows as $row) {
+            $rowData = [];
+            foreach ($columns as $col) {
+                // Convert column index to letter for getCell()
+                $columnLetter = Coordinate::stringFromColumnIndex($col);
+                $cell = $sheet->getCell($columnLetter . $row);
+                $value = $cell->getValue();
+                
+                // Convert to string and trim for consistency
+                $rowData[$col] = !is_null($value) ? trim((string)$value) : null;
+            }
+            $data[] = $rowData;
+        }
+        
+        return [
+            'bounds' => [
+                'columns' => $columns,
+                'rows' => $rows,
+                'column_count' => count($columns),
+                'row_count' => count($rows),
+            ],
+            'data' => $data,
+        ];
+    }
 
-        return ([
-            'columns' => $columns,
-            'rows' => $rows,
-        ]);
+    protected function getData(Request $request): array
+    {
+        $files = [
+            'matrix' => $request->file('matrix'),
+            'forms' => $request->file('forms'),
+        ];
+        
+        $result = [
+            'version' => $request->input('version'),
+            'files' => [],
+        ];
+        
+        foreach ($files as $fileKey => $file) {
+            try {
+                $reader = new XlsxReader();
+                $reader->setReadDataOnly(true);
+                
+                $spreadsheet = $reader->load($file->getPathname());
+                $sheetNames = $spreadsheet->getSheetNames();
+                
+                $sheetsData = [];
+                
+                // Process each sheet in the file
+                foreach ($sheetNames as $sheetName) {
+                    $sheet = $spreadsheet->getSheetByName($sheetName);
+                    if ($sheet) {
+                        $sheetsData[$sheetName] = $this->extractSheetData($sheet);
+                    }
+                }
+                
+                $result['files'][$fileKey] = [
+                    'name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                    'sheet_names' => $sheetNames,
+                    'sheets' => $sheetsData,
+                ];
+                
+            } catch (\Throwable $e) {
+                $result['files'][$fileKey] = [
+                    'name' => $file->getClientOriginalName(),
+                    'error' => 'Не удалось прочитать файл: ' . $e->getMessage(),
+                ];
+            }
+        }
+        
+        return $result;
     }
 }
