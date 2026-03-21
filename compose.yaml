@@ -24,6 +24,8 @@ services:
             - sail
         depends_on:
             - mariadb
+            - python
+
     mariadb:
         image: 'mariadb:11'
         ports:
@@ -34,20 +36,16 @@ services:
             MYSQL_DATABASE: '${DB_DATABASE}'
             MYSQL_USER: '${DB_USERNAME}'
             MYSQL_PASSWORD: '${DB_PASSWORD}'
-            # MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
         volumes:
             - 'sail-mariadb:/var/lib/mysql'
             - './vendor/laravel/sail/database/mariadb/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
         networks:
             - sail
         healthcheck:
-            test:
-                - CMD
-                - healthcheck.sh
-                - '--connect'
-                - '--innodb_initialized'
+            test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
             retries: 3
             timeout: 5s
+
     phpmyadmin:
         image: phpmyadmin/phpmyadmin
         ports:
@@ -60,21 +58,23 @@ services:
             - mariadb
         networks:
             - sail
+
     python:
         build:
             context: .
             dockerfile: python.Dockerfile
-        container_name: sail-python
         volumes:
-            - .:/var/www/html
+            - .:/app
+        ports:
+            - "8000:8000"
         networks:
-            sail:
-                aliases:
-                    - python # <--- Explicitly tell the network to call this 'python'
+            - sail
+        restart: unless-stopped
 
 networks:
     sail:
         driver: bridge
+
 volumes:
     sail-mariadb:
         driver: local

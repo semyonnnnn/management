@@ -1,45 +1,50 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, UploadFile, File
 import pandas as pd
-import os
+from io import BytesIO
 
-app = Flask(__name__)
+app = FastAPI()
 
-@app.route('/process-matrix', methods=['POST'])
-def process_matrix():
-    data = request.get_json()
-    file_path = data.get('file_path')
+def clean_df(df: pd.DataFrame) -> pd.DataFrame:
+    # Strip strings column-wise (only object/string columns)
+    for col in df.select_dtypes(include='object'):
+        df[col] = df[col].astype(str).str.strip()
+    # Drop fully empty rows
+    df = df.dropna(how='all')
+    return df
 
-    # Debugging check: Does the file actually exist where Python is looking?
-    if not os.path.exists(file_path):
-        return jsonify({
-            "status": "error", 
-            "message": f"File not found at: {file_path}. Is the volume mapped correctly?"
-        }), 400
+@app.post("/process")
+async def process(
+    matrix: UploadFile = File(...),
+    forms: UploadFile = File(...),
+):
+    matrix_result = {}
+    forms_result = {}
 
-    try:
-        # Determine file type and read
-        if file_path.endswith('.xlsx') or file_path.endswith('.xls'):
-            df = pd.read_excel(file_path)
-        else:
-            df = pd.read_csv(file_path)
-        
-        # Example logic: Sum the first column
-        # Convert to float to ensure JSON serializability
-        result_value = float(df.iloc[:, 0].sum()) 
+    # Read matrix bytes into memory
+    matrix_bytes = await matrix.read()
+    xls_matrix = pd.ExcelFile(BytesIO(matrix_bytes))
+    for sheet_name in xls_matrix.sheet_names:
+        df = pd.read_excel(xls_matrix, sheet_name=sheet_name)
+        df = clean_df(df)
+        matrix_result[str(sheet_name)] = {
+            "rows": int(len(df)),
+            "columns": int(len(df.columns)),
+            "column_names": [str(c) for c in df.columns]
+        }
 
-        return jsonify({
-            "status": "success",
-            "result": result_value,
-            "rows_processed": len(df),
-            "file_used": file_path
-        })
-        
-    except Exception as e:
-        return jsonify({
-            "status": "error", 
-            "message": f"Pandas Error: {str(e)}"
-        }), 400
+    # Read forms bytes into memory
+    forms_bytes = await forms.read()
+    xls_forms = pd.ExcelFile(BytesIO(forms_bytes))
+    for sheet_name in xls_forms.sheet_names:
+        df = pd.read_excel(xls_forms, sheet_name=sheet_name)
+        df = clean_df(df)
+        forms_result[str(sheet_name)] = {
+            "rows": int(len(df)),
+            "columns": int(len(df.columns)),
+            "column_names": [str(c) for c in df.columns]
+        }
 
-if __name__ == '__main__':
-    # MUST use 0.0.0.0 to listen for requests from the Laravel container
-    app.run(host='0.0.0.0', port=5000)
+    return {
+        "matrix": matrix_result,
+        "forms": forms_result
+    }

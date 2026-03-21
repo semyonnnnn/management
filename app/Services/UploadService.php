@@ -11,14 +11,23 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 class UploadService
 {
     public function handle(Request $request)
-    {
-        $this->validateUpload($request);
-        // $this->validateSheetNames($request);
-        // $data = $this->getData($request);
+{
+    // Call Python service via HTTP multipart
+    $response = \Illuminate\Support\Facades\Http::withHeaders([
+        'Accept' => 'application/json',
+    ])->attach(
+        'matrix',
+        fopen($request->file('matrix')->getRealPath(), 'r'),
+        $request->file('matrix')->getClientOriginalName()
+    )->attach(
+        'forms',
+        fopen($request->file('forms')->getRealPath(), 'r'),
+        $request->file('forms')->getClientOriginalName()
+    )->post('http://python:8000/process');
 
-        // dd($data);
-    }
-
+    // Dump the JSON response from Python
+    dd($response->json());
+}
 
     public function validateUpload(Request $request): void
     {
