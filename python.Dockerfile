@@ -20,7 +20,8 @@ RUN pip install --no-cache-dir \
     mysql-connector-python \
     fastapi \
     uvicorn \
-    python-multipart
+    python-multipart \
+    numpy
 
 # Copy app
 COPY . /app

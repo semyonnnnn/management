@@ -72,7 +72,6 @@ export interface LoadItem {
     percent: number;
     label: string;
     value: number | string;
-    color: string;
 }
 
 export interface TotalLoadCardProps {
@@ -82,8 +81,8 @@ export interface TotalLoadCardProps {
 export interface DeptData {
     id: string;
     name: string;
-    territory: 'ekb' | 'kg';
-    territoryLabel: string;
+    territory: string;
+    dataTerritory: 'ekb' | 'krg';
     staff: number;
     totalLoad: number;
     avgLoad: number;

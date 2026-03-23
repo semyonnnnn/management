@@ -11,23 +11,37 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 class UploadService
 {
     public function handle(Request $request)
-{
-    // Call Python service via HTTP multipart
-    $response = \Illuminate\Support\Facades\Http::withHeaders([
-        'Accept' => 'application/json',
-    ])->attach(
-        'matrix',
-        fopen($request->file('matrix')->getRealPath(), 'r'),
-        $request->file('matrix')->getClientOriginalName()
-    )->attach(
-        'forms',
-        fopen($request->file('forms')->getRealPath(), 'r'),
-        $request->file('forms')->getClientOriginalName()
-    )->post('http://python:8000/process');
+    {
+        $this->validateUpload($request);
+        $this->validateSheetNames($request);
 
-    // Dump the JSON response from Python
-    dd($response->json());
-}
+        $res = $this->python($request);
+        dd($res);
+    }
+
+
+    public function python(Request $request)
+    {
+        $response = \Illuminate\Support\Facades\Http::attach(
+            'matrix',
+            file_get_contents($request->file('matrix')->getRealPath()),
+            $request->file('matrix')->getClientOriginalName()
+        )->attach(
+                'forms',
+                file_get_contents($request->file('forms')->getRealPath()),
+                $request->file('forms')->getClientOriginalName()
+            )->post('http://python:8000/process');
+
+        if ($response->failed()) {
+            // This will tell you if Python crashed (500) or wasn't found (404)
+            return response()->json([
+                'error' => 'Python service failed',
+                'details' => $response->body()
+            ], $response->status());
+        }
+
+        return $response->json();
+    }
 
     public function validateUpload(Request $request): void
     {

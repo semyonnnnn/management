@@ -6,17 +6,17 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 ///////////////////////
 use App\Services\UploadService;
-use App\Services\CalcService;
+// use App\Services\CalcService;
 
 class DashboardController extends Controller
 {
     protected UploadService $uploadService;
-    protected CalcService $calcService;
+    // protected CalcService $calcService;
 
-    public function __construct(UploadService $uploadService, CalcService $calcService)
+    public function __construct(UploadService $uploadService)
     {
         $this->uploadService = $uploadService;
-        $this->calcService = $calcService;
+        // $this->calcService = $calcService;
     }
     public function index(Request $request)
     {
@@ -25,6 +25,6 @@ class DashboardController extends Controller
     public function uploadFiles(Request $request)
     {
         $this->uploadService->handle($request);
-        $this->calcService->handle($request);
+        // $this->calcService->handle($request);
     }
 }

@@ -84,9 +84,9 @@ const LoadAndModifyModule: React.FC = () => {
 
     // ! should be dynamically generated
     const loads: LoadItem[] = [
-        { id: "all", label: "По Управлению", value: 123456, percent: 75, color: "bg-green-500" },
-        { id: "ekb", label: "Екатеринбург", value: 65432, percent: 60, color: "bg-yellow-500" },
-        { id: "krg", label: "Курган", value: 58000, percent: 25, color: "bg-blue-500" },
+        { id: "all", label: "По Управлению", value: 123456, percent: 75 },
+        { id: "ekb", label: "Екатеринбург", value: 65432, percent: 60 },
+        { id: "krg", label: "Курган", value: 58000, percent: 25 },
     ];
 
     // ! should be dynamically generated
@@ -95,8 +95,7 @@ const LoadAndModifyModule: React.FC = () => {
         {
             id: "dept_1155",
             name: "Отдел региональных счетов и балансов",
-            territory: "ekb",
-            territoryLabel: "Екатеринбург",
+            territory: "Екатеринбург",
             staff: 1,
             totalLoad: 21.9,
             avgLoad: 22,
