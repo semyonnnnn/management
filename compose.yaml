@@ -65,6 +65,7 @@ services:
             dockerfile: python.Dockerfile
         volumes:
             - ./app/Python:/app
+        working_dir: /app
         ports:
             - '8000:8000'
         networks:
