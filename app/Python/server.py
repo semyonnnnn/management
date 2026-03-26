@@ -10,14 +10,13 @@ from utils import json_ready
 app = FastAPI()
 
 @app.post("/process")
-async def process(matrix: UploadFile = File(...), forms: UploadFile = File(...)):
+async def process(matrix: UploadFile = File(...)):
     try:
         # Read files into memory
-        df_forms = pd.read_excel(BytesIO(await forms.read()), header=None)
         xls_matrix = pd.ExcelFile(BytesIO(await matrix.read()))
 
         # Process
-        processor = DepartmentProcessor(df_forms, xls_matrix)
+        processor = DepartmentProcessor(xls_matrix)
         result = processor.process_data()
 
         # Return proper JSON
@@ -25,7 +24,6 @@ async def process(matrix: UploadFile = File(...), forms: UploadFile = File(...))
             "data": json_ready({
                 "deps": result["departments"],
                 "forms": result["forms"],
-                "assignments": result["assignments"]
             })
         })
 

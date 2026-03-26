@@ -1,124 +1,121 @@
 import pandas as pd
+import re
 from utils import clean_float
 
-ALLOWED_SHEETS = {
-    "forms": ["Справочник"],
-    "matrix": {
-        "ekb": ["СО"],
-        "krg": ["КО"]
-    }
-}
-
 class DepartmentProcessor:
-    def __init__(self, forms_df, matrix_xls):
-        self.forms_df = forms_df
-        self.matrix_xls = matrix_xls
-        self.forms = []
+    def __init__(self, *args):
+        """
+        Supports either:
+            DepartmentProcessor(matrix_xls)
+        or
+            DepartmentProcessor(forms_df, matrix_xls)
+        """
+        if len(args) == 1:
+            self.forms_df = None
+            self.matrix_xls = args[0]
+        elif len(args) == 2:
+            self.forms_df = args[0]
+            self.matrix_xls = args[1]
+        else:
+            raise TypeError(f"DepartmentProcessor.__init__() takes 1 or 2 positional arguments but {len(args)} were given")
+
         self.departments = []
-        self.assignments = []
+        self.forms = []
 
     def process_data(self):
-        # -----------------------------
-        # Parse forms (Справочник)
-        # -----------------------------
-        df_forms = self.forms_df
-        mask = df_forms.iloc[:, 0].astype(str).str.match(r"^\d{7}")
-        start_row = mask.index[mask].min() if mask.any() else 0
-        df_forms = df_forms.iloc[int(start_row):]
+        dept_temp = {}
 
-        for _, row in df_forms.iterrows():
-            okud = str(row[0]).strip()
-            if not okud or "итог" in okud.lower():
-                continue
+        for sheet_name in self.matrix_xls.sheet_names:
+            df = pd.read_excel(
+                self.matrix_xls,
+                sheet_name=sheet_name,
+                header=None,
+                dtype=str
+            )
 
-            self.forms.append({
-                "okud": okud,
-                "name": str(row[1])[:60] if len(row) > 1 and row[1] else f"Форма {okud}",
-                "indicators": clean_float(row[7]) if len(row) > 7 else 0,
-                "k1": clean_float(row[9]) if len(row) > 9 else 1,
-                "k2": clean_float(row[10]) if len(row) > 10 else 1,
-                "k3": clean_float(row[11]) if len(row) > 11 else 1,
-                "k4": clean_float(row[12]) if len(row) > 12 else 1,
-                "k5": clean_float(row[13]) if len(row) > 13 else 1,
-                "k6": clean_float(row[14]) if len(row) > 14 else 1,
-            })
+            # -----------------------------
+            # Departments
+            # -----------------------------
+            name_col = 5   # F
+            staff_col = 39 # AN
+            workload_col = 40 # AO
 
-        forms_map = {f["okud"]: f for f in self.forms}
+            col_values = df.iloc[:, name_col].fillna("").astype(str).str.strip()
+            valid_depts = set()
+            for val in col_values.unique():
+                val_lower = val.lower()
+                if not val or "итог" in val_lower:
+                    continue
+                if any(str(r).strip().lower() == f"{val_lower} итог" for r in col_values):
+                    valid_depts.add(val)
 
-        # -----------------------------
-        # Process matrix sheets
-        # -----------------------------
-        for territory, sheets in ALLOWED_SHEETS["matrix"].items():
-            for sheet_name in sheets:
-                if sheet_name not in self.matrix_xls.sheet_names:
+            for _, row in df.iterrows():
+                if len(row) <= name_col:
+                    continue
+                dept_name = str(row[name_col]).strip()
+                if dept_name not in valid_depts:
                     continue
 
-                df_matrix = pd.read_excel(self.matrix_xls, sheet_name=sheet_name, header=None)
+                staff = int(clean_float(row[staff_col])) if len(row) > staff_col and row[staff_col] else 0
+                workload = int(clean_float(row[workload_col])) if len(row) > workload_col and row[workload_col] else 0
+                territory = "ekb" if "СО" in sheet_name else "krg"
 
-                dept_col = 5
-                okud_col = 2
-                period_col = 3
-                staff_col = 38
-                indicators_col = 32  # Column AG (0-indexed)
+                if dept_name not in dept_temp:
+                    dept_temp[dept_name] = {
+                        "name": dept_name,
+                        "territory": territory,
+                        "staff": staff,
+                        "workload": workload
+                    }
+                else:
+                    dept_temp[dept_name]["staff"] = max(dept_temp[dept_name]["staff"], staff)
+                    dept_temp[dept_name]["workload"] += workload
 
-                col_values = df_matrix.iloc[:, dept_col].fillna("").astype(str).str.strip()
+            # -----------------------------
+            # Forms (strict 7-digit OKUD from column C)
+            # -----------------------------
+            okud_col = 2       # C
+            name_col_form = 1  # B
+            indicators_col = 32 # AG
+            period_col = 3     # D
+            coeff_cols = list(range(33, 39))  # AH–AM
+            final_col = 40     # AO
 
-                # -----------------------------
-                # Find valid departments
-                # -----------------------------
-                valid_depts = set()
-                for val in col_values.unique():
-                    if not val or val.lower() == "общий итог":
-                        continue
-                    if any(str(r).strip().lower() == f"{val.lower()} итог" for r in col_values):
-                        valid_depts.add(val)
+            for _, row in df.iterrows():
+                if len(row) <= okud_col:
+                    continue
 
-                dept_map = {}
+                raw_okud = str(row[okud_col]).strip()
+                # Include only exactly 7 consecutive digits
+                if not re.fullmatch(r"\d{7}", raw_okud):
+                    continue
 
-                # -----------------------------
-                # Parse departments and assignments
-                # -----------------------------
-                for _, row in df_matrix.iterrows():
-                    if len(row) <= dept_col:
-                        continue
+                okud = raw_okud
+                name = str(row[name_col_form]).strip()[:60] if len(row) > name_col_form and row[name_col_form] else f"Форма {okud}"
+                indicators = int(clean_float(row[indicators_col])) if len(row) > indicators_col and row[indicators_col] else 0
+                period_val = str(row[period_col]).strip() if len(row) > period_col and row[period_col] else None
+                reports = self.period_to_reports(period_val)
 
-                    dept_name = str(row[dept_col]).strip()
-                    if dept_name not in valid_depts:
-                        continue
+                coeff = 1
+                for col in coeff_cols:
+                    if len(row) > col and row[col]:
+                        coeff *= float(clean_float(row[col]))
 
-                    staff = int(clean_float(row[staff_col])) if len(row) > staff_col else 0
-                    if dept_name not in dept_map or dept_map[dept_name]["staff"] < staff:
-                        dept_map[dept_name] = {
-                            "id": f"{dept_name}_{territory}",
-                            "name": dept_name,
-                            "territory": "Екатеринбург" if territory == "ekb" else "Курган",
-                            "staff": staff
-                        }
+                final = int(clean_float(row[final_col])) if len(row) > final_col and row[final_col] else 0
 
-                    okud = str(row[okud_col]).strip() if len(row) > okud_col else None
-                    if not okud or okud not in forms_map:
-                        continue
+                self.forms.append({
+                    "name": name,
+                    "indicators": indicators,
+                    "reports": reports,
+                    "coeff": coeff,
+                    "final": final
+                })
 
-                    reports = self.period_to_reports(str(row[period_col]).strip() if len(row) > period_col else None)
-
-                    indicators = 0
-                    if len(row) > indicators_col:
-                        raw_val = row[indicators_col]
-                        if pd.notna(raw_val):
-                            indicators = clean_float(raw_val)
-
-                    self.assignments.append({
-                        "okud": okud,
-                        "reports": reports,
-                        "indicators": indicators
-                    })
-
-                self.departments.extend(dept_map.values())
+        self.departments = list(dept_temp.values())
 
         return {
             "departments": self.departments,
-            "forms": self.forms,
-            "assignments": self.assignments
+            "forms": self.forms
         }
 
     @staticmethod
@@ -132,4 +129,6 @@ class DepartmentProcessor:
             return 4
         if "полугод" in p:
             return 2
+        if "год" in p:
+            return 1
         return 1

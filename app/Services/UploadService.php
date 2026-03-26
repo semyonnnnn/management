@@ -12,13 +12,105 @@ class UploadService
 {
     public function handle(Request $request)
     {
+        // 1️⃣ Validate the uploaded Excel files
         $this->validateUpload($request);
         $this->validateSheetNames($request);
 
+        // 2️⃣ Call Python service
         $res = $this->python($request);
-        dd($res);
+
+        // 3️⃣ Validate and sanitize Python response
+        $clean = $this->validatePythonResponse($res);
+
+        // 4️⃣ Store into DB directly
+        $this->storeDataRaw($clean, $request->input('version'));
+
+        return response()->json(['success' => true]);
     }
 
+    /**
+     * Validate Python response and purge untrusted input
+     */
+    protected function validatePythonResponse(array $res): array
+    {
+        if (!isset($res['data']['deps'], $res['data']['forms'])) {
+            throw ValidationException::withMessages([
+                'python' => ['Python response is missing required keys.']
+            ]);
+        }
+
+        $deps = [];
+        foreach ($res['data']['deps'] as $dep) {
+            $deps[] = [
+                'name' => isset($dep['name']) ? substr(strip_tags($dep['name']), 0, 255) : '',
+                'territory' => in_array($dep['territory'] ?? '', ['ekb', 'krg']) ? $dep['territory'] : 'ekb',
+                'staff' => isset($dep['staff']) ? (int) $dep['staff'] : 0,
+                'workload' => isset($dep['workload']) ? (int) $dep['workload'] : 0,
+            ];
+        }
+
+        $forms = [];
+        foreach ($res['data']['forms'] as $form) {
+            $forms[] = [
+                'name' => isset($form['name']) ? substr(strip_tags($form['name']), 0, 60) : '',
+                'indicators' => isset($form['indicators']) ? (int) $form['indicators'] : 0,
+                'reports' => isset($form['reports']) ? (int) $form['reports'] : 1,
+                'coeff' => isset($form['coeff']) ? (float) $form['coeff'] : 1.0,
+                'final' => isset($form['final']) ? (int) $form['final'] : 0,
+            ];
+        }
+
+        return [
+            'deps' => $deps,
+            'forms' => $forms,
+        ];
+    }
+
+    /**
+     * Store data directly into the database using DB facade
+     */
+    protected function storeDataRaw(array $data, string $versionName): void
+    {
+        \DB::transaction(function () use ($data, $versionName) {
+            // Insert version
+            $versionId = \DB::table('versions')->insertGetId([
+                'name' => $versionName,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Insert departments
+            $depIdMap = [];
+            foreach ($data['deps'] as $dep) {
+                $depId = \DB::table('departments')->insertGetId([
+                    'name' => $dep['name'],
+                    'territory' => $dep['territory'],
+                    'staff' => $dep['staff'],
+                    'workload' => $dep['workload'],
+                    'versions_id' => $versionId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $depIdMap[$dep['name']] = $depId;
+            }
+
+            // Insert forms, assign to first department as placeholder
+            $firstDepId = reset($depIdMap);
+            foreach ($data['forms'] as $form) {
+                \DB::table('forms')->insert([
+                    'name' => $form['name'],
+                    'indicators' => $form['indicators'],
+                    'reports' => $form['reports'],
+                    'coeff' => $form['coeff'],
+                    'final' => $form['final'],
+                    'department_id' => $firstDepId,
+                    'versions_id' => $versionId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
+    }
 
     public function python(Request $request)
     {
