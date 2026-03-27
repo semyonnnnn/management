@@ -11,6 +11,7 @@ return new class extends Migration {
         // Only table tracking uploads / manual saves
         Schema::create('versions', function (Blueprint $table) {
             $table->id();
+            $table->boolean('isCurrent');
             $table->string('name');
             $table->timestamps();
         });
@@ -35,7 +36,7 @@ return new class extends Migration {
             $table->decimal('coeff', 8, 2)->default(1);
             $table->integer('final');
             $table->foreignId('department_id')->constrained();
-            $table->foreignId('versions_id')->constrained();
+            $table->foreignId('versions_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

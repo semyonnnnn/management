@@ -8,19 +8,33 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import "@fontsource/jetbrains-mono/400.css"; // regular
 import "@fontsource/jetbrains-mono/700.css"; // bold
 
-
 export default function Authenticated({ header, children }: PropsWithChildren<{ header?: ReactNode }>) {
     const user = usePage().props.auth.user;
+    const { url } = usePage();
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [showingMainDropdown, setShowingMainDropdown] = useState(false);
 
+    // Function to check if a route is active
+    const isActive = (routePath: string) => {
+        if (routePath === 'main.index' && (url === '/' || url === '/main')) {
+            return true;
+        }
+        if (routePath === 'uploadFiles.get' && url.includes('/upload')) {
+            return true;
+        }
+        if (routePath === 'versions.get' && url.includes('/versions')) {
+            return true;
+        }
+        return false;
+    };
+
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-transparent" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-            <nav className="bg-white border-b border-gray-600 text-[#f3ffca] font-headline tracking-tighter uppercase">
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+            <nav className="bg-white/80 backdrop-blur-sm border-b border-indigo-200/50">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between items-center">
 
-                        {/* Logo (kept exactly as in your HTML design) */}
+                        {/* Logo */}
                         <div className="flex flex-col">
                             <div className="flex justify-center shrink-0 items-center h-full">
                                 <Link href="/main">
@@ -29,48 +43,70 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                             </div>
                         </div>
 
-                        {/* Right controls (status, account, sign-out) */}
-                        <div className="hidden sm:flex sm:items-center gap-6">
+                        {/* Navigation Links */}
+                        <div className='flex gap-5'>
+                            <div
+                                className={`cursor-pointer px-3 py-1 text-sm font-mono font-bold tracking-wider transition-all duration-200 ${isActive('main.index')
+                                        ? 'text-indigo-600 border-b-2 border-indigo-600'
+                                        : 'text-gray-900 border-b-2 border-transparent hover:border-indigo-500'
+                                    }`}
+                                onClick={() => router.get(route('main.index'))}
+                            >
+                                ГЛАВНАЯ
+                            </div>
+                            <div
+                                className={`cursor-pointer px-3 py-1 text-sm font-mono font-bold tracking-wider transition-all duration-200 ${isActive('uploadFiles.get')
+                                        ? 'text-indigo-600 border-b-2 border-indigo-600'
+                                        : 'text-gray-900 border-b-2 border-transparent hover:border-indigo-500'
+                                    }`}
+                                onClick={() => router.get(route('uploadFiles.get'))}
+                            >
+                                ЗАГРУЗИТЬ
+                            </div>
+                            <div
+                                className={`cursor-pointer px-3 py-1 text-sm font-mono font-bold tracking-wider transition-all duration-200 ${isActive('versions.get')
+                                        ? 'text-indigo-600 border-b-2 border-indigo-600'
+                                        : 'text-gray-900 border-b-2 border-transparent hover:border-indigo-500'
+                                    }`}
+                                onClick={() => router.get(route('versions.get'))}
+                            >
+                                ВЕРСИИ
+                            </div>
+                        </div>
 
-                            {/* User Block */}
-                            <div className="flex items-center gap-3 px-4 py-2 bg-surface-container-low ghost-border bg-black">
-                                <AccountCircleOutlinedIcon className="text-[#00eefc]" />
+                        {/* Right controls */}
+                        <div className="hidden sm:flex sm:items-center gap-4">
 
-                                <span
-                                    className="font-mono text-[10px] text-gray-300 tracking-widest"
-                                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                                >
-                                    {user.name}
+                            {/* User Block - Sharp edges style */}
+                            <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 border border-indigo-400/30">
+                                <AccountCircleOutlinedIcon className="text-white text-lg" />
+                                <span className="font-mono text-[11px] text-white tracking-wider font-bold">
+                                    {user.name.toUpperCase()}
                                 </span>
                             </div>
 
-
-                            {/* Sign Out Button */}
+                            {/* Sign Out Button - Modern sharp style */}
                             <button
-                                style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                                onClick={() => router.post(route('logout'))}
                                 className="
-            px-4 py-2
-            bg-white text-black
-            border
-            cursor-pointer
-            text-sm tracking-widest
-            transition-all duration-300
-            hover:bg-black
-            hover:text-white
-            hover:border-white
-            border-black
-        "
+                                    px-5 py-2
+                                    bg-white text-gray-900
+                                    border border-gray-300
+                                    cursor-pointer
+                                    text-[11px] font-mono font-bold tracking-wider
+                                    transition-all duration-200
+                                    hover:bg-gray-900 hover:text-white hover:border-gray-900
+                                "
                             >
-                                выйти
+                                ВЫЙТИ
                             </button>
-
                         </div>
 
                         {/* Mobile menu button */}
                         <div className="-me-2 flex items-center sm:hidden">
                             <button
                                 onClick={() => setShowingNavigationDropdown(prev => !prev)}
-                                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-900 dark:hover:text-gray-400 dark:focus:bg-gray-900 dark:focus:text-gray-400"
+                                className="inline-flex items-center justify-center rounded-md p-2 text-indigo-600 transition duration-150 ease-in-out hover:bg-indigo-100 hover:text-indigo-700 focus:bg-indigo-100 focus:text-indigo-700"
                             >
                                 <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                     <path
@@ -93,12 +129,16 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                     </div>
                 </div>
 
-                {/* Responsive menu */}
+                {/* Responsive mobile menu */}
                 <div className={`${showingNavigationDropdown ? 'block' : 'hidden'} sm:hidden`}>
-                    <div className="border-t border-gray-200 pb-1 pt-4 dark:border-gray-600">
+                    <div className="border-t border-indigo-200/50 pb-1 pt-4 bg-white/80 backdrop-blur-sm">
                         <div className="px-4">
-                            <div className="text-base font-medium text-gray-800 dark:text-gray-200" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{user.name}</div>
-                            <div className="text-sm font-medium text-gray-500">{user.email}</div>
+                            <div className="text-sm font-mono font-bold text-gray-900 tracking-wider uppercase">
+                                {user.name}
+                            </div>
+                            <div className="text-[10px] font-mono text-indigo-500 mt-1">
+                                {user.email}
+                            </div>
                         </div>
 
                         <div className="mt-3 space-y-1">
@@ -106,20 +146,16 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                                 as="button"
                                 method="post"
                                 href={route('logout')}
+                                className="text-[11px] font-mono font-bold tracking-wider"
                             >
-                                Log Out
+                                ВЫЙТИ
                             </ResponsiveNavLink>
                         </div>
                     </div>
                 </div>
             </nav>
-            {/* {header && (
-                <header className="bg-white dark:bg-gray-800">
-                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{header}</div>
-                </header>
-            )} */}
 
-            <main>{children}</main>
+            <main className="p-6">{children}</main>
         </div>
     );
 }
