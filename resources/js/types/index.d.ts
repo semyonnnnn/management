@@ -93,11 +93,11 @@ export interface DeptData {
 
 interface DeptForm {
     id: string;
-    form: string;
+    name: string;
     indicators: number;
     reports: number;
     coeff: number;
-    calc: number;
+    final: number;
 }
 
 export interface DeptTableProps {
@@ -108,9 +108,17 @@ export interface DeptTableProps {
     changeStaff: (id: string, value: number) => void;
 }
 
-export interface ModalDetailsProps {
+interface ModalDetailsProps {
     showModal: boolean;
-    setShowModal: (showModal: boolean) => void;
+    setShowModal: (v: boolean) => void;
+    departmentName: string;
+    territory: string;
+    staffCount: number;
+    totalLoad: number;
+    loadPerStaff: number;
+    forms: any[];
+    levelPercent: number; // NEW
+    levelClass: 'low' | 'medium' | 'high'; // NEW
 }
 
 export interface ModalDetailsProps {
@@ -126,11 +134,11 @@ export interface ModalDetailsProps {
 
 interface FormData {
     id: string;
-    form: string;
+    name: string;
     indicators: number;
     reports: number;
     coeff: number;
-    calc: number;
+    final: number;
 }
 
 export interface Version {

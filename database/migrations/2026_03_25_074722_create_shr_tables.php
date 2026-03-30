@@ -30,13 +30,18 @@ return new class extends Migration {
         // Forms are independent of versions
         Schema::create('forms', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 60);
-            $table->integer('indicators');
-            $table->integer('reports');
-            $table->decimal('coeff', 8, 2)->default(1);
-            $table->integer('final');
-            $table->foreignId('department_id')->constrained();
-            $table->foreignId('versions_id')->constrained()->cascadeOnDelete();
+            $table->string('name', 255);
+            $table->integer('indicators')->default(0);
+            $table->integer('reports')->default(1);
+            $table->decimal('coeff', 8, 2)->default(1.0);
+            $table->integer('final')->default(0);
+            $table->foreignId('department_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete(); // department can be null if missing
+            $table->foreignId('versions_id')
+                ->constrained()
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

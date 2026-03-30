@@ -1,6 +1,5 @@
 import Modal from "@/components/custom/Modal";
 import { ModalDetailsProps } from "@/types";
-import { useState } from "react";
 
 const ModalDetails = ({
     showModal,
@@ -11,37 +10,39 @@ const ModalDetails = ({
     totalLoad,
     loadPerStaff,
     forms,
+    levelPercent,
+    levelClass,
 }: ModalDetailsProps) => {
 
-    const totalCalc = forms.reduce((sum, f) => sum + f.calc, 0);
+    const totalCalc = forms.reduce((sum, f) => sum + f.final, 0);
 
-    // Mock workload percentage (to be replaced with backend data)
-    const [workloadPercent] = useState(68); // Example: 68% workload
-
-    // Color function based on workload percentage
-    const getWorkloadColor = (percent: number) => {
-        if (percent < 50) return "#10b981"; // emerald-500
-        if (percent < 75) return "#f59e0b"; // amber-500
-        return "#f43f5e"; // rose-500
+    const getWorkloadColor = (className: string) => {
+        switch (className) {
+            case "low": return "#10b981";    // green
+            case "medium": return "#f59e0b"; // amber
+            case "high": return "#f43f5e";   // red
+            default: return "#10b981";
+        }
     };
 
-    const getWorkloadStatus = (percent: number) => {
-        if (percent < 50) return "ОПТИМАЛЬНО";
-        if (percent < 75) return "УМЕРЕННО";
-        return "КРИТИЧНО";
+    const getWorkloadStatus = (className: string) => {
+        switch (className) {
+            case "low": return "ОПТИМАЛЬНО";
+            case "medium": return "УМЕРЕННО";
+            case "high": return "КРИТИЧНО";
+            default: return "ОПТИМАЛЬНО";
+        }
     };
 
-    // Circular progress component
     const CircularProgress = ({ percent, size = 100, strokeWidth = 8 }: { percent: number; size?: number; strokeWidth?: number }) => {
         const radius = (size - strokeWidth) / 2;
         const circumference = 2 * Math.PI * radius;
         const offset = circumference - (percent / 100) * circumference;
-        const color = getWorkloadColor(percent);
+        const color = getWorkloadColor(levelClass);
 
         return (
             <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
                 <svg className="transform -rotate-90" width={size} height={size}>
-                    {/* Background circle */}
                     <circle
                         cx={size / 2}
                         cy={size / 2}
@@ -50,7 +51,6 @@ const ModalDetails = ({
                         stroke="#e2e8f0"
                         strokeWidth={strokeWidth}
                     />
-                    {/* Progress circle */}
                     <circle
                         cx={size / 2}
                         cy={size / 2}
@@ -76,35 +76,27 @@ const ModalDetails = ({
 
     return (
         <Modal show={showModal} onClose={() => setShowModal(false)} maxWidth="2xl">
-            <div className="bg-white border border-indigo-200/50">
+            <div className="bg-white border border-indigo-200/50 h-[600px] flex flex-col">
+                <div className="p-6 flex-1 flex flex-col space-y-6 overflow-hidden">
 
-                {/* Body */}
-                <div className="p-6 space-y-6">
-
-                    {/* Department Header */}
-                    {/* Department Header */}
+                    {/* Header */}
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 bg-indigo-500"></div>
-                            <p className="font-mono text-[12px] font-bold text-indigo-700 tracking-wider">
-                                {departmentName}
-                            </p>
+                            <p className="font-mono text-[12px] font-bold text-indigo-700 tracking-wider">{departmentName}</p>
                         </div>
-
-                        {/* Status Badge and Close Button Container */}
                         <div className="flex items-center gap-3">
-                            {/* Workload Status Badge */}
-                            <div className={`px-3 py-1 border ${workloadPercent < 50 ? 'border-emerald-200 bg-emerald-50' :
-                                workloadPercent < 75 ? 'border-amber-200 bg-amber-50' : 'border-rose-200 bg-rose-50'
+                            <div className={`px-3 py-1 border ${levelClass === "low" ? 'border-emerald-200 bg-emerald-50' :
+                                levelClass === "medium" ? 'border-amber-200 bg-amber-50' :
+                                    'border-rose-200 bg-rose-50'
                                 }`}>
-                                <span className={`font-mono text-[10px] font-bold tracking-wider ${workloadPercent < 50 ? 'text-emerald-700' :
-                                    workloadPercent < 75 ? 'text-amber-700' : 'text-rose-700'
+                                <span className={`font-mono text-[10px] font-bold tracking-wider ${levelClass === "low" ? 'text-emerald-700' :
+                                    levelClass === "medium" ? 'text-amber-700' :
+                                        'text-rose-700'
                                     }`}>
-                                    {getWorkloadStatus(workloadPercent)}
+                                    {getWorkloadStatus(levelClass)}
                                 </span>
                             </div>
-
-                            {/* Close Button */}
                             <button
                                 onClick={() => setShowModal(false)}
                                 className="w-7 h-7 bg-white border border-gray-300 hover:border-indigo-400 hover:bg-indigo-50 transition-all flex items-center justify-center"
@@ -116,81 +108,52 @@ const ModalDetails = ({
                         </div>
                     </div>
 
-                    {/* Metrics and Workload Visual */}
+                    {/* Metrics & Circular */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-
-                        {/* Metrics Container - using flex layout instead of grid */}
                         <div className="md:col-span-2 relative overflow-hidden border border-indigo-200/50 bg-gradient-to-br from-indigo-50/70 via-white to-indigo-50/30">
-
-                            {/* subtle top accent */}
                             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-indigo-400/70 via-indigo-300/40 to-transparent" />
-
-                            {/* Metrics as divs in flex container - full height */}
                             <div className="flex flex-col h-full">
-                                {/* First row - 2 divs - takes 50% height */}
                                 <div className="flex flex-1 border-b border-indigo-200/40">
                                     <div className="flex-1 px-4 py-3 min-w-0 flex flex-col justify-center">
                                         <div className="text-[9px] font-mono font-bold text-indigo-600 tracking-wider uppercase mb-1 whitespace-nowrap">
                                             ТЕРРИТОРИЯ
                                         </div>
-                                        <div className="font-mono text-[13px] font-bold truncate text-gray-900">
-                                            {territory}
-                                        </div>
+                                        <div className="font-mono text-[13px] font-bold truncate text-gray-900">{territory}</div>
                                     </div>
                                     <div className="w-px bg-indigo-200/40"></div>
                                     <div className="flex-1 px-4 py-3 min-w-0 flex flex-col justify-center">
                                         <div className="text-[9px] font-mono font-bold text-indigo-600 tracking-wider uppercase mb-1 whitespace-nowrap">
                                             СОТРУДНИКОВ
                                         </div>
-                                        <div className="font-mono text-[13px] font-bold truncate text-gray-900">
-                                            {staffCount}
-                                        </div>
+                                        <div className="font-mono text-[13px] font-bold truncate text-gray-900">{staffCount}</div>
                                     </div>
                                 </div>
-
-                                {/* Second row - 2 divs - takes 50% height */}
                                 <div className="flex flex-1">
                                     <div className="flex-1 px-4 py-3 min-w-0 flex flex-col justify-center">
                                         <div className="text-[9px] font-mono font-bold text-indigo-600 tracking-wider uppercase mb-1 whitespace-nowrap">
                                             СУММАРНАЯ НАГРУЗКА
                                         </div>
-                                        <div className="font-mono text-[13px] font-bold truncate text-indigo-700">
-                                            {totalLoad.toLocaleString()}
-                                        </div>
+                                        <div className="font-mono text-[13px] font-bold truncate text-indigo-700">{totalLoad.toLocaleString()}</div>
                                     </div>
                                     <div className="w-px bg-indigo-200/40"></div>
                                     <div className="flex-1 px-4 py-3 min-w-0 flex flex-col justify-center">
                                         <div className="text-[9px] font-mono font-bold text-indigo-600 tracking-wider uppercase mb-1 whitespace-nowrap">
                                             НАГРУЗКА / СОТРУДНИКА
                                         </div>
-                                        <div className="font-mono text-[13px] font-bold truncate text-indigo-700">
-                                            {loadPerStaff.toLocaleString()}
-                                        </div>
+                                        <div className="font-mono text-[13px] font-bold truncate text-indigo-700">{loadPerStaff.toLocaleString()}</div>
                                     </div>
                                 </div>
                             </div>
-
-                            {/* subtle bottom accent */}
                             <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-200 to-transparent" />
                         </div>
 
-                        {/* Circular Workload */}
                         <div className="relative flex items-center justify-center border border-indigo-200/50 bg-gradient-to-br from-indigo-50/40 to-white p-5">
-
-                            {/* subtle glow */}
                             <div className="absolute inset-0 bg-indigo-100/20 blur-2xl opacity-40" />
-
-                            <CircularProgress
-                                percent={workloadPercent}
-                                size={120}
-                                strokeWidth={10}
-                            />
-
+                            <CircularProgress percent={levelPercent} size={120} strokeWidth={10} />
                         </div>
-
                     </div>
 
-                    {/* Additional Workload Details */}
+                    {/* Workload summary */}
                     <div className="grid grid-cols-3 gap-3 border border-indigo-200/50 p-3 bg-indigo-50/20">
                         <div className="text-center">
                             <div className="text-[8px] font-mono text-gray-500 tracking-wider uppercase">НОРМАТИВ</div>
@@ -198,38 +161,30 @@ const ModalDetails = ({
                         </div>
                         <div className="text-center">
                             <div className="text-[8px] font-mono text-gray-500 tracking-wider uppercase">ТЕКУЩАЯ</div>
-                            <div className={`font-mono text-[11px] font-bold ${workloadPercent < 50 ? 'text-emerald-600' :
-                                workloadPercent < 75 ? 'text-amber-600' : 'text-rose-600'
-                                }`}>
-                                {workloadPercent}%
-                            </div>
+                            <div className={`font-mono text-[11px] font-bold ${levelClass === "low" ? 'text-emerald-600' :
+                                levelClass === "medium" ? 'text-amber-600' :
+                                    'text-rose-600'
+                                }`}>{levelPercent}%</div>
                         </div>
                         <div className="text-center">
                             <div className="text-[8px] font-mono text-gray-500 tracking-wider uppercase">РЕЗЕРВ</div>
-                            <div className="font-mono text-[11px] font-bold text-gray-700">{100 - workloadPercent}%</div>
+                            <div className="font-mono text-[11px] font-bold text-gray-700">{100 - levelPercent}%</div>
                         </div>
                     </div>
 
-                    {/* Forms Table */}
-                    <div className="space-y-3">
-                        {/* Header */}
-                        <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-indigo-50 to-transparent border border-indigo-200/50">
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-indigo-500"></div>
-                                <p className="font-mono text-[11px] font-bold text-indigo-700 tracking-wider">
-                                    ФОРМЫ НАГРУЗКИ
-                                </p>
-                            </div>
+                    {/* Forms table */}
+                    <div className="flex-1 flex flex-col border border-indigo-200/50 rounded-md overflow-hidden">
+                        <div className="flex items-center justify-between px-3 py-2 bg-indigo-50 border-b border-indigo-200/50">
+                            <p className="font-mono text-[11px] font-bold text-indigo-700 tracking-wider">ФОРМЫ НАГРУЗКИ</p>
                             <div className="flex gap-4 text-[10px] font-mono text-gray-500">
                                 <span>ФОРМ: <span className="font-bold text-gray-900">{forms.length}</span></span>
                                 <span>СУММА: <span className="font-bold text-indigo-600">{totalCalc.toFixed(1)}</span></span>
                             </div>
                         </div>
 
-                        {/* Table */}
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm border border-indigo-200/50">
-                                <thead className="bg-indigo-100/60 border-b border-indigo-200/70">
+                        <div className="flex-1 overflow-y-auto">
+                            <table className="w-full text-sm border-collapse">
+                                <thead className="bg-indigo-100 sticky top-0 z-10">
                                     <tr className="divide-x divide-indigo-200/60">
                                         <th className="px-3 py-2 text-left text-[10px] font-mono font-bold text-indigo-700 uppercase">ФОРМА</th>
                                         <th className="px-3 py-2 text-left text-[10px] font-mono font-bold text-indigo-700 uppercase">ПОКАЗАТЕЛЕЙ</th>
@@ -238,26 +193,25 @@ const ModalDetails = ({
                                         <th className="px-3 py-2 text-left text-[10px] font-mono font-bold text-indigo-700 uppercase">РАСЧЁТ</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-indigo-100/60">
-                                    {forms.map((f) => (
+                                <tbody>
+                                    {forms.map(f => (
                                         <tr key={f.id} className="hover:bg-indigo-50/40 transition-colors divide-x divide-indigo-100">
-                                            <td className="px-3 py-2 font-mono text-[11px] text-gray-900">{f.form}</td>
+                                            <td className="px-3 py-2 font-mono text-[11px] text-gray-900">{f.name}</td>
                                             <td className="px-3 py-2 font-mono text-[11px] text-gray-600 bg-indigo-50/40">{f.indicators}</td>
                                             <td className="px-3 py-2 font-mono text-[11px] text-gray-600">{f.reports}</td>
                                             <td className="px-3 py-2 font-mono text-[11px] text-gray-600 bg-indigo-50/40">{f.coeff}</td>
-                                            <td className="px-3 py-2 font-mono text-[11px] font-bold text-gray-900">{f.calc}</td>
+                                            <td className="px-3 py-2 font-mono text-[11px] font-bold text-gray-900">{f.final}</td>
                                         </tr>
                                     ))}
                                 </tbody>
-                                <tfoot className="border-t border-indigo-300/60 bg-indigo-100/40">
-                                    <tr className="divide-x divide-indigo-200">
-                                        <td colSpan={4} className="px-3 py-2 font-mono text-[11px] font-bold text-gray-900 uppercase tracking-wider text-right">ИТОГО</td>
-                                        <td className="px-3 py-2 font-mono text-[12px] font-bold text-indigo-700">{totalCalc.toFixed(1)}</td>
-                                    </tr>
-                                </tfoot>
                             </table>
                         </div>
+
+                        <div className="flex justify-end border-t border-indigo-300/60 bg-indigo-100/40 px-3 py-2 font-mono text-[12px] font-bold text-indigo-700">
+                            ИТОГО: {totalCalc.toFixed(1)}
+                        </div>
                     </div>
+
                 </div>
             </div>
         </Modal>

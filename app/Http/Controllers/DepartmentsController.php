@@ -18,28 +18,49 @@ class DepartmentsController extends Controller
 
     public function index(Request $request)
     {
-        // 1. Get the ID of the single "current" version first
+        // 1. Get the current version
         $currentVersion = DB::table('versions')
             ->where('isCurrent', true)
             ->first();
 
-        // 2. If no current version exists, return an empty collection to avoid errors
         if (!$currentVersion) {
             return Inertia::render('Departments/Index', [
                 'departments' => [],
-                'version_name' => 'No active version'
+                'version_name' => 'No active version',
+                'forms' => []
             ]);
         }
 
-        // 3. Fetch departments strictly for that specific version ID
+        // 2. Fetch all departments for this version
         $departments = DB::table('departments')
             ->where('versions_id', $currentVersion->id)
             ->select('id', 'name', 'territory', 'staff', 'workload')
             ->orderBy('name', 'asc')
+            ->get()
+            ->keyBy('id'); // for quick lookup
+
+        // 3. Fetch all forms for this version
+        $forms = DB::table('forms')
+            ->where('versions_id', $currentVersion->id)
+            ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'department_id')
+            ->orderBy('name', 'asc')
             ->get();
 
+        // 4. Map forms into departments
+        $departmentsWithForms = $departments->map(function ($dep) use ($forms) {
+            $depForms = $forms->filter(fn($f) => $f->department_id == $dep->id)->values();
+            return [
+                'id' => $dep->id,
+                'name' => $dep->name,
+                'territory' => $dep->territory,
+                'staff' => $dep->staff,
+                'workload' => $dep->workload,
+                'forms' => $depForms
+            ];
+        })->values();
+
         return Inertia::render('Departments/Index', [
-            'departments' => $departments,
+            'departments' => $departmentsWithForms,
             'version_name' => $currentVersion->name
         ]);
     }

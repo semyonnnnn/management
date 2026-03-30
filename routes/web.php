@@ -20,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/versions', [VersionsController::class, 'index'])->name('versions.get');
     Route::post('/versions/{id}', [VersionsController::class, 'apply'])->name('versions.apply');
+    Route::post('/versions', [VersionsController::class, 'create'])->name('versions.create');
     Route::delete('/versions/{id}', [VersionsController::class, 'destroy'])->name('versions.delete');
 
 });

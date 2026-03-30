@@ -80,6 +80,7 @@ class DepartmentProcessor:
             period_col = 3     # D
             coeff_cols = list(range(33, 39))  # AH–AM
             final_col = 40     # AO
+            dept_name_col = 5   # F
 
             for _, row in df.iterrows():
                 if len(row) <= okud_col:
@@ -103,7 +104,11 @@ class DepartmentProcessor:
 
                 final = int(clean_float(row[final_col])) if len(row) > final_col and row[final_col] else 0
 
+                # Department name from same row
+                department_name = str(row[dept_name_col]).strip() if len(row) > dept_name_col and row[dept_name_col] else None
+
                 self.forms.append({
+                    "department": department_name,
                     "name": name,
                     "indicators": indicators,
                     "reports": reports,
