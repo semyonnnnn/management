@@ -2,6 +2,12 @@
 import type { FormDataErrors } from '@inertiajs/core';
 import { Config } from 'ziggy-js';
 
+export type registerOrLoginType = {
+    userId: number | null;
+    email: string;
+    token: string;
+} | null;
+
 export interface User {
     id: number;
     name: string;

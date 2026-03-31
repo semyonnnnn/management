@@ -143,7 +143,7 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
                 })}
             />
             {hasChanges && !isModalOpen && (
-                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="fixed bottom-10 left-[15vw] -translate-x-1/2 z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="bg-white/90 backdrop-blur-md border border-indigo-200 p-2 shadow-2xl flex gap-2">
                         <button
                             onClick={() => {

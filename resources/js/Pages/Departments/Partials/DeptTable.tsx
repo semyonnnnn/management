@@ -12,12 +12,6 @@ const DeptTable: React.FC<DeptTableProps> = ({
     const [selectedDept, setSelectedDept] = useState<any>(null);
     const [selectedTerritory, setSelectedTerritory] = useState<string>("all");
 
-    const levelColor = {
-        low: "bg-emerald-500",
-        medium: "bg-amber-500",
-        high: "bg-rose-500",
-    };
-
     const territoryColor = {
         ekb: "bg-indigo-100 text-indigo-700 border border-indigo-200",
         krg: "bg-purple-100 text-purple-700 border border-purple-200",
@@ -41,9 +35,28 @@ const DeptTable: React.FC<DeptTableProps> = ({
         { value: "krg", label: "КУРГАН" },
     ];
 
-    const everyone = departments.reduce((sum, dep) => sum + dep.staff, 0);
-    const full_load = departments.reduce((sum, dep) => sum + dep.totalLoad, 0);
-    const per_person = Math.floor(full_load / everyone);
+    // Total load is constant for the organization, staff is the variable
+    const total_org_load = departments.reduce((sum, dep) => sum + dep.totalLoad, 0);
+    const total_org_staff = departments.reduce((sum, dep) => sum + dep.staff, 0);
+
+    // The "optimal" or "average" load per person across the whole organization
+    const org_average_load_per_person = total_org_staff > 0 ? total_org_load / total_org_staff : 0;
+
+    const calcLevelPercent = (dep: any) => {
+        if (dep.staff <= 0) return 0;
+        const depLoadPerPerson = dep.totalLoad / dep.staff;
+        if (org_average_load_per_person === 0) return 0;
+        return Math.floor((depLoadPerPerson / org_average_load_per_person) * 100);
+    };
+
+    const getLevelClass = (percent: number) => {
+        if (percent < 25) return "bg-orange-400 shadow-[0_0_8px_rgba(255,165,0,0.7)]";
+        if (percent >= 25 && percent < 50) return "bg-yellow-400";
+        if (percent >= 50 && percent <= 100) return "bg-green-200";
+        if (percent > 100 && percent <= 150) return "bg-green-500";
+        if (percent > 150 && percent <= 175) return "bg-rose-500";
+        return "bg-red-700";
+    };
 
     return (
         <div className="bg-white/80 backdrop-blur-sm border border-indigo-200/50">
@@ -117,121 +130,90 @@ const DeptTable: React.FC<DeptTableProps> = ({
                         <tr className="bg-indigo-50/50 border-b border-indigo-200/50">
                             <td></td>
                             <td></td>
-
-                            <td className="text-center align-middle">
+                            <td className="text-center align-middle border-r">
                                 <div className="my-2 inline-block p-2 w-fit text-xs text-white py-1 bg-indigo-600/50 border-indigo-700/70 border">
-                                    {everyone.toLocaleString()}
+                                    {total_org_staff.toLocaleString()}
                                 </div>
                             </td>
-
-                            <td className="text-center align-middle">
+                            <td className="text-center align-middle border-r">
                                 <div className="my-2 inline-block p-2 w-fit text-xs text-white py-1 bg-indigo-600/50 border-indigo-700/70 border">
-                                    {full_load.toLocaleString()}
+                                    {total_org_load.toLocaleString()}
                                 </div>
                             </td>
                             <td className="text-center align-middle">
                                 <div className="my-2 inline-block p-2 w-fit text-xs text-white py-1 bg-indigo-600/50 border-indigo-700/70 border">
-                                    {per_person.toLocaleString()}
+                                    {Math.floor(org_average_load_per_person).toLocaleString()}
                                 </div>
                             </td>
                             <td></td>
                             <td></td>
                         </tr>
-                        {filteredDepartments.map((dept) => {
-                            const visiblePercent =
-                                dept.staff === 0
-                                    ? 100
-                                    : Math.min(dept.levelPercent / 2, 100);
 
-                            const isLow = dept.levelPercent < 50;
-                            const isHigh = dept.levelPercent > 150;
+                        {filteredDepartments.map((dept) => {
+                            const levelPercent = calcLevelPercent(dept);
+                            const levelClass = getLevelClass(levelPercent);
+                            const loadPerStaff = dept.staff > 0 ? Math.floor(dept.totalLoad / dept.staff) : 0;
 
                             return (
                                 <tr
                                     key={dept.id}
-                                    className={`border-b border-indigo-100/50 transition-all
-                                `}
+                                    className={`border-b border-indigo-100/50 transition-all`}
                                 >
                                     <td className="p-3 flex items-center gap-2">
                                         {dept.name}
                                     </td>
-
                                     <td className="p-3 px-2 py-1 text-[9px] font-mono font-bold tracking-wider">
                                         <div
-                                            className={`px-2 py-1 ${territoryColor[dept.territory]
-                                                }`}
+                                            className={`px-2 py-1 ${territoryColor[dept.territory]}`}
                                         >
                                             {dept.territory === "ekb"
                                                 ? "ЕКАТЕРИНБУРГ"
                                                 : "КУРГАН"}
                                         </div>
                                     </td>
-
                                     <td className="text-center p-3">
                                         <input
                                             type="number"
                                             min={0}
-                                            value={dept.staff}
-                                            onChange={(e) =>
-                                                changeStaff(
-                                                    dept.id,
-                                                    Number(e.target.value)
-                                                )
-                                            }
+                                            // Use a string check or short-circuit to handle the visual empty state if desired
+                                            value={dept.staff === 0 ? "" : dept.staff}
+                                            placeholder="0"
+                                            onFocus={(e) => e.target.select()}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                // If the input is cleared, we treat it as 0 for the state
+                                                changeStaff(dept.id, val === "" ? 0 : Number(val));
+                                            }}
                                             className="w-20 text-center border border-indigo-200/50 bg-indigo-50/30 px-2 py-1.5 font-mono text-[12px] text-gray-900 focus:outline-none focus:border-indigo-400 transition-colors"
                                         />
                                     </td>
-
                                     <td className="text-right p-3">
                                         <span className="font-mono text-[12px] font-bold text-gray-900">
                                             {dept.totalLoad.toLocaleString()}
                                         </span>
                                     </td>
-
                                     <td className="text-right p-3">
                                         <span className="font-mono text-[12px] text-gray-600">
-                                            {dept.avgLoad.toLocaleString()}
+                                            {loadPerStaff.toLocaleString()}
                                         </span>
                                     </td>
-
-                                    <td className="p-3">
-                                        <div className="w-24 bg-gray-200 h-1 relative">
-
-                                            {/* 25% */}
+                                    <td className="p-3 flex flex-col">
+                                        <div className="w-24 bg-gray-200 h-1 relative ">
                                             <div className="absolute left-1/4 top-0 h-1 w-[1px] bg-gray-400 opacity-40" />
-
-                                            {/* 50% */}
                                             <div className="absolute left-1/2 top-0 h-1 w-[1px] bg-gray-500 opacity-60" />
-
-                                            {/* 75% */}
                                             <div className="absolute left-3/4 top-0 h-1 w-[1px] bg-gray-400 opacity-40" />
-
                                             <div
-                                                className={`
-                                                h-1 transition-all duration-500
-                                                ${isLow
-                                                        ? "bg-amber-400 shadow-[0_0_8px_rgba(255,215,0,0.7)]"
-                                                        : isHigh
-                                                            ? "bg-rose-500"
-                                                            : "bg-emerald-500"
-                                                    }
-                                            `}
-                                                style={{
-                                                    width: `${visiblePercent}%`,
-                                                }}
+                                                className={`h-1 transition-all duration-500 ${levelClass}`}
+                                                style={{ width: `${Math.min(levelPercent, 200) / 2}%` }}
                                             />
                                         </div>
-
                                         <div className="text-[9px] font-mono text-gray-600 mt-1 text-right">
-                                            {dept.levelPercent}%
+                                            {levelPercent}%
                                         </div>
                                     </td>
-
                                     <td className="p-3">
                                         <button
-                                            onClick={() =>
-                                                handleOpenModal(dept)
-                                            }
+                                            onClick={() => handleOpenModal(dept)}
                                             className="w-8 h-8 bg-white border border-gray-300 hover:border-indigo-400 hover:bg-indigo-50 flex items-center justify-center"
                                         >
                                             <svg
@@ -259,13 +241,13 @@ const DeptTable: React.FC<DeptTableProps> = ({
             {selectedDept && (
                 <ModalDetails
                     forms={selectedDept.forms || []}
-                    loadPerStaff={selectedDept.avgLoad}
+                    loadPerStaff={selectedDept.staff > 0 ? Math.floor(selectedDept.totalLoad / selectedDept.staff) : 0}
                     totalLoad={selectedDept.totalLoad}
                     staffCount={selectedDept.staff}
                     departmentName={selectedDept.name}
                     territory={selectedDept.territory}
-                    levelPercent={selectedDept.levelPercent}
-                    levelClass={selectedDept.levelClass}
+                    levelPercent={calcLevelPercent(selectedDept)}
+                    levelClass={getLevelClass(calcLevelPercent(selectedDept))}
                     setShowModal={setShowModal}
                     showModal={showModal}
                 />
