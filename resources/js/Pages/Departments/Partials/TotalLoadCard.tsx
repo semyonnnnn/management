@@ -67,7 +67,7 @@ export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads }) => {
                                         {load.label.toUpperCase()}
                                     </span>
                                     <div className={`text-[10px] font-mono font-bold px-2 py-0.5 ${load.percent < 50 ? 'bg-amber-500 text-white' :
-                                            load.percent <= 75 ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'
+                                        load.percent <= 75 ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'
                                         }`}>
                                         {getStatusIcon(load.percent)}
                                     </div>
@@ -88,7 +88,7 @@ export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads }) => {
                                             ТЕКУЩАЯ ДОЛЯ
                                         </span>
                                         <span className={`text-sm font-mono font-bold ${load.percent < 50 ? 'text-amber-600' :
-                                                load.percent <= 75 ? 'text-emerald-600' : 'text-rose-600'
+                                            load.percent <= 75 ? 'text-emerald-600' : 'text-rose-600'
                                             }`}>
                                             {load.percent * 2}%
                                         </span>
@@ -104,7 +104,7 @@ export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads }) => {
                                     </div>
                                     <div className="pt-2.5">
                                         <div className={`text-[9px] font-mono font-bold tracking-wider ${load.percent < 50 ? 'text-amber-600' :
-                                                load.percent <= 75 ? 'text-emerald-600' : 'text-rose-600'
+                                            load.percent <= 75 ? 'text-emerald-600' : 'text-rose-600'
                                             }`}>
                                             {getStatusText(load.percent)}
                                         </div>
