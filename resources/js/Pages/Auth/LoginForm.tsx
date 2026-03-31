@@ -101,7 +101,7 @@ export function LoginForm() {
                         </Button>
                         <Button onClick={(e) => {
                             e.preventDefault();
-                            setRegisterOrLogin('register');
+                            // setRegisterOrLogin('register');
                         }}>
                             Нет Аккаунта?
                         </Button>

@@ -12,7 +12,7 @@ export default function MobileNav({ showingNavigationDropdown }: MobileMenuProps
     const { registerOrLogin, setRegisterOrLogin } = useAuthContext();
 
     const handleAuthClick = (type: 'login' | 'register') => {
-        setRegisterOrLogin(type);
+        setRegisterOrLogin(type as any);
     };
 
     return (

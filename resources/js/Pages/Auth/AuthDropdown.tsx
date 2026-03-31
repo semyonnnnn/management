@@ -15,7 +15,7 @@ export function AuthDropdown() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const handleAuthClick = (type: 'login' | 'register') => {
-        setRegisterOrLogin(type);
+        setRegisterOrLogin(type as any);
         setDialogOpen(true);
         setDropdownOpen(false); // Close dropdown when opening dialog
     };
@@ -55,8 +55,8 @@ export function AuthDropdown() {
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent className="sm:max-w-106.25 dark:bg-gray-800 dark:text-white">
-                    {registerOrLogin === 'login' && <LoginForm />}
-                    {registerOrLogin === 'register' && <RegisterForm />}
+                    {(registerOrLogin as any) === 'login' && <LoginForm />}
+                    {(registerOrLogin as any) === 'register' && <RegisterForm />}
                 </DialogContent>
             </Dialog>
         </>

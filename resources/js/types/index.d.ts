@@ -18,6 +18,20 @@ export interface User {
     roles: string[];
 }
 
+interface BackendDepartment {
+    id: number | string;
+    name: string;
+    workload: number | string;
+    staff: number | string;
+    territory: 'ekb' | 'krg';
+    forms?: any[];
+}
+
+interface StaffFormData {
+    staff_map: Record<string, number>;
+    version: string;
+}
+
 export type PageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {
@@ -82,7 +96,6 @@ export interface LoadItem {
 
 export interface TotalLoadCardProps {
     loads: LoadItem[];
-    printProtocol: () => void;
 }
 export interface DeptData {
     id: string;
@@ -109,8 +122,6 @@ interface DeptForm {
 export interface DeptTableProps {
     departments: DeptData[];
     toggleEditMode: () => void;
-    printProtocol: () => void;
-    openDeptDetail: (id: string) => void;
     changeStaff: (id: string, value: number) => void;
 }
 

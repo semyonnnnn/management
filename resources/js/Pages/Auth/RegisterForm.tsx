@@ -118,7 +118,7 @@ export function RegisterForm() {
                 <Button
                     onClick={async (e) => {
                         e.preventDefault();
-                        setRegisterOrLogin('login');
+                        // setRegisterOrLogin('login');
                         const res = await fetch('/login');
                         const data = await res.json();
                         setLoginProps(data);
