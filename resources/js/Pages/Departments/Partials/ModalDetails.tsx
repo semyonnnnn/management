@@ -158,18 +158,18 @@ const ModalDetails = ({
 
                     <div className="grid grid-cols-3 gap-3 border border-indigo-200/50 p-3 bg-indigo-50/20">
                         <div className="text-center">
-                            <div className="text-[8px] font-mono text-gray-500 tracking-wider uppercase">НОРМАТИВ</div>
-                            <div className="font-mono text-[11px] font-bold text-gray-700">100%</div>
+                            <div className="text-[12px] font-mono text-gray-900 tracking-wider uppercase">НОРМАТИВ</div>
+                            <div className="font-mono text-[16px] font-bold text-gray-700">100%</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-[8px] font-mono text-gray-500 tracking-wider uppercase">ТЕКУЩАЯ</div>
-                            <div className="font-mono text-[11px] font-bold" style={{ color }}>
+                            <div className="text-[12px] font-mono text-gray-900 tracking-wider uppercase">ТЕКУЩАЯ</div>
+                            <div className="font-mono text-[16px] font-bold" style={{ color }}>
                                 {Math.min(levelPercent, maxPercent)}%
                             </div>
                         </div>
                         <div className="text-center">
-                            <div className="text-[8px] font-mono text-gray-500 tracking-wider uppercase">РЕЗЕРВ</div>
-                            <div className="font-mono text-[11px] font-bold text-gray-700">
+                            <div className="text-[12px] font-mono text-gray-900 tracking-wider uppercase">РЕЗЕРВ</div>
+                            <div className="font-mono text-[16px] font-bold text-gray-700">
                                 {Math.max(maxPercent - levelPercent, 0)}%
                             </div>
                         </div>
@@ -177,7 +177,7 @@ const ModalDetails = ({
 
                     <div className="flex-1 flex flex-col border border-indigo-200/50 rounded-md overflow-hidden">
                         <div className="flex items-center justify-between px-3 py-2 bg-indigo-50 border-b border-indigo-200/50">
-                            <div className="flex gap-4 text-sm font-mono text-gray-500 justify-between w-full">
+                            <div className="flex text-[15px] gap-4 text-sm font-mono text-gray-500 justify-between w-full">
                                 <div>
                                     форм: <span className="font-bold text-indigo-600">{forms.length}</span>
                                 </div>
@@ -191,21 +191,21 @@ const ModalDetails = ({
                             <table className="w-full text-sm border-collapse">
                                 <thead className="bg-indigo-100 sticky top-0 z-10">
                                     <tr className="divide-x divide-indigo-200/60">
-                                        <th className="px-3 py-2 text-left text-[10px] font-mono font-bold text-indigo-700 uppercase">ФОРМА</th>
-                                        <th className="px-3 py-2 text-left text-[10px] font-mono font-bold text-indigo-700 uppercase">ПОКАЗАТЕЛЕЙ</th>
-                                        <th className="px-3 py-2 text-left text-[10px] font-mono font-bold text-indigo-700 uppercase">КОЛ-ВО ОТЧЁТОВ</th>
-                                        <th className="px-3 py-2 text-left text-[10px] font-mono font-bold text-indigo-700 uppercase">КОЭФ. (K1..K6)</th>
-                                        <th className="px-3 py-2 text-left text-[10px] font-mono font-bold text-indigo-700 uppercase">РАСЧЁТ</th>
+                                        <th className="px-3 py-2 text-left text-[15px] font-mono font-bold text-indigo-700 uppercase">ФОРМА</th>
+                                        <th className="px-3 py-2 text-left text-[15px] font-mono font-bold text-indigo-700 uppercase">ПОКАЗАТЕЛЕЙ</th>
+                                        <th className="px-3 py-2 text-left text-[15px] font-mono font-bold text-indigo-700 uppercase">ОТЧЁТЫ</th>
+                                        <th className="px-3 py-2 text-left text-[15px] font-mono font-bold text-indigo-700 uppercase">КОЭФ. (K1..K6)</th>
+                                        <th className="px-3 py-2 text-left text-[15px] font-mono font-bold text-indigo-700 uppercase">РАСЧЁТ</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {forms.map(f => (
                                         <tr key={f.id} className="hover:bg-indigo-50/40 transition-colors divide-x divide-indigo-100">
-                                            <td className="px-3 py-2 font-mono text-[11px] text-gray-900">{f.name}</td>
-                                            <td className="px-3 py-2 font-mono text-[11px] text-gray-600 bg-indigo-50/40">{f.indicators}</td>
-                                            <td className="px-3 py-2 font-mono text-[11px] text-gray-600">{f.reports}</td>
-                                            <td className="px-3 py-2 font-mono text-[11px] text-gray-600 bg-indigo-50/40">{f.coeff}</td>
-                                            <td className="px-3 py-2 font-mono text-[11px] font-bold text-gray-900">{f.final}</td>
+                                            <td className="px-3 py-2 font-mono text-[15px] text-gray-900">{f.name}</td>
+                                            <td className="px-3 py-2 font-mono text-[15px] text-gray-600 bg-indigo-50/40">{f.indicators}</td>
+                                            <td className="px-3 py-2 font-mono text-[15px] text-gray-600">{f.reports}</td>
+                                            <td className="px-3 py-2 font-mono text-[15px] text-gray-600 bg-indigo-50/40">{f.coeff}</td>
+                                            <td className="px-3 py-2 font-mono text-[15px] font-bold text-gray-900">{f.final}</td>
                                         </tr>
                                     ))}
                                 </tbody>

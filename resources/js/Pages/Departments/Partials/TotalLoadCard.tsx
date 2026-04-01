@@ -31,7 +31,6 @@ export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads }) => {
                     </div>
                     <h6 className="text-xl font-mono font-bold text-gray-900 tracking-tighter uppercase">ОБЩАЯ_НАГРУЗКА</h6>
                 </div>
-                <div className="text-[10px] font-mono text-indigo-600 bg-white/60 backdrop-blur-sm px-3 py-1 border border-indigo-200/50 uppercase">РЕАЛЬНОЕ_ВРЕМЯ</div>
             </div>
 
             <div className="p-6">
@@ -44,7 +43,7 @@ export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads }) => {
 
                             <div className="p-5 relative z-10">
                                 <div className="flex items-center justify-between mb-5">
-                                    <span className="text-[11px] font-mono font-bold text-indigo-500 tracking-wider">
+                                    <span className="text-[12px] font-mono font-bold text-indigo-500 tracking-wider">
                                         {load.label.toUpperCase()}
                                     </span>
                                     <div className={`text-[10px] font-mono font-bold px-2 py-0.5 text-white ${load.percent < 45 ? 'bg-amber-500' : load.percent <= 60 ? 'bg-emerald-500' : 'bg-rose-500'
@@ -57,12 +56,12 @@ export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads }) => {
                                     <div className="text-5xl font-mono font-black text-gray-900 tracking-tighter leading-none">
                                         {load.value.toLocaleString()}
                                     </div>
-                                    <div className="text-[10px] font-mono text-indigo-400 mt-2 tracking-wider uppercase">ЕДИНИЦ</div>
+                                    <div className="text-[10px] font-mono text-indigo-900 mt-2 tracking-wider uppercase">ЕДИНИЦ</div>
                                 </div>
 
                                 <div className="space-y-2.5">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-mono text-indigo-400 tracking-wider uppercase">ТЕКУЩАЯ ДОЛЯ</span>
+                                        <span className="text-[12px] font-mono text-indigo-800 tracking-wider uppercase">ТЕКУЩАЯ ДОЛЯ</span>
                                         <span className={`text-sm font-mono font-bold ${load.percent < 45 ? 'text-amber-600' : load.percent <= 60 ? 'text-emerald-600' : 'text-rose-600'
                                             }`}>
                                             {Math.round(load.percent * 2)}%
@@ -86,7 +85,7 @@ export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads }) => {
                                     </div>
 
                                     <div className="pt-1">
-                                        <div className={`text-[9px] font-mono font-bold tracking-wider ${load.percent < 45 ? 'text-amber-600' : load.percent <= 60 ? 'text-emerald-600' : 'text-rose-600'
+                                        <div className={`text-[12px] font-mono font-bold tracking-wider ${load.percent < 45 ? 'text-amber-600' : load.percent <= 60 ? 'text-emerald-600' : 'text-rose-600'
                                             }`}>
                                             {getStatusText(load.percent)}
                                         </div>

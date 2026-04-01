@@ -79,7 +79,7 @@ const DeptTable: React.FC<ExtendedProps> = ({
                             <th className="text-right p-3 text-[10px] font-mono font-bold text-indigo-600 tracking-wider uppercase">СУММАРНАЯ_НАГРУЗКА</th>
                             <th className="text-right p-3 text-[10px] font-mono font-bold text-indigo-600 tracking-wider uppercase">НАГРУЗКА/СОТРУДНИКА</th>
                             <th className="p-3 text-[10px] font-mono font-bold text-indigo-600 tracking-wider uppercase">УРОВЕНЬ</th>
-                            <th className="p-3 text-[10px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ДЕЙСТВИЯ</th>
+                            <th className="p-3 text-[10px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ДЕТАЛИ</th>
                         </tr>
                     </thead>
                     <tbody>

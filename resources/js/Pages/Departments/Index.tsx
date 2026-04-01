@@ -22,6 +22,8 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
     const [localStaff, setLocalStaff] = useState<Record<string, number>>({});
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    // const everyone = backendDepartments.reduce((acc, dep) => acc + dep.staff, 0);
+
     const { data, setData, post, processing } = useForm({
         staff_map: {} as Record<string, number>,
         version: "",
@@ -107,10 +109,9 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
         <div className="container mx-auto p-3 space-y-6 pb-32">
             <TotalLoadCard loads={loads} />
 
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
-                <p className="text-blue-700 text-sm font-bold uppercase tracking-wider">
-                    Целевой показатель: {Math.round(fixedOptimalLoad)} ед./чел.
-                    <span className="ml-2 font-normal lowercase">(шкала индикатора: центр = 100%)</span>
+            <div className="bg-blue-50  flex gap-5">
+                <p className="text-blue-700 border-l-4 border-blue-500 text-sm font-bold  p-4 uppercase tracking-wider">
+                    Нагрузка на человека: {Math.round(fixedOptimalLoad).toLocaleString()}
                 </p>
             </div>
 
