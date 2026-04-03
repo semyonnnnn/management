@@ -22,6 +22,8 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
     const [localStaff, setLocalStaff] = useState<Record<string, number>>({});
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const staticDepartments = backendDepartments;
+
     // const everyone = backendDepartments.reduce((acc, dep) => acc + dep.staff, 0);
 
     const { data, setData, post, processing } = useForm({
@@ -116,6 +118,7 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
             </div>
 
             <DeptTable
+                staticDepartments={staticDepartments}
                 departments={processedDepartments}
                 changeStaff={changeStaff}
                 fixedOptimalLoad={fixedOptimalLoad}

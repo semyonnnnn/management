@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { DeptTableProps } from "@/types";
 import { ModalDetails } from "./ModalDetails";
+import { DialogDescription } from "@radix-ui/react-dialog";
 
 interface ExtendedProps extends DeptTableProps {
     fixedOptimalLoad: number;
+    staticDepartments: any[];
 }
 
 const DeptTable: React.FC<ExtendedProps> = ({
+    staticDepartments,
     departments,
     changeStaff,
     fixedOptimalLoad,
@@ -76,6 +79,7 @@ const DeptTable: React.FC<ExtendedProps> = ({
                             <th className="text-left p-3 text-[10px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ОТДЕЛ</th>
                             <th className="text-left p-3 text-[10px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ТЕРРИТОРИЯ</th>
                             <th className="text-center p-3 text-[10px] font-mono font-bold text-indigo-600 tracking-wider uppercase">СОТРУДНИКОВ</th>
+                            <th className="text-center p-3 text-[10px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ШТАТНОЕ</th>
                             <th className="text-right p-3 text-[10px] font-mono font-bold text-indigo-600 tracking-wider uppercase">СУММАРНАЯ_НАГРУЗКА</th>
                             <th className="text-right p-3 text-[10px] font-mono font-bold text-indigo-600 tracking-wider uppercase">НАГРУЗКА/СОТРУДНИКА</th>
                             <th className="p-3 text-[10px] font-mono font-bold text-indigo-600 tracking-wider uppercase">УРОВЕНЬ</th>
@@ -83,7 +87,7 @@ const DeptTable: React.FC<ExtendedProps> = ({
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredDepartments.map((dept) => {
+                        {filteredDepartments.map((dept, index) => {
                             const workloadPercent = calcWorkloadRawPercent(dept);
                             const levelClass = getLevelClass(workloadPercent);
                             const loadPerStaff = dept.staff > 0 ? Math.floor(dept.totalLoad / dept.staff) : 0;
@@ -106,6 +110,9 @@ const DeptTable: React.FC<ExtendedProps> = ({
                                             onChange={(e) => changeStaff(dept.id, Number(e.target.value))}
                                             className="w-20 text-center border border-indigo-200/50 bg-indigo-50/30 px-2 py-1.5 font-mono text-[12px] outline-none"
                                         />
+                                    </td>
+                                    <td className="text-center p-3">
+                                        <p className="w-20 text-center border-b border-indigo-200/50 bg-indigo-50/90 px-1 py-1.5 font-mono text-[12px] outline-none">{staticDepartments[index].staff}</p>
                                     </td>
                                     <td className="text-right p-3 font-mono text-[12px] font-bold">{dept.totalLoad.toLocaleString()}</td>
                                     <td className="text-right p-3 font-mono text-[12px] text-gray-600">{loadPerStaff.toLocaleString()}</td>
