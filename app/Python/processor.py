@@ -22,10 +22,17 @@ class DepartmentProcessor:
         self.departments = []
         self.forms = []
 
+   
     def process_data(self):
         dept_temp = {}
 
         for sheet_name in self.matrix_xls.sheet_names:
+            sheet_lower = str(sheet_name).strip().lower()
+            
+            # Skip summary sheets or instructions entirely
+            if "итог" in sheet_lower or "справка" in sheet_lower:
+                continue
+
             df = pd.read_excel(
                 self.matrix_xls,
                 sheet_name=sheet_name,
@@ -41,12 +48,22 @@ class DepartmentProcessor:
             workload_col = 40 # AO
 
             col_values = df.iloc[:, name_col].fillna("").astype(str).str.strip()
+            
+            # 1. Determine if this sheet uses the "Name итог" subtotal row structure
+            has_inline_totals = any("итог" in str(r).lower() for r in col_values)
+            
             valid_depts = set()
             for val in col_values.unique():
                 val_lower = val.lower()
-                if not val or "итог" in val_lower:
+                if not val or "итог" in val_lower or "отдел" not in val_lower:
                     continue
-                if any(str(r).strip().lower() == f"{val_lower} итог" for r in col_values):
+                
+                if has_inline_totals:
+                    # Strict validation for spreadsheets structured like tipa_tatari
+                    if any(str(r).strip().lower() == f"{val_lower} итог" for r in col_values):
+                        valid_depts.add(val)
+                else:
+                    # Flat data structure collection for formats like real_tatari
                     valid_depts.add(val)
 
             for _, row in df.iterrows():
@@ -58,7 +75,15 @@ class DepartmentProcessor:
 
                 staff = int(clean_float(row[staff_col])) if len(row) > staff_col and row[staff_col] else 0
                 workload = int(clean_float(row[workload_col])) if len(row) > workload_col and row[workload_col] else 0
-                territory = "ekb" if "СО" in sheet_name else "krg"
+                
+                # 2. Normalize Territory safely for React front-end filters ('ekb' / 'krg')
+                if "со" in sheet_lower or "екат" in sheet_lower or "ekb" in sheet_lower:
+                    territory = "ekb"
+                elif "курган" in sheet_lower or "krg" in sheet_lower:
+                    territory = "krg"
+                else:
+                    # Fallback to ekb or pass it through if it's already an accepted key
+                    territory = "ekb" 
 
                 if dept_name not in dept_temp:
                     dept_temp[dept_name] = {
@@ -87,6 +112,14 @@ class DepartmentProcessor:
                     continue
 
                 raw_okud = str(row[okud_col]).strip()
+                
+                # 3. Clean float conversion string bugs (e.g., '616009.0' -> '616009')
+                raw_okud = raw_okud.split('.')[0]
+                
+                # 4. Fill in leading zeros lost during Excel number parsing
+                if len(raw_okud) == 6 and raw_okud.isdigit():
+                    raw_okud = "0" + raw_okud
+
                 # Include only exactly 7 consecutive digits
                 if not re.fullmatch(r"\d{7}", raw_okud):
                     continue
@@ -104,7 +137,6 @@ class DepartmentProcessor:
 
                 final = int(clean_float(row[final_col])) if len(row) > final_col and row[final_col] else 0
 
-                # Department name from same row
                 department_name = str(row[dept_name_col]).strip() if len(row) > dept_name_col and row[dept_name_col] else None
 
                 self.forms.append({

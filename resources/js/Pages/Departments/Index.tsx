@@ -1,11 +1,12 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import axios from "axios";
 import { Head, useForm, router } from "@inertiajs/react";
 import React, { useState, useEffect, useMemo } from "react";
+///////////////////////////////////////////////////////
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { DeptData, PageProps, LoadItem } from "@/types";
 import { TotalLoadCard } from "./Partials/TotalLoadCard";
 import { DeptTable } from "./Partials/DeptTable";
 import Modal from "@/components/custom/Modal";
-import axios from "axios";
 
 export default function Index({ auth, departments, forms, versionId }: PageProps & { departments: any[], forms: any[], versionId: number }) {
     return (
@@ -24,6 +25,7 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[], c
     currentVersionId
 }) => {
     const [localStaff, setLocalStaff] = useState<Record<string, number>>({});
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [saving, setSaving] = useState(false);
 
@@ -48,21 +50,6 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[], c
         return totalStaff > 0 ? totalWorkload / totalStaff : 0;
     }, [backendDepartments]);
 
-    const krgDepartments = backendDepartments.filter(dep => dep.territory === 'krg');
-    const ekbDepartments = backendDepartments.filter(dep => dep.territory === 'ekb');
-
-    const fixedKrgOptimalLoad = useMemo(() => {
-        const totalWorkload = krgDepartments.reduce((acc, d) => acc + Number(d.workload), 0);
-        const totalStaff = krgDepartments.reduce((acc, d) => acc + Number(d.staff), 0);
-        return totalStaff > 0 ? totalWorkload / totalStaff : 0;
-    }, [backendDepartments]);
-
-    const fixedEkbOptimalLoad = useMemo(() => {
-        const totalWorkload = ekbDepartments.reduce((acc, d) => acc + Number(d.workload), 0);
-        const totalStaff = ekbDepartments.reduce((acc, d) => acc + Number(d.staff), 0);
-        return totalStaff > 0 ? totalWorkload / totalStaff : 0;
-    }, [backendDepartments]);
-
     // Calculate Card Data: Mapping "Optimal" to 50% visual width
     const loads: LoadItem[] = useMemo(() => {
         const getStats = (territoryKey?: string) => {
@@ -76,7 +63,7 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[], c
 
             // Map: (avg / benchmark) * 50. If avg == benchmark, percent is 50 (The Center).
             const percent = fixedOptimalLoad > 0 ? Math.round((avg / fixedOptimalLoad) * 50) : 0;
-            return { workload, percent };
+            return { workload, percent, avg };
         };
 
         const global = getStats();
@@ -84,9 +71,9 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[], c
         const krg = getStats('krg');
 
         return [
-            { id: "all", label: "По Управлению", value: Math.round(global.workload), percent: global.percent, load_per_person: fixedOptimalLoad },
-            { id: "ekb", label: "Екатеринбург", value: Math.round(ekb.workload), percent: ekb.percent, load_per_person: fixedEkbOptimalLoad },
-            { id: "krg", label: "Курган", value: Math.round(krg.workload), percent: krg.percent, load_per_person: fixedKrgOptimalLoad },
+            { id: "all", label: "По Управлению", value: Math.round(global.workload), percent: global.percent, load_per_person: global.avg },
+            { id: "ekb", label: "Екатеринбург", value: Math.round(ekb.workload), percent: ekb.percent, load_per_person: ekb.avg },
+            { id: "krg", label: "Курган", value: Math.round(krg.workload), percent: krg.percent, load_per_person: krg.avg },
         ];
     }, [backendDepartments, localStaff, fixedOptimalLoad]);
 
@@ -113,6 +100,7 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[], c
         setData('staff_map', updated);
     };
 
+    console.log("localStaff", localStaff);
     const handleSaveStaffChanges = async () => {
         setSaving(true);
         try {

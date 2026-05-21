@@ -6,9 +6,6 @@ interface ExtendedProps extends DeptTableProps {
     fixedOptimalLoad: number;
 }
 
-
-
-
 const DeptTable: React.FC<ExtendedProps> = ({
     departments,
     changeStaff,
@@ -28,7 +25,6 @@ const DeptTable: React.FC<ExtendedProps> = ({
         setShowModal(true);
     };
 
-    console.log(departments);
 
     const filteredDepartments = selectedTerritory === "all"
         ? departments
@@ -81,7 +77,9 @@ const DeptTable: React.FC<ExtendedProps> = ({
                     <thead className="bg-indigo-50/50 border-b border-indigo-200/50">
                         <tr className="align-top">
                             <th className="text-left p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ОТДЕЛ</th>
-                            <th className="text-left p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ТЕРРИТОРИЯ</th>
+                            {selectedTerritory === 'all' &&
+                                <th className="text-left p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ТЕРРИТОРИЯ</th>
+                            }
                             <th className="text-right p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">СОТРУДНИКОВ</th>
                             <th className="text-right p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ШТАТНОЕ</th>
                             <th className="text-right p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">СУММАРНАЯ НАГРУЗКА, показатели</th>
@@ -102,11 +100,13 @@ const DeptTable: React.FC<ExtendedProps> = ({
                             return (
                                 <tr key={dept.id} className={`border-b border-indigo-900/40 transition-all ${index % 2 === 0 ? 'bg-indigo-200/40' : ''}`}>
                                     <td className="px-2 text-md">{dept.name}</td>
-                                    <td className="px-2">
-                                        <div className={`px-2 py-1 text-[9px] font-mono font-bold tracking-wider w-fit ${territoryColor[dept.territory as keyof typeof territoryColor]}`}>
-                                            {dept.territory === "ekb" ? "ЕКАТЕРИНБУРГ" : "КУРГАН"}
-                                        </div>
-                                    </td>
+                                    {selectedTerritory === 'all' &&
+                                        <td className="px-2">
+                                            <div className={`px-2 py-1 text-[9px] font-mono font-bold tracking-wider w-fit ${territoryColor[dept.territory as keyof typeof territoryColor]}`}>
+                                                {dept.territory === "ekb" ? "ЕКАТЕРИНБУРГ" : "КУРГАН"}
+                                            </div>
+                                        </td>
+                                    }
                                     <td className="text-center px-2">
                                         <input
                                             type="number"
