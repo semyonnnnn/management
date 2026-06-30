@@ -41,7 +41,7 @@ export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads }) => {
 
     return (
         <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border border-indigo-100 shadow-sm">
-            <div className="border-b border-indigo-200/50 px-6 py-5 flex justify-between items-center">
+            {/* <div className="border-b border-indigo-200/50 px-6 py-5 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-sm">
                         <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +50,7 @@ export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads }) => {
                     </div>
                     <h6 className="text-xl font-mono font-bold text-gray-900 tracking-tighter uppercase">общая нагрузка по сбору форм фсн</h6>
                 </div>
-            </div>
+            </div> */}
 
             <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

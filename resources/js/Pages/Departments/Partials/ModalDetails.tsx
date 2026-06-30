@@ -1,5 +1,6 @@
 import Modal from "@/components/custom/Modal";
 import { ModalDetailsProps } from "@/types";
+import { ModalDetailsSummary } from "./ModalDetailsSummary";
 
 const getColor = (percent: number) => {
     if (percent < 50) return "#f59e0b";  // Amber
@@ -39,8 +40,6 @@ const ModalDetails = ({
         const radius = (size - strokeWidth) / 2;
         const circumference = 2 * Math.PI * radius;
 
-        // Fix: Cap the visual progress circle representation at 100% (fully closed ring) 
-        // to prevent negative dash offsets from breaking SVG graphics.
         const visualPercent = Math.min(percent, 100);
         const offset = circumference - (visualPercent / 100) * circumference;
         const strokeColor = getColor(percent);
@@ -81,14 +80,17 @@ const ModalDetails = ({
         );
     };
 
-    const maxPercent = 100;
-    // Fix: Calculate a clean, non-negative reserve value
-    const currentReserve = Math.max(0, maxPercent - levelPercent);
+    const terr_local = {
+        'ekb': 'Екатеринбург',
+        'krg': 'Курган'
+    };
 
     return (
-        <Modal show={showModal} onClose={() => setShowModal(false)} maxWidth="2xl">
-            <div className="bg-white border border-indigo-200/50 h-[600px] flex flex-col">
+        <Modal show={showModal} onClose={() => setShowModal(false)} maxWidth="">
+            <div className="bg-white border border-indigo-200/50 h-auto max-h-[90vh] flex flex-col">
                 <div className="p-6 flex-1 flex flex-col space-y-6 overflow-hidden">
+
+                    {/* Header */}
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 bg-indigo-500"></div>
@@ -116,71 +118,21 @@ const ModalDetails = ({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div className="md:col-span-2 relative overflow-hidden border border-indigo-200/50 bg-gradient-to-br from-indigo-50/70 via-white to-indigo-50/30">
-                            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-indigo-400/70 via-indigo-300/40 to-transparent" />
-                            <div className="flex flex-col h-full">
-                                <div className="flex flex-1 border-b border-indigo-200/40">
-                                    <div className="flex-1 px-4 py-3 min-w-0 flex flex-col justify-center">
-                                        <div className="text-[9px] font-mono font-bold text-indigo-600 tracking-wider uppercase mb-1 whitespace-nowrap">
-                                            ТЕРРИТОРИЯ
-                                        </div>
-                                        <div className="font-mono text-[13px] font-bold truncate text-gray-900">{territory}</div>
-                                    </div>
-                                    <div className="w-px bg-indigo-200/40"></div>
-                                    <div className="flex-1 px-4 py-3 min-w-0 flex flex-col justify-center">
-                                        <div className="text-[9px] font-mono font-bold text-indigo-600 tracking-wider uppercase mb-1 whitespace-nowrap">
-                                            СОТРУДНИКОВ
-                                        </div>
-                                        <div className="font-mono text-[13px] font-bold truncate text-gray-900">{staffCount}</div>
-                                    </div>
-                                </div>
+                    {/* Summary Card Metrics Panel */}
+                    <ModalDetailsSummary
+                        territory={territory}
+                        terr_local={terr_local}
+                        staffCount={staffCount}
+                        totalLoad={totalLoad}
+                        loadPerStaff={loadPerStaff}
+                        levelPercent={levelPercent}
+                        fixedOptimalLoad={fixedOptimalLoad}
+                        color={color}
+                        CircularProgress={CircularProgress}
+                    />
 
-                                <div className="flex flex-1">
-                                    <div className="flex-1 px-4 py-3 min-w-0 flex flex-col justify-center">
-                                        <div className="text-[9px] font-mono font-bold text-indigo-600 tracking-wider uppercase mb-1 whitespace-nowrap">
-                                            СУММАРНАЯ НАГРУЗКА, показателей
-                                        </div>
-                                        <div className="font-mono text-[13px] font-bold truncate text-indigo-700">{totalLoad.toLocaleString()}</div>
-                                    </div>
-                                    <div className="w-px bg-indigo-200/40"></div>
-                                    <div className="flex-1 px-4 py-3 min-w-0 flex flex-col justify-center">
-                                        <div className="text-[9px] font-mono font-bold text-indigo-600 tracking-wider uppercase mb-1 whitespace-nowrap">
-                                            НАГРУЗКА на 1 СОТРУДНИКА,<br /> показателей
-                                        </div>
-                                        <div className="font-mono text-[13px] font-bold truncate text-indigo-700">{loadPerStaff.toLocaleString()}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-200 to-transparent" />
-                        </div>
-
-                        <div className="relative flex items-center justify-center border border-indigo-200/50 bg-gradient-to-br from-indigo-50/40 to-white p-5">
-                            <div className="absolute inset-0 bg-indigo-100/20 blur-2xl opacity-40" />
-                            <CircularProgress percent={levelPercent} size={120} strokeWidth={10} />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-3 border border-indigo-200/50 p-3 bg-indigo-50/20">
-                        <div className="text-center">
-                            <div className="text-[12px] font-mono text-gray-900 tracking-wider uppercase">средняя нагрузка по управлению</div>
-                            <div className="font-mono text-[16px] font-bold text-gray-700">{Math.round(fixedOptimalLoad).toLocaleString()}</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-[12px] font-mono text-gray-900 tracking-wider uppercase">ТЕКУЩАЯ</div>
-                            <div className="font-mono text-[16px] font-bold" style={{ color }}>
-                                {levelPercent}%
-                            </div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-[12px] font-mono text-gray-900 tracking-wider uppercase">РЕЗЕРВ</div>
-                            <div className="font-mono text-[16px] font-bold text-gray-700">
-                                {currentReserve}%
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col border border-indigo-200/50 rounded-md overflow-hidden">
+                    {/* Table Parent Layout Container */}
+                    <div className="flex-1 flex flex-col border border-indigo-200/50 rounded-md rounded-br-none overflow-hidden">
                         <div className="flex items-center justify-between px-3 py-2 bg-indigo-50 border-b border-indigo-200/50">
                             <div className="flex text-[15px] gap-4 text-sm font-mono text-gray-500 justify-between w-full">
                                 <div>
@@ -192,29 +144,54 @@ const ModalDetails = ({
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto">
-                            <table className="w-full text-sm border-collapse">
-                                <thead className="bg-indigo-100 sticky top-0 z-10">
-                                    <tr className="divide-x divide-indigo-200/60">
-                                        <th className="px-3 py-2 text-left text-[15px] font-mono font-bold text-indigo-700 uppercase">ФОРМА</th>
-                                        <th className="px-3 py-2 text-left text-[15px] font-mono font-bold text-indigo-700 uppercase">ПОКАЗАТЕЛЕЙ</th>
-                                        <th className="px-3 py-2 text-left text-[15px] font-mono font-bold text-indigo-700 uppercase">ОТЧЁТЫ</th>
-                                        <th className="px-3 py-2 text-left text-[15px] font-mono font-bold text-indigo-700 uppercase">КОЭФ. (K1..K6)</th>
-                                        <th className="px-3 py-2 text-left text-[15px] font-mono font-bold text-indigo-700 uppercase">РАСЧЁТ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {forms.map(f => (
-                                        <tr key={f.id} className="hover:bg-indigo-50/40 transition-colors divide-x divide-indigo-100">
-                                            <td className="px-3 py-2 font-mono text-[15px] text-gray-900">{f.name}</td>
-                                            <td className="px-3 py-2 font-mono text-[15px] text-gray-600 bg-indigo-50/40">{f.indicators}</td>
-                                            <td className="px-3 py-2 font-mono text-[15px] text-gray-600">{f.reports}</td>
-                                            <td className="px-3 py-2 font-mono text-[15px] text-gray-600 bg-indigo-50/40">{f.coeff}</td>
-                                            <td className="px-3 py-2 font-mono text-[15px] font-bold text-gray-900">{f.final}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        {/* FIXED: Changed inner view wrappers to allow smooth horizontal auto-scrolling 
+                          if total custom cell metrics exceed the modal boundary.
+                        */}
+                        <div className="flex-1 overflow-x-auto overflow-y-auto min-h-0
+                                    [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
+                                    [&::-webkit-scrollbar-track]:bg-indigo-50/30
+                                    [&::-webkit-scrollbar-thumb]:bg-indigo-500
+                                    hover:[&::-webkit-scrollbar-thumb]:bg-indigo-600">
+
+                            {/* Force internal block matrix to keep absolute width matching total structural width */}
+                            <div className="min-w-max divide-y divide-indigo-100">
+
+                                {/* TABLE HEADER BLOCK */}
+                                <div className="sticky top-0 z-20 flex items-center bg-indigo-100 border-b border-indigo-200 font-mono font-bold text-indigo-700 text-[15px] uppercase tracking-wide shadow-sm pr-2">
+                                    <div className="w-48 min-w-[192px] px-3 py-2.5">ФОРМА</div>
+                                    <div className="w-32 min-w-[128px] px-3 py-2.5 text-left">ПОКАЗАТЕЛЕЙ</div>
+                                    <div className="w-28 min-w-[112px] px-3 py-2.5 text-left">ОТЧЁТЫ</div>
+                                    <div className="w-36 min-w-[144px] px-3 py-2.5 text-left">КОЭФ. (K1..K6)</div>
+                                    <div className="w-24 min-w-[96px] px-3 py-2.5 text-left">РАСЧЁТ</div>
+                                    <div className="w-24 min-w-[96px] px-3 py-2.5 text-left">ДЕЙСТВИЯ</div>
+                                </div>
+
+                                {/* TABLE ROWS LOOP */}
+                                {forms.map(f => (
+                                    <div key={f.id} className="flex items-center hover:bg-indigo-50/40 transition-colors text-sm font-mono text-gray-900 pr-2">
+                                        {/* FIXED: Replaced flex-1 truncate with explicit bounding parameters matching header matrix */}
+                                        <div className="w-48 min-w-[192px] px-3 py-2 text-gray-900 truncate" title={f.name}>
+                                            {f.name}
+                                        </div>
+                                        <div className="w-32 min-w-[128px] px-3 py-2 text-gray-600 bg-indigo-50/20 self-stretch flex items-center">
+                                            {f.indicators}
+                                        </div>
+                                        <div className="w-28 min-w-[112px] px-3 py-2 text-gray-600 self-stretch flex items-center">
+                                            {f.reports}
+                                        </div>
+                                        <div className="w-36 min-w-[144px] px-3 py-2 text-gray-600 bg-indigo-50/20 self-stretch flex items-center">
+                                            {f.coeff}
+                                        </div>
+                                        <div className="w-24 min-w-[96px] px-3 py-2 font-bold text-gray-900 self-stretch flex items-center">
+                                            {f.final}
+                                        </div>
+                                        <div className="w-24 min-w-[96px] px-3 py-2 text-gray-500 self-stretch flex items-center">
+                                            test
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
                         </div>
                     </div>
                 </div>

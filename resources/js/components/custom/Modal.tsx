@@ -14,7 +14,7 @@ export default function Modal({
     onClose = () => { },
 }: PropsWithChildren<{
     show: boolean;
-    maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+    maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | 'fit' | '';
     closeable?: boolean;
     onClose: CallableFunction;
 }>) {
@@ -25,11 +25,18 @@ export default function Modal({
     };
 
     const maxWidthClass = {
-        sm: 'sm:max-w-sm',
-        md: 'sm:max-w-md',
-        lg: 'sm:max-w-lg',
-        xl: 'sm:max-w-xl',
-        '2xl': 'sm:max-w-2xl',
+        sm: 'sm:max-w-sm w-full',
+        md: 'sm:max-w-md w-full',
+        lg: 'sm:max-w-lg w-full',
+        xl: 'sm:max-w-xl w-full',
+        '2xl': 'sm:max-w-2xl w-full',
+        '3xl': 'sm:max-w-3xl w-full',
+        '4xl': 'sm:max-w-4xl w-full',
+        '5xl': 'sm:max-w-5xl w-full',
+        '6xl': 'sm:max-w-6xl w-full',
+        '7xl': 'sm:max-w-7xl w-full',
+        'fit': 'sm:w-fit w-full mx-auto',
+        '': ''
     }[maxWidth];
 
     return (
@@ -37,8 +44,8 @@ export default function Modal({
             <Dialog
                 as="div"
                 id="modal"
-                className="fixed backdrop-blur-sm inset-0 flex transform items-center overflow-y-auto px-4 py-6 transition-all sm:px-0"
-                onClose={() => { }}
+                className="fixed backdrop-blur-sm inset-0 z-50 flex justify-center items-center overflow-y-auto p-4 transition-all sm:p-6"
+                onClose={close}
             >
                 <TransitionChild
                     enter="ease-out duration-300"
@@ -48,8 +55,7 @@ export default function Modal({
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="absolute inset-0 bg-gray-500/75 dark:bg-gray-900/75 z-0"
-                        onClick={close} />
+                    <div className="absolute inset-0 bg-gray-500/75 dark:bg-gray-900/75 z-0" onClick={close} />
                 </TransitionChild>
 
                 <TransitionChild
@@ -60,8 +66,8 @@ export default function Modal({
                     leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                     leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
-                    <DialogPanel onClick={(e) => e.stopPropagation()}
-                        className={`mb-6 z-50 transform overflow-hidden bg-white shadow-xl transition-all sm:mx-auto sm:w-full dark:bg-gray-800 ${maxWidthClass}`}
+                    <DialogPanel
+                        className={`my-8 z-50 transform overflow-hidden bg-white shadow-xl transition-all dark:bg-gray-800 ${maxWidthClass} !h-fit`}
                     >
                         {children}
                     </DialogPanel>
