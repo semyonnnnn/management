@@ -5,8 +5,8 @@ import { PropsWithChildren, ReactNode, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 // Import the font weights you need
-import "@fontsource/jetbrains-mono/400.css"; // regular
-import "@fontsource/jetbrains-mono/700.css"; // bold
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/700.css";
 
 export default function Authenticated({ header, children }: PropsWithChildren<{ header?: ReactNode }>) {
     const user = usePage().props.auth.user;
@@ -25,11 +25,17 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
         if (routePath === 'versions.get' && url.includes('/versions')) {
             return true;
         }
+        if (routePath === 'forms' && url.includes('/forms')) {
+            return true;
+        }
+        if (routePath === 'state' && url.includes('/state')) {
+            return true;
+        }
         return false;
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+        <div className="min-h-screen bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
             <nav className="bg-white/80 backdrop-blur-sm border-b border-indigo-200/50">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between items-center">
@@ -45,40 +51,19 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
 
                         {/* Navigation Links */}
                         <div className='flex gap-5'>
-                            <div
-                                className={`cursor-pointer px-3 py-1 text-sm font-mono font-bold tracking-wider transition-all duration-200 ${isActive('main.index')
-                                        ? 'text-indigo-600 border-b-2 border-indigo-600'
-                                        : 'text-gray-900 border-b-2 border-transparent hover:border-indigo-500'
-                                    }`}
-                                onClick={() => router.get(route('main.index'))}
-                            >
-                                ГЛАВНАЯ
-                            </div>
-                            <div
-                                className={`cursor-pointer px-3 py-1 text-sm font-mono font-bold tracking-wider transition-all duration-200 ${isActive('uploadFiles.get')
-                                        ? 'text-indigo-600 border-b-2 border-indigo-600'
-                                        : 'text-gray-900 border-b-2 border-transparent hover:border-indigo-500'
-                                    }`}
-                                onClick={() => router.get(route('uploadFiles.get'))}
-                            >
-                                ЗАГРУЗИТЬ
-                            </div>
-                            <div
-                                className={`cursor-pointer px-3 py-1 text-sm font-mono font-bold tracking-wider transition-all duration-200 ${isActive('versions.get')
-                                        ? 'text-indigo-600 border-b-2 border-indigo-600'
-                                        : 'text-gray-900 border-b-2 border-transparent hover:border-indigo-500'
-                                    }`}
-                                onClick={() => router.get(route('versions.get'))}
-                            >
-                                ВЕРСИИ
-                            </div>
+
+                            <MenuItem _route="main.index" isActive={isActive} name="главная" />
+                            <MenuItem _route="uploadFiles.get" isActive={isActive} name="загрузить" />
+                            <MenuItem _route="versions.get" isActive={isActive} name="версии" />
+                            <MenuItem _route="forms" isActive={isActive} name="формы" />
+                            <MenuItem _route="state.index" isActive={isActive} name="штатное" />
                         </div>
 
                         {/* Right controls */}
                         <div className="hidden sm:flex sm:items-center gap-4">
 
                             {/* User Block - Sharp edges style */}
-                            <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 border border-indigo-400/30">
+                            <div className="flex items-center gap-3 px-4 py-2 bg-linear-to-r from-indigo-600 to-purple-600 border border-indigo-400/30">
                                 <AccountCircleOutlinedIcon className="text-white text-lg" />
                                 <span className="font-mono text-[11px] text-white tracking-wider font-bold">
                                     {user.name.toUpperCase()}
@@ -156,6 +141,20 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
             </nav>
 
             <main className="p-6">{children}</main>
+        </div>
+    );
+}
+
+const MenuItem = ({ _route, isActive, name }: { _route: string, isActive: (path: string) => Boolean, name: string }) => {
+    return (
+        <div
+            className={`select-none lowercase cursor-pointer px-3 py-1 text-sm font-mono font-bold tracking-wider transition-all duration-200 ${isActive(_route)
+                ? 'text-indigo-600 border-b-2 border-indigo-600'
+                : 'text-gray-900 border-b-2 border-transparent hover:border-indigo-500'
+                }`}
+            onClick={() => router.get(route(_route))}
+        >
+            {name}
         </div>
     );
 }

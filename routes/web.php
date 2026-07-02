@@ -1,10 +1,12 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+////////////////////////////////////////
 use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\VersionsController;
-use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\FormsPageController;
+use App\Http\Controllers\StatePageController;
 
 Route::get('/', function () {
     return redirect('/main');
@@ -24,6 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/versions', [VersionsController::class, 'create'])->name('versions.create');
     Route::delete('/versions/{id}', [VersionsController::class, 'destroy'])->name('versions.delete');
 
+    Route::get('/forms', [FormsPageController::class, 'index'])->name('forms');
+
+    Route::get('/state', [StatePageController::class, 'index'])->name('state.index');
 });
 
 require __DIR__ . '/auth.php';

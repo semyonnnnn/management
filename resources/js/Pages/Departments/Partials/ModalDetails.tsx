@@ -154,16 +154,16 @@ const ModalDetails = ({
                                     hover:[&::-webkit-scrollbar-thumb]:bg-indigo-600">
 
                             {/* Force internal block matrix to keep absolute width matching total structural width */}
-                            <div className="min-w-max divide-y divide-indigo-100">
+                            <div className="min-w-max divide-y divide-indigo-100 overflow-x-none text-nowrap">
 
                                 {/* TABLE HEADER BLOCK */}
                                 <div className="sticky top-0 z-20 flex items-center bg-indigo-100 border-b border-indigo-200 font-mono font-bold text-indigo-700 text-[15px] uppercase tracking-wide shadow-sm pr-2">
-                                    <div className="w-48 min-w-[192px] px-3 py-2.5">ФОРМА</div>
-                                    <div className="w-32 min-w-[128px] px-3 py-2.5 text-left">ПОКАЗАТЕЛЕЙ</div>
-                                    <div className="w-28 min-w-[112px] px-3 py-2.5 text-left">ОТЧЁТЫ</div>
-                                    <div className="w-36 min-w-[144px] px-3 py-2.5 text-left">КОЭФ. (K1..K6)</div>
-                                    <div className="w-24 min-w-[96px] px-3 py-2.5 text-left">РАСЧЁТ</div>
-                                    <div className="w-24 min-w-[96px] px-3 py-2.5 text-left">ДЕЙСТВИЯ</div>
+                                    <div className="w-48 min-w-48 px-3 py-2.5">ФОРМА</div>
+                                    <div className="w-32 min-w-32 px-3 py-2.5 text-left">ПОКАЗАТЕЛЕЙ</div>
+                                    <div className="w-28 min-w-28 px-3 py-2.5 text-left">ОТЧЁТЫ</div>
+                                    <div className="w-36 min-w-36 px-3 py-2.5 text-left">КОЭФ. (K1..K6)</div>
+                                    <div className="w-24 min-w-24 px-3 py-2.5 text-left">РАСЧЁТ</div>
+                                    <div className="w-24 min-w-24 px-3 py-2.5 text-left">ДЕЙСТВИЯ</div>
                                 </div>
 
                                 {/* TABLE ROWS LOOP */}
