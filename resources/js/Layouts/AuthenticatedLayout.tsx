@@ -28,7 +28,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
         if (routePath === 'forms' && url.includes('/forms')) {
             return true;
         }
-        if (routePath === 'state' && url.includes('/state')) {
+        if (routePath === 'state.index' && url.includes('/state')) {
             return true;
         }
         return false;

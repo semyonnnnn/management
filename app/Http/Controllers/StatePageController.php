@@ -15,7 +15,7 @@ class StatePageController extends Controller
 
         $state = DB::table('departments')
             ->where('versions_id', $currentVersion->id)
-            ->select('id', 'name', 'state')
+            ->select('id', 'territory', 'name', 'state')
             ->orderBy('name', 'asc')
             ->get();
 
