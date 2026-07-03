@@ -1,23 +1,38 @@
 import React, { useState, useMemo } from 'react';
+import { useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
 import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/700.css';
+import { AddDepartment } from './AddDepartment';
+import Modal from "@/components/custom/Modal";
+import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 
 interface DepartmentState {
     id: string | number;
+    code: string;
     territory: string;
     name: string;
     state: number;
 }
 
 interface StatePageProps extends PageProps {
-    state: DepartmentState[];
+    state: DepartmentState[] | null;
 }
 
 export default function Index({ state }: StatePageProps) {
     const [selectedTerritory, setSelectedTerritory] = useState<string>("all");
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const [isAdding, setIsAdding] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<DepartmentState | null>(null);
+
+    const { data, setData, post, processing, reset } = useForm({
+        code: '',
+        name: '',
+        territory: 'ekb',
+        state: 0,
+    });
 
     const territoryColor = {
         ekb: "bg-indigo-100 text-indigo-700 border border-indigo-200",
@@ -25,6 +40,7 @@ export default function Index({ state }: StatePageProps) {
     };
 
     const filteredState = useMemo(() => {
+        if (!state) return [];
         return state.filter((dept) => {
             const matchTerritory = selectedTerritory === "all" || dept.territory === selectedTerritory;
             const matchSearch = dept.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -32,19 +48,25 @@ export default function Index({ state }: StatePageProps) {
         });
     }, [state, selectedTerritory, searchQuery]);
 
+    const handleAdd = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(route('state.create'), {
+            onSuccess: () => {
+                reset();
+                setIsAdding(false);
+            }
+        });
+    };
+
     return (
         <AuthenticatedLayout>
             <div className="space-y-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-
                 <div className="bg-white border border-indigo-200/50 p-1.5 flex flex-col md:flex-row gap-2 justify-between items-stretch md:items-center shadow-sm">
                     <div className="flex flex-1 items-center justify-between">
                         <div className="text-3xl font-bold text-gray-900 uppercase tracking-tight flex items-center gap-1.5 shrink-0">
                             ШТАТНОЕ
-                            <span className="text-indigo-600">
-                                [{filteredState.length}]
-                            </span>
+                            <span className="text-indigo-600">[{filteredState.length}]</span>
                         </div>
-
                         <div className="relative flex-1 max-w-md mr-28">
                             <input
                                 type="text"
@@ -63,7 +85,6 @@ export default function Index({ state }: StatePageProps) {
                             )}
                         </div>
                     </div>
-
                     <div className="flex gap-0.5 bg-white border border-gray-300 p-0.5 shrink-0">
                         {["all", "ekb", "krg"].map((t) => (
                             <button
@@ -85,11 +106,13 @@ export default function Index({ state }: StatePageProps) {
                         <table className="min-w-full">
                             <thead className="bg-indigo-50/80 border-b border-indigo-200/80">
                                 <tr className="align-bottom">
+                                    <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 tracking-wider uppercase border-r border-indigo-200 w-24">КОД</th>
                                     <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 tracking-wider uppercase">ОТДЕЛ</th>
-                                    {selectedTerritory === 'all' && (
-                                        <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 tracking-wider uppercase w-40">ТЕРРИТОРИЯ</th>
-                                    )}
                                     <th className="text-right px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 tracking-wider uppercase w-32">ШТАТНОЕ</th>
+                                    {selectedTerritory === 'all' && (
+                                        <th className="text-right px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 tracking-wider uppercase w-40">ТЕРРИТОРИЯ</th>
+                                    )}
+                                    <th className="w-12"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -99,30 +122,43 @@ export default function Index({ state }: StatePageProps) {
                                         className={`border-b border-indigo-900/10 transition-colors hover:bg-indigo-50/50 ${index % 2 === 0 ? 'bg-slate-50/60' : 'bg-white'
                                             }`}
                                     >
+                                        <td className="px-1.5 py-1 text-base font-bold text-indigo-700 leading-none align-middle border-r border-indigo-200 bg-indigo-50/30">
+                                            {dept.code}
+                                        </td>
                                         <td className="px-1.5 py-1 text-base font-bold text-gray-900 leading-none align-middle">
                                             {dept.name}
                                         </td>
+                                        <td className="px-1.5 py-1 text-right align-middle">
+                                            <div className="inline-flex items-center justify-center bg-indigo-50/80 border border-indigo-200 px-2 py-0 min-w-10">
+                                                <span className="font-mono text-xl font-bold text-indigo-800 leading-none">
+                                                    {dept.state}
+                                                </span>
+                                            </div>
+                                        </td>
                                         {selectedTerritory === 'all' && (
-                                            <td className="px-1.5 py-1 align-middle">
-                                                <div className={`px-1.5 py-0 text-[11px] font-mono font-bold tracking-wider w-fit uppercase ${territoryColor[dept.territory as keyof typeof territoryColor] || "bg-gray-200 text-gray-800"
+                                            <td className="px-1.5 py-1 align-middle flex justify-end">
+                                                <div className={`px-2 py-0.5 text-[11px] font-mono font-bold tracking-wider uppercase text-left w-fit ${territoryColor[dept.territory as keyof typeof territoryColor] || "bg-gray-200 text-gray-800"
                                                     }`}>
                                                     {dept.territory === "ekb" ? "ЕКАТЕРИНБУРГ" : dept.territory === "krg" ? "КУРГАН" : dept.territory}
                                                 </div>
                                             </td>
                                         )}
                                         <td className="px-1.5 py-1 text-right align-middle">
-                                            <div className="inline-flex items-center justify-center bg-indigo-50/80 border border-indigo-200 px-2 py-0 min-w-[2.5rem]">
-                                                <span className="font-mono text-xl font-bold text-indigo-800 leading-none">
-                                                    {dept.state}
-                                                </span>
-                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    setItemToDelete(dept);
+                                                    setIsDeleting(true);
+                                                }}
+                                                className="w-7 h-7 flex items-center justify-center bg-pink-100 border border-red-300 text-red-600 hover:bg-pink-200 transition-all cursor-pointer font-bold"
+                                            >
+                                                ×
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
-
                                 {filteredState.length === 0 && (
                                     <tr>
-                                        <td colSpan={selectedTerritory === 'all' ? 3 : 2} className="p-4 text-center">
+                                        <td colSpan={selectedTerritory === 'all' ? 5 : 4} className="p-4 text-center">
                                             <div className="text-base font-bold text-gray-400 border border-dashed border-indigo-200 bg-white/50 py-2 uppercase tracking-widest font-mono">
                                                 ДАННЫЕ ОТСУТСТВУЮТ
                                             </div>
@@ -133,8 +169,33 @@ export default function Index({ state }: StatePageProps) {
                         </table>
                     </div>
                 </div>
-
+                {isAdding && (
+                    <AddDepartment
+                        handleCancel={() => {
+                            reset();
+                            setIsAdding(!isAdding)
+                        }}
+                        data={data}
+                        setData={setData}
+                        processing={processing}
+                        handleAdd={handleAdd}
+                        showTerritory={selectedTerritory === 'all'}
+                    />
+                )}
             </div>
+
+            <DeleteConfirmationModal
+                show={isDeleting}
+                onClose={() => setIsDeleting(false)}
+                item={itemToDelete}
+            />
+
+            <button
+                onClick={() => setIsAdding(!isAdding)}
+                className="fixed bottom-8 right-8 w-12 h-12 bg-indigo-600 text-white shadow-xl flex items-center justify-center text-5xl hover:bg-indigo-700 transition-all z-50 cursor-pointer"
+            >
+                +
+            </button>
         </AuthenticatedLayout>
     );
 }

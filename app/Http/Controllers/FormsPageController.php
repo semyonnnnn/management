@@ -30,7 +30,7 @@ class FormsPageController extends Controller
         }
 
         // Fetch departments for reference mapping
-        $departments = DB::table('departments')
+        $departments = DB::table('old_departments')
             ->where('versions_id', $currentVersion->id)
             ->select('id', 'name', 'territory', 'staff', 'workload', 'state')
             ->orderBy('name', 'asc')
@@ -39,12 +39,12 @@ class FormsPageController extends Controller
         // Fetch raw forms matching version baseline
         $forms = DB::table('forms')
             ->where('versions_id', $currentVersion->id)
-            ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'department_id')
+            ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'old_department_id')
             ->get();
 
         // Legacy cross-reference mappings
         $oldDepartmentIds = $forms->pluck('department_id')->unique()->toArray();
-        $oldDepartmentsLookup = DB::table('departments')
+        $oldDepartmentsLookup = DB::table('old_departments')
             ->whereIn('id', $oldDepartmentIds)
             ->pluck('name', 'id')
             ->toArray();

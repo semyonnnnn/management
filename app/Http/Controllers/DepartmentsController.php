@@ -23,6 +23,7 @@ class DepartmentsController extends Controller
             ->where('isCurrent', true)
             ->first();
 
+        // Handle case where no version exists
         if (!$currentVersion) {
             return Inertia::render('Departments/Index', [
                 'departments' => [],
@@ -31,61 +32,62 @@ class DepartmentsController extends Controller
             ]);
         }
 
-        // 2. Fetch all departments for this version
-        $departments = DB::table('departments')
+        // 2. Fetch Data
+        $departments = DB::table('old_departments')
             ->where('versions_id', $currentVersion->id)
             ->select('id', 'name', 'territory', 'staff', 'workload', 'state')
             ->orderBy('name', 'asc')
             ->get();
 
-        // 3. Fetch all forms for this version
+
         $forms = DB::table('forms')
             ->where('versions_id', $currentVersion->id)
-            ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'department_id')
+            ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'old_department_id')
             ->orderBy('name', 'asc')
             ->get();
 
-        /* 
-    |--------------------------------------------------------------------------
-    | BACKUP WORKAROUND: Map by Name if IDs are mismatched
-    |--------------------------------------------------------------------------
-    | Because the forms table contains stale department_ids, we map them by 
-    | department name so that your data binds perfectly on the frontend.
-    */
+        // Handle case where version exists but has no departments (Return early)
+        if ($departments->isEmpty()) {
+            return Inertia::render('Departments/Index', [
+                'departments' => [],
+                'forms' => [],
+                'versionId' => $currentVersion->id,
+            ]);
+        }
 
-        // Create an array mapping: ['Old Dept ID' => 'Dept Name'] 
-        // We get this by finding what departments those old IDs belonged to
-        $oldDepartmentIds = $forms->pluck('department_id')->unique()->toArray();
-        $oldDepartmentsLookup = DB::table('departments')
-            ->whereIn('id', $oldDepartmentIds)
-            ->pluck('name', 'id')
-            ->toArray();
+        // 3. Conditional Form Mapping
+        // Only process lookups if forms exist to prevent unnecessary queries/logic errors
+        $formsGroupedByName = collect([]);
 
-        // Group forms by department name for an O(1) lightning-fast lookup map
-        $formsGroupedByName = $forms->groupBy(function ($form) use ($oldDepartmentsLookup) {
-            return $oldDepartmentsLookup[$form->department_id] ?? 'unknown';
-        });
+        if ($forms->isNotEmpty()) {
+            $oldDepartmentIds = $forms->pluck('department_id')->unique()->toArray();
+            $oldDepartmentsLookup = DB::table('old_departments')
+                ->whereIn('id', $oldDepartmentIds)
+                ->pluck('name', 'id')
+                ->toArray();
 
-        // 4. Build your response array
+            $formsGroupedByName = $forms->groupBy(function ($form) use ($oldDepartmentsLookup) {
+                return $oldDepartmentsLookup[$form->department_id] ?? 'unknown';
+            });
+        }
+
+        // 4. Build response
         $departmentsWithForms = $departments->map(function ($dep) use ($formsGroupedByName) {
-            // Find matching forms using the department's name
-            $depForms = $formsGroupedByName->get($dep->name, collect([]))->values();
-
             return [
-                'id' => (string)$dep->id, // Cast to string to match your React component expectations
+                'id' => (string)$dep->id,
                 'name' => $dep->name,
                 'territory' => $dep->territory,
                 'staff' => (int)$dep->staff,
                 'workload' => (int)$dep->workload,
-                'forms' => $depForms,
+                'forms' => $formsGroupedByName->get($dep->name, collect([]))->values(),
                 'state' => $dep->state
             ];
         })->values();
 
         return Inertia::render('Departments/Index', [
             'departments' => $departmentsWithForms,
-            'forms' => $forms, // Kept to satisfy your prop types if needed
-            'versionId' => $currentVersion->id // Matches your React Index component expectations
+            'forms' => $forms,
+            'versionId' => $currentVersion->id
         ]);
     }
 }

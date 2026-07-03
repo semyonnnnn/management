@@ -29,6 +29,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/forms', [FormsPageController::class, 'index'])->name('forms');
 
     Route::get('/state', [StatePageController::class, 'index'])->name('state.index');
+    Route::post('/state', [StatePageController::class, 'create'])->name('state.create');
+    Route::put('/state', [StatePageController::class, 'update'])->name('state.update');
+    Route::delete('/state/{id}', [StatePageController::class, 'destroy'])->name('state.delete');
 });
 
 require __DIR__ . '/auth.php';

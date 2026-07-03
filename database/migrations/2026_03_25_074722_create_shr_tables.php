@@ -17,7 +17,7 @@ return new class extends Migration {
         });
 
         // Departments are independent of versions
-        Schema::create('departments', function (Blueprint $table) {
+        Schema::create('old_departments', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('territory');
@@ -36,7 +36,7 @@ return new class extends Migration {
             $table->integer('reports')->default(1);
             $table->decimal('coeff', 8, 2)->default(1.0);
             $table->integer('final')->default(0);
-            $table->foreignId('department_id')
+            $table->foreignId('old_department_id')
                 ->nullable()
                 ->constrained()
                 ->nullOnDelete(); // department can be null if missing
