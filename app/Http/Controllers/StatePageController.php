@@ -36,7 +36,7 @@ class StatePageController extends Controller
             ->with('message', 'Отдел успешно добавлен');
     }
 
-    public function destroy($id)
+    public function delete($id)
     {
         $department = Department::findOrFail($id);
         $department->delete();

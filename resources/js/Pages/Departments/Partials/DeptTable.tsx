@@ -52,7 +52,7 @@ const DeptTable: React.FC<ExtendedProps> = ({
         <div className="bg-white/80 backdrop-blur-sm border border-indigo-200/50">
             <div className="border-b border-indigo-200/50 px-5 py-4 flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+                    <div className="w-7 h-7 bg-linear-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
@@ -64,7 +64,7 @@ const DeptTable: React.FC<ExtendedProps> = ({
                         <button
                             key={t}
                             onClick={() => setSelectedTerritory(t)}
-                            className={`px-3 py-1.5 text-[10px] font-mono font-bold tracking-wider transition-all duration-200 ${selectedTerritory === t ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border border-indigo-400/30" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"}`}
+                            className={`px-3 py-1.5 text-[10px] font-mono font-bold tracking-wider transition-all duration-200 ${selectedTerritory === t ? "bg-linear-to-r from-indigo-600 to-purple-600 text-white border border-indigo-400/30" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"}`}
                         >
                             {t === 'all' ? 'ВСЕ' : t.toUpperCase() === 'EKB' ? 'ЕКАТЕРИНБУРГ' : 'КУРГАН'}
                         </button>

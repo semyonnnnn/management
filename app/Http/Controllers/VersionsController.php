@@ -137,7 +137,7 @@ class VersionsController extends Controller
         return redirect()->back()->with('success', 'Новая версия успешно создана и применена');
     }
 
-    public function destroy($id)
+    public function delete($id)
     {
         DB::transaction(function () use ($id) {
             // 1. Delete linked forms first (to avoid foreign key errors)

@@ -18,6 +18,7 @@ class UploadController extends Controller
     public function store(Request $request)
     {
         (new UploadService)->store($request);
+        return redirect('/old_forms');
     }
 
     public function update(Request $request)

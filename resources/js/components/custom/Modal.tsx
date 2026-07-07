@@ -67,7 +67,7 @@ export default function Modal({
                     leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
                     <DialogPanel
-                        className={`my-8 z-50 transform overflow-hidden bg-white shadow-xl transition-all dark:bg-gray-800 ${maxWidthClass} !h-fit`}
+                        className={`my-8 z-50 transform overflow-hidden bg-white shadow-xl transition-all dark:bg-gray-800 ${maxWidthClass} h-fit!`}
                     >
                         {children}
                     </DialogPanel>

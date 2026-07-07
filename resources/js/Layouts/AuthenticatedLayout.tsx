@@ -2,7 +2,6 @@ import ApplicationLogo from '@/components/custom/ApplicationLogo';
 import { router, Link, usePage } from '@inertiajs/react';
 import ResponsiveNavLink from '@/components/custom/ResponsiveNavLink';
 import { PropsWithChildren, ReactNode, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 // Import the font weights you need
 import "@fontsource/jetbrains-mono/400.css";
@@ -25,7 +24,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
         if (routePath === 'versions.get' && url.includes('/versions')) {
             return true;
         }
-        if (routePath === 'forms' && url.includes('/forms')) {
+        if (routePath === 'old_forms' && url.includes('/old_forms')) {
             return true;
         }
         if (routePath === 'state.index' && url.includes('/state')) {
@@ -56,7 +55,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                             <MenuItem _route="uploadFiles.get" isActive={isActive} name="загрузить" />
                             <MenuItem _route="versions.get" isActive={isActive} name="версии" />
                             <MenuItem _route="old_forms" isActive={isActive} name="старые формы" />
-                            <MenuItem _route="forms" isActive={isActive} name="формы" />
+                            <MenuItem _route="forms.index" isActive={isActive} name="формы" />
                             <MenuItem _route="state.index" isActive={isActive} name="штатное" />
                         </div>
 

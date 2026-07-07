@@ -17,7 +17,7 @@ export default function Index({ versions }: { versions: Version[] }) {
     const handleApplyVersion = (version: Version) => {
         setSelectedVersion(version);
         console.log("Apply version:", version);
-        router.post(route('versions.apply', { id: version.id }));
+        router.put(route('versions.update', { id: version.id }));
     };
 
     const handleDeleteClick = (version: Version, e: React.MouseEvent) => {
@@ -57,7 +57,7 @@ export default function Index({ versions }: { versions: Version[] }) {
                             <div className="px-5 py-4">
                                 <div className="flex justify-between items-center">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-7 h-7 bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+                                        <div className="w-7 h-7 bg-linear-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
                                             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
@@ -66,7 +66,7 @@ export default function Index({ versions }: { versions: Version[] }) {
                                             ВЕРСИИ_ШТАТНОГО_РАСПИСАНИЯ
                                         </h6>
                                     </div>
-                                    <div className="px-2 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[10px] font-mono font-bold tracking-wider">
+                                    <div className="px-2 py-1 bg-linear-to-r from-indigo-600 to-purple-600 text-white text-[10px] font-mono font-bold tracking-wider">
                                         {versions.length}
                                     </div>
                                 </div>
@@ -109,7 +109,7 @@ export default function Index({ versions }: { versions: Version[] }) {
                                                     className={`px-3 py-1.5 text-white border-0 cursor-pointer text-[10px] font-mono font-bold tracking-wider transition-all duration-200 flex items-center gap-1
                                                         ${v.isCurrent
                                                             ? 'bg-gray-300 cursor-not-allowed'
-                                                            : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'}`}
+                                                            : 'bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'}`}
                                                 >
                                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -141,7 +141,7 @@ export default function Index({ versions }: { versions: Version[] }) {
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                         <div className="bg-white border border-indigo-200/50 max-w-md w-full mx-4">
                             <div className="border-b border-indigo-200/50 px-5 py-4 flex items-center gap-2">
-                                <div className="w-7 h-7 bg-gradient-to-br from-rose-600 to-red-600 flex items-center justify-center">
+                                <div className="w-7 h-7 bg-linear-to-br from-rose-600 to-red-600 flex items-center justify-center">
                                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
@@ -170,7 +170,7 @@ export default function Index({ versions }: { versions: Version[] }) {
                                 </button>
                                 <button
                                     onClick={confirmDelete}
-                                    className="px-4 py-2 bg-gradient-to-r from-rose-600 to-red-600 text-white border-0 cursor-pointer text-[10px] font-mono font-bold tracking-wider transition-all duration-200 hover:from-rose-700 hover:to-red-700 flex items-center gap-2"
+                                    className="px-4 py-2 bg-linear-to-r from-rose-600 to-red-600 text-white border-0 cursor-pointer text-[10px] font-mono font-bold tracking-wider transition-all duration-200 hover:from-rose-700 hover:to-red-700 flex items-center gap-2"
                                 >
                                     УДАЛИТЬ
                                 </button>

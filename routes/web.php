@@ -6,6 +6,7 @@ use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\VersionsController;
 use App\Http\Controllers\OldFormsController;
+use App\Http\Controllers\FormsController;
 use App\Http\Controllers\StatePageController;
 
 Route::get('/', function () {
@@ -22,16 +23,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/uploadFiles', [UploadController::class, 'update'])->name('uploadFiles.update');
 
     Route::get('/versions', [VersionsController::class, 'index'])->name('versions.get');
-    Route::post('/versions/{id}', [VersionsController::class, 'apply'])->name('versions.apply');
     Route::post('/versions', [VersionsController::class, 'create'])->name('versions.create');
-    Route::delete('/versions/{id}', [VersionsController::class, 'destroy'])->name('versions.delete');
+    Route::put('/versions/{id}', [VersionsController::class, 'update'])->name('versions.update');
+    Route::delete('/versions/{id}', [VersionsController::class, 'delete'])->name('versions.delete');
 
     Route::get('/old_forms', [OldFormsController::class, 'index'])->name('old_forms');
+
+    Route::get('/forms', [FormsController::class, 'index'])->name('forms.index');
+    Route::post('/forms', [FormsController::class, 'create'])->name('forms.create');
+    Route::put('/forms', [FormsController::class, 'update'])->name('forms.update');
+    Route::delete('/forms', [FormsController::class, 'delete'])->name('forms.delete');
 
     Route::get('/state', [StatePageController::class, 'index'])->name('state.index');
     Route::post('/state', [StatePageController::class, 'create'])->name('state.create');
     Route::put('/state', [StatePageController::class, 'update'])->name('state.update');
-    Route::delete('/state/{id}', [StatePageController::class, 'destroy'])->name('state.delete');
+    Route::delete('/state/{id}', [StatePageController::class, 'delete'])->name('state.delete');
 });
 
 require __DIR__ . '/auth.php';
