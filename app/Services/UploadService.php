@@ -17,7 +17,6 @@ class UploadService
         $this->validateSheetNames($request);
 
         $res = $this->python($request);
-
         $clean = $this->validatePythonResponse($res);
 
         $this->storeDataRaw($clean, $request->input('version'));
@@ -105,7 +104,7 @@ class UploadService
                     'reports' => $form['reports'],
                     'coeff' => $form['coeff'],
                     'final' => $form['final'],
-                    'department_id' => $depId,
+                    'old_department_id' => $depId,
                     'versions_id' => $versionId,
                     'created_at' => now(),
                     'updated_at' => now(),

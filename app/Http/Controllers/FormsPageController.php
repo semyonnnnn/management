@@ -16,7 +16,7 @@ class FormsPageController extends Controller
             ->first();
 
         if (!$currentVersion) {
-            return Inertia::render('Duplicate/Index', [
+            return Inertia::render('Forms/Index', [
                 'departments' => [],
                 'forms' => [
                     'data' => [],
@@ -42,8 +42,8 @@ class FormsPageController extends Controller
             ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'old_department_id')
             ->get();
 
-        // Legacy cross-reference mappings
-        $oldDepartmentIds = $forms->pluck('department_id')->unique()->toArray();
+        // Legacy cross-reference mappings - FIXED to use old_department_id
+        $oldDepartmentIds = $forms->pluck('old_department_id')->unique()->toArray();
         $oldDepartmentsLookup = DB::table('old_departments')
             ->whereIn('id', $oldDepartmentIds)
             ->pluck('name', 'id')
@@ -51,7 +51,8 @@ class FormsPageController extends Controller
 
         // Pre-build structural data matrix properties for absolute consistency
         $mappedForms = $forms->map(function ($form) use ($oldDepartmentsLookup, $departments) {
-            $resolvedName = $oldDepartmentsLookup[$form->department_id] ?? 'unknown';
+            // FIXED to use old_department_id
+            $resolvedName = $oldDepartmentsLookup[$form->old_department_id] ?? 'unknown';
             $activeDept = $departments->firstWhere('name', $resolvedName);
 
             $form->resolvedDeptName = $activeDept ? $activeDept->name : 'Неизвестное ведомство';

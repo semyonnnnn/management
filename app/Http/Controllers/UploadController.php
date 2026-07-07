@@ -14,12 +14,12 @@ class UploadController extends Controller
     {
         return Inertia::render('UploadFiles/Index');
     }
-    
+
     public function store(Request $request)
     {
         (new UploadService)->handle($request);
     }
-    
+
     public function update(Request $request)
     {
         (new UploadService)->handleManualEdit($request);

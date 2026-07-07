@@ -56,18 +56,19 @@ class DepartmentsController extends Controller
         }
 
         // 3. Conditional Form Mapping
-        // Only process lookups if forms exist to prevent unnecessary queries/logic errors
         $formsGroupedByName = collect([]);
 
         if ($forms->isNotEmpty()) {
-            $oldDepartmentIds = $forms->pluck('department_id')->unique()->toArray();
+            // FIXED: Changed 'department_id' to 'old_department_id'
+            $oldDepartmentIds = $forms->pluck('old_department_id')->unique()->toArray();
             $oldDepartmentsLookup = DB::table('old_departments')
                 ->whereIn('id', $oldDepartmentIds)
                 ->pluck('name', 'id')
                 ->toArray();
 
             $formsGroupedByName = $forms->groupBy(function ($form) use ($oldDepartmentsLookup) {
-                return $oldDepartmentsLookup[$form->department_id] ?? 'unknown';
+                // FIXED: Changed 'department_id' to 'old_department_id'
+                return $oldDepartmentsLookup[$form->old_department_id] ?? 'unknown';
             });
         }
 
