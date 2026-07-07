@@ -179,7 +179,6 @@ export default function Index({ state }: StatePageProps) {
                         setData={setData}
                         processing={processing}
                         handleAdd={handleAdd}
-                        showTerritory={selectedTerritory === 'all'}
                     />
                 )}
             </div>
@@ -189,7 +188,6 @@ export default function Index({ state }: StatePageProps) {
                 onClose={() => setIsDeleting(false)}
                 item={itemToDelete}
             />
-
             <button
                 onClick={() => setIsAdding(!isAdding)}
                 className="fixed bottom-8 right-8 w-12 h-12 bg-indigo-600 text-white shadow-xl flex items-center justify-center text-5xl hover:bg-indigo-700 transition-all z-50 cursor-pointer"

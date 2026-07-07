@@ -4,10 +4,9 @@ interface AddDepartmentProps {
     processing: boolean;
     handleAdd: (e: React.FormEvent) => void;
     handleCancel: () => void;
-    showTerritory: boolean;
 }
 
-const AddDepartment = ({ data, setData, processing, handleAdd, handleCancel, showTerritory }: AddDepartmentProps) => {
+const AddDepartment = ({ data, setData, processing, handleAdd, handleCancel }: AddDepartmentProps) => {
 
     const handleNumberChange = (field: string, value: string) => {
         if (/^\d*$/.test(value)) {
@@ -26,9 +25,7 @@ const AddDepartment = ({ data, setData, processing, handleAdd, handleCancel, sho
                         <tr className="align-bottom">
                             <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 w-24">КОД</th>
                             <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700">НАЗВАНИЕ</th>
-                            {showTerritory && (
-                                <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 w-32">ТЕРРИТОРИЯ</th>
-                            )}
+                            <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 w-32">ТЕРРИТОРИЯ</th>
                             <th className="text-right px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 w-24">ШТАТНОЕ</th>
                         </tr>
                     </thead>
@@ -50,18 +47,16 @@ const AddDepartment = ({ data, setData, processing, handleAdd, handleCancel, sho
                                     className="w-full bg-white border border-gray-300 p-1 text-sm font-mono focus:border-indigo-600 outline-none"
                                 />
                             </td>
-                            {showTerritory && (
-                                <td className="px-1 py-1">
-                                    <select
-                                        value={data.territory}
-                                        onChange={e => setData('territory', e.target.value)}
-                                        className="w-32 bg-white border border-gray-300 p-1 text-sm font-mono uppercase focus:border-indigo-600 outline-none"
-                                    >
-                                        <option value="ekb">ЕКБ</option>
-                                        <option value="krg">КРГ</option>
-                                    </select>
-                                </td>
-                            )}
+                            <td className="px-1 py-1">
+                                <select
+                                    value={data.territory}
+                                    onChange={e => setData('territory', e.target.value)}
+                                    className="w-32 bg-white border border-gray-300 p-1 text-sm font-mono uppercase focus:border-indigo-600 outline-none"
+                                >
+                                    <option value="ekb">ЕКБ</option>
+                                    <option value="krg">КРГ</option>
+                                </select>
+                            </td>
                             <td className="px-1 py-1 text-right">
                                 <div className="flex justify-end">
                                     <input

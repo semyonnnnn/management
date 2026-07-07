@@ -1,0 +1,108 @@
+# Core Aliases
+alias docker='sudo docker'
+alias sail='./vendor/bin/sail'
+
+# Compose definitions
+export DEV_COMPOSE="docker compose -f compose.yaml"
+export PROD_COMPOSE="docker compose -f compose.prod.yaml"
+export CONTAINER="m-drive-irl-laravel.test-1"
+
+# Helper Function
+clean_up() {
+    sudo docker compose -f compose.yaml down --remove-orphans
+    sudo docker compose -f compose.prod.yaml down --remove-orphans
+}
+
+# Standardized Aliases
+alias sailup='sudo $DEV_COMPOSE up -d'
+alias saildown='sudo $DEV_COMPOSE down --remove-orphans'
+alias sailnpm='docker exec -it $CONTAINER npm'
+
+# Workflow Aliases
+alias saildev='sailup && sailnpm run dev'
+alias resaildev='sail down && sail up -d && sail npm run dev'
+alias resail='clean_up && sailup'
+alias sailprod='sail down && rm -f public/hot && sail up -d && sail npm run build'
+
+# Docker Monitoring
+alias dockerps="docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Ports}}'"
+alias dockerpsa="docker ps -a --format 'table {{.ID}}\t{{.Names}}\t{{.Ports}}'"
+
+# Clean Rebuilds
+alias redocker="clean_up && sudo $DEV_COMPOSE up -d"
+alias redockerbuild="clean_up && sudo $DEV_COMPOSE up -d --build"
+
+# python
+alias python='./env/bin/python3'
+
+# ~/.bashrc: executed by bash(1) for non-login shells.
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+HISTCONTROL=ignoreboth
+shopt -s histappend
+HISTSIZE=1000
+HISTFILESIZE=2000
+shopt -s checkwinsize
+
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+    debian_chroot=$(cat /etc/debian_chroot)
+fi
+
+case "$TERM" in
+    xterm-color|*-256color) color_prompt=yes;;
+esac
+
+if [ -n "$force_color_prompt" ]; then
+    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+        color_prompt=yes
+    else
+        color_prompt=
+    fi
+fi
+
+if [ "$color_prompt" = yes ]; then
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;33m\]\w\[\033[00m\]\$ '
+else
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+fi
+unset color_prompt force_color_prompt
+
+case "$TERM" in
+xterm*|rxvt*)
+    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    ;;
+*)
+    ;;
+esac
+
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+export LS_COLORS=$LS_COLORS:'di=01;96:'
