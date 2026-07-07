@@ -109,7 +109,7 @@ class VersionsController extends Controller
                 }
 
                 // 5. Clone forms for the new version
-                $forms = DB::table('forms')
+                $forms = DB::table('old_forms')
                     ->where('versions_id', $previousVersion->id)
                     ->get();
 
@@ -117,7 +117,7 @@ class VersionsController extends Controller
                 foreach ($forms as $form) {
                     $newForms[] = [
                         'versions_id' => $versionId,
-                        'department_id' => $form->department_id,
+                        'old_department_id' => $form->old_department_id,
                         'name' => $form->name,
                         'indicators' => $form->indicators,
                         'reports' => $form->reports,
@@ -129,7 +129,7 @@ class VersionsController extends Controller
                 }
 
                 if (!empty($newForms)) {
-                    DB::table('forms')->insert($newForms);
+                    DB::table('old_forms')->insert($newForms);
                 }
             }
         });
@@ -141,7 +141,7 @@ class VersionsController extends Controller
     {
         DB::transaction(function () use ($id) {
             // 1. Delete linked forms first (to avoid foreign key errors)
-            DB::table('forms')->where('versions_id', $id)->delete();
+            DB::table('old_forms')->where('versions_id', $id)->delete();
 
             // 2. Delete linked departments
             DB::table('old_departments')->where('versions_id', $id)->delete();

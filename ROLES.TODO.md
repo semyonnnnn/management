@@ -1,2 +1,0 @@
-- pivot table for sensei - gakusei relationship
-- give power to admins and root

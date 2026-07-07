@@ -40,7 +40,7 @@ class DepartmentsController extends Controller
             ->get();
 
 
-        $forms = DB::table('forms')
+        $forms = DB::table('old_forms')
             ->where('versions_id', $currentVersion->id)
             ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'old_department_id')
             ->orderBy('name', 'asc')

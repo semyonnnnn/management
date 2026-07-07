@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class FormsPageController extends Controller
+class OldFormsController extends Controller
 {
     public function index(Request $request)
     {
@@ -16,7 +16,7 @@ class FormsPageController extends Controller
             ->first();
 
         if (!$currentVersion) {
-            return Inertia::render('Forms/Index', [
+            return Inertia::render('OldForms/Index', [
                 'departments' => [],
                 'forms' => [
                     'data' => [],
@@ -37,7 +37,7 @@ class FormsPageController extends Controller
             ->get();
 
         // Fetch raw forms matching version baseline
-        $forms = DB::table('forms')
+        $forms = DB::table('old_forms')
             ->where('versions_id', $currentVersion->id)
             ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'old_department_id')
             ->get();
@@ -112,7 +112,7 @@ class FormsPageController extends Controller
             ];
         })->values();
 
-        return Inertia::render('Duplicate/Index', [
+        return Inertia::render('OldForms/Index', [
             'departments' => $departmentsDataProps,
             'forms' => $paginatedForms,
             'versionId' => $currentVersion->id,

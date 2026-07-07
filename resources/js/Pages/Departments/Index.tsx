@@ -110,7 +110,7 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[], c
                 staff: staff
             }));
 
-            await axios.post('/uploadFilesEdit', {
+            await axios.put('/uploadFiles', {
                 departments: updates,
                 version_id: currentVersionId
             });
@@ -143,13 +143,6 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[], c
     return (
         <div className="container mx-auto p-3 space-y-6 pb-32">
             <TotalLoadCard loads={loads} />
-
-            {/* <div className="bg-blue-50 flex gap-5">
-                <p className="text-blue-700 border-l-4 border-blue-500 text-sm font-bold p-4 uppercase tracking-wider">
-                    Нагрузка на человека: {Math.round(fixedOptimalLoad).toLocaleString()}
-                </p>
-            </div> */}
-
             <DeptTable
                 departments={processedDepartments}
                 changeStaff={changeStaff}
@@ -175,7 +168,7 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[], c
                         </button>
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            className="px-10 py-4 bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-mono font-bold text-xl uppercase hover:opacity-90"
+                            className="px-10 py-4 bg-linear-to-br from-indigo-600 to-purple-600 text-white font-mono font-bold text-xl uppercase hover:opacity-90"
                             disabled={saving}
                         >
                             {saving ? 'СОХРАНЕНИЕ...' : 'ПРИМЕНИТЬ'}

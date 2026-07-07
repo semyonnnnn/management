@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\VersionsController;
-use App\Http\Controllers\FormsPageController;
+use App\Http\Controllers\OldFormsController;
 use App\Http\Controllers\StatePageController;
 
 Route::get('/', function () {
@@ -19,14 +19,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/uploadFiles', [UploadController::class, 'index'])->name('uploadFiles.get');
     Route::post('/uploadFiles', [UploadController::class, 'store'])->name('uploadFiles.upload');
-    Route::post('/uploadFilesEdit', [UploadController::class, 'update'])->name('uploadFiles.edit');
+    Route::put('/uploadFiles', [UploadController::class, 'update'])->name('uploadFiles.update');
 
     Route::get('/versions', [VersionsController::class, 'index'])->name('versions.get');
     Route::post('/versions/{id}', [VersionsController::class, 'apply'])->name('versions.apply');
     Route::post('/versions', [VersionsController::class, 'create'])->name('versions.create');
     Route::delete('/versions/{id}', [VersionsController::class, 'destroy'])->name('versions.delete');
 
-    Route::get('/forms', [FormsPageController::class, 'index'])->name('forms');
+    Route::get('/old_forms', [OldFormsController::class, 'index'])->name('old_forms');
 
     Route::get('/state', [StatePageController::class, 'index'])->name('state.index');
     Route::post('/state', [StatePageController::class, 'create'])->name('state.create');

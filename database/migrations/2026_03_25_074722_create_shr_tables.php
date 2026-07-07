@@ -29,7 +29,7 @@ return new class extends Migration {
         });
 
         // Forms are independent of versions
-        Schema::create('forms', function (Blueprint $table) {
+        Schema::create('old_forms', function (Blueprint $table) {
             $table->id();
             $table->string('name', 255);
             $table->integer('indicators')->default(0);
@@ -49,7 +49,7 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('forms');
+        Schema::dropIfExists('old_forms');
         Schema::dropIfExists('old_departments');
         Schema::dropIfExists('versions');
     }

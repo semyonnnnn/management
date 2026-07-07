@@ -17,11 +17,11 @@ class UploadController extends Controller
 
     public function store(Request $request)
     {
-        (new UploadService)->handle($request);
+        (new UploadService)->store($request);
     }
 
     public function update(Request $request)
     {
-        (new UploadService)->handleManualEdit($request);
+        (new UploadService)->update($request);
     }
 }

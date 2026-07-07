@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 class UploadService
 {
-    public function handle(Request $request)
+    public function store(Request $request)
     {
         $this->validateUpload($request);
         $this->validateSheetNames($request);
@@ -98,7 +98,7 @@ class UploadService
                 $depName = $form['department'] ?? null;
                 $depId = $depName && isset($depIdMap[$depName]) ? $depIdMap[$depName] : null;
 
-                DB::table('forms')->insert([
+                DB::table('old_forms')->insert([
                     'name' => $form['name'],
                     'indicators' => $form['indicators'],
                     'reports' => $form['reports'],
@@ -152,7 +152,7 @@ class UploadService
     }
 
 
-    public function handleManualEdit(Request $request)
+    public function update(Request $request)
     {
         \Log::info('Manual edit request', $request->all());
 

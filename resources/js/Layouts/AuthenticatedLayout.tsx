@@ -55,6 +55,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                             <MenuItem _route="main.index" isActive={isActive} name="главная" />
                             <MenuItem _route="uploadFiles.get" isActive={isActive} name="загрузить" />
                             <MenuItem _route="versions.get" isActive={isActive} name="версии" />
+                            <MenuItem _route="old_forms" isActive={isActive} name="старые формы" />
                             <MenuItem _route="forms" isActive={isActive} name="формы" />
                             <MenuItem _route="state.index" isActive={isActive} name="штатное" />
                         </div>
