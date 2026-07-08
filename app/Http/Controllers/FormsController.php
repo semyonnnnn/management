@@ -77,10 +77,9 @@ class FormsController extends Controller
             ];
         });
 
-        // If departments table is empty, this returns an empty collection cleanly mapped to an array
         $departmentsDataProps = Department::query()->where('versions_id', $currentVersion->id)
             ->orderBy('name', 'asc')
-            ->get(['id', 'name', 'territory', 'staff', 'workload', 'state'])
+            ->get(['id', 'code', 'name', 'territory', 'state'])
             ->map(function (Department $dep): array {
                 return [
                     'id' => (string)$dep->id,
