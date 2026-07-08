@@ -6,31 +6,28 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+//////////////////////////
+use App\Models\Version;
 
 class VersionsController extends Controller
 {
     public function index()
     {
-        // FIX: Added 'id' to the select statement
-        $versions = DB::table('versions')
-            ->select('id', 'name', 'created_at as date', 'isCurrent')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($version) {
-                return [
-                    'id' => $version->id, // This will now work because id was selected
-                    'name' => $version->name,
-                    'isCurrent' => (bool) $version->isCurrent,
-                    'date' => Carbon::parse($version->date)->format('d/m/Y')
-                ];
-            });
+        $versions = Version::query()
+            ->latest() // Shortcut for orderBy('created_at', 'desc')
+            ->get();
 
         return Inertia::render('Versions/Index', [
-            'versions' => $versions
+            'versions' => $versions->map(fn($version) => [
+                'id' => $version->id,
+                'name' => $version->name,
+                'isCurrent' => $version->isCurrent,
+                'date' => $version->created_at?->format('d/m/Y') ?? 'N/A',
+            ])
         ]);
     }
 
-    public function apply($id)
+    public function apply(int | string $id)
     {
         DB::transaction(function () use ($id) {
             // 1. Set every version to false
@@ -62,7 +59,7 @@ class VersionsController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            // 1. Mark all existing versions as not current
+            // 1. Mark all existing version as not current
             DB::table('versions')->update([
                 'isCurrent' => false,
                 'updated_at' => now(),
@@ -93,7 +90,7 @@ class VersionsController extends Controller
                 $newDepartments = [];
                 foreach ($departments as $dept) {
                     $newDepartments[] = [
-                        'versions_id' => $versionId,
+                        'version_id' => $versionId,
                         'name' => $dept->name,
                         'territory' => $dept->territory,
                         'staff' => isset($staffMap[$dept->id]) ? (int) $staffMap[$dept->id] : $dept->staff,
@@ -137,7 +134,7 @@ class VersionsController extends Controller
         return redirect()->back()->with('success', 'Новая версия успешно создана и применена');
     }
 
-    public function delete($id)
+    public function delete(int | string $id)
     {
         DB::transaction(function () use ($id) {
             // 1. Delete linked forms first (to avoid foreign key errors)

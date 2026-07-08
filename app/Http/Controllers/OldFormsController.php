@@ -31,14 +31,14 @@ class OldFormsController extends Controller
 
         // Fetch departments for reference mapping
         $departments = DB::table('old_departments')
-            ->where('versions_id', $currentVersion->id)
+            ->where('version_id', $currentVersion->id)
             ->select('id', 'name', 'territory', 'staff', 'workload', 'state')
             ->orderBy('name', 'asc')
             ->get();
 
         // Fetch raw forms matching version baseline
         $forms = DB::table('old_forms')
-            ->where('versions_id', $currentVersion->id)
+            ->where('version_id', $currentVersion->id)
             ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'old_department_id')
             ->get();
 

@@ -39,7 +39,7 @@ class FormsController extends Controller
         $territory = $request->input('territory') ? strtolower(trim((string)$request->input('territory'))) : 'all';
 
         /** @var Builder|\Illuminate\Contracts\Database\Eloquent\Builder $formsQuery */
-        $formsQuery = Form::query()->with('department')->where('versions_id', $currentVersion->id);
+        $formsQuery = Form::query()->with('department')->where('version_id', $currentVersion->id);
 
         if ($territory !== 'all') {
             $formsQuery->whereHas('department', function ($query) use ($territory) {
@@ -77,7 +77,7 @@ class FormsController extends Controller
             ];
         });
 
-        $departmentsDataProps = Department::query()->where('versions_id', $currentVersion->id)
+        $departmentsDataProps = Department::query()->where('version_id', $currentVersion->id)
             ->orderBy('name', 'asc')
             ->get(['id', 'code', 'name', 'territory', 'state'])
             ->map(function (Department $dep): array {

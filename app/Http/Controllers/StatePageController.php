@@ -29,7 +29,7 @@ class StatePageController extends Controller
         );
 
         Department::create(array_merge($r->validated(), [
-            'versions_id' => $version->id
+            'version_id' => $version->id
         ]));
 
         return to_route('state.index')

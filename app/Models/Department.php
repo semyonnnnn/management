@@ -11,6 +11,10 @@ class Department extends Model
     // app/Models/Department.php
     public function version()
     {
-        return $this->belongsTo(Version::class, 'versions_id');
+        return $this->belongsTo(Version::class, 'version_id');
+    }
+    public function form()
+    {
+        return $this->hasMany(Form::class, 'form_id');
     }
 }

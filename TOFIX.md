@@ -1,4 +1,4 @@
-1. install debugbar
+1. do versioning
 
 should i?:
 

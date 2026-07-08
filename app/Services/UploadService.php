@@ -65,7 +65,7 @@ class UploadService
         DB::transaction(function () use ($data, $versionName) {
 
             // 1. Deactivate old current version
-            DB::table('versions')
+            DB::table('versionss')
                 ->where('isCurrent', true)
                 ->update(['isCurrent' => false, 'updated_at' => now()]);
 
@@ -86,7 +86,7 @@ class UploadService
                     'staff' => $dep['staff'],
                     'state' => $dep['staff'], // ← state gets the same value as staff
                     'workload' => $dep['workload'],
-                    'versions_id' => $versionId,
+                    'version_id' => $versionId,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -105,7 +105,7 @@ class UploadService
                     'coeff' => $form['coeff'],
                     'final' => $form['final'],
                     'old_department_id' => $depId,
-                    'versions_id' => $versionId,
+                    'version_id' => $versionId,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -178,7 +178,7 @@ class UploadService
 
                 DB::table('old_departments')
                     ->where('id', $deptUpdate['id'])
-                    ->where('versions_id', $validated['version_id'])
+                    ->where('version_id', $validated['version_id'])
                     ->update([
                         'staff' => $deptUpdate['staff'],
                         'state' => $originalDept->state, // Use the exact original value

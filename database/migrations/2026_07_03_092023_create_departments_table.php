@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('territory', 3);
             $table->integer('state');
-            $table->foreignId('versions_id')->constrained();
+            $table->foreignId('version_id')->constrained();
             $table->timestamps();
         });
     }

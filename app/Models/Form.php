@@ -20,4 +20,9 @@ class Form extends Model
         'department_id',
         'versions_id',
     ];
+
+    public function department()
+    {
+        return $this->hasMany(Department::class, 'department_id');
+    }
 }
