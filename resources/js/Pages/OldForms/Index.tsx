@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
 import { router } from '@inertiajs/react';
-import AddFormModal from './AddFormModal'; // Imported the new modal context
+import { AddFormModal } from './AddFormModal'; // Imported the new modal context
 import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/700.css';
 

@@ -15,7 +15,7 @@ interface AddFormModalProps {
     versionId: number;
 }
 
-export default function AddFormModal({ isOpen, onClose, departments, versionId }: AddFormModalProps) {
+export const AddFormModal = ({ isOpen, onClose, departments, versionId }: AddFormModalProps) => {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         indicators: 0,

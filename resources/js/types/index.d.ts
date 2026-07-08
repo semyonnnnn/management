@@ -171,3 +171,48 @@ export interface STVersionsCardProps {
     printProtocol: () => void;
     versions: Version[];
 }
+
+export interface Department {
+    id: string;
+    name: string;
+    territory: string;
+    staff: number;
+    workload: number;
+    state?: number;
+    [key: string]: any;
+}
+
+export interface StatisticalForm {
+    id: number;
+    name: string;
+    indicators: number;
+    reports: number;
+    coeff: string;
+    old_department_id?: string | number;
+    resolvedDeptName?: string;
+    resolvedTerritory?: string;
+    [key: string]: any;
+}
+
+export interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+export interface PaginatedForms {
+    data: StatisticalForm[];
+    links: PaginationLink[];
+    total: number;
+    current_page: number;
+}
+
+export interface ExtendedPageProps extends PageProps {
+    departments: Department[];
+    forms: PaginatedForms;
+    versionId: number;
+    filters: {
+        territory?: string;
+        search?: string;
+    };
+}

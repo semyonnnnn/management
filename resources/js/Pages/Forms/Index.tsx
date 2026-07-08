@@ -1,55 +1,12 @@
 import { useState, useEffect } from 'react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { PageProps } from '@/types';
 import { router } from '@inertiajs/react';
-import AddFormModal from './AddFormModal'; // Imported the new modal context
-import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/700.css';
+import '@fontsource/jetbrains-mono/400.css';
+//////////////////////////////////////////////////
+import { AddFormModal } from './AddFormModal'; // Imported the new modal context
+import { ExtendedPageProps } from '@/types';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-interface Department {
-    id: string;
-    name: string;
-    territory: string;
-    staff: number;
-    workload: number;
-    state?: number;
-    [key: string]: any;
-}
-
-interface StatisticalForm {
-    id: number;
-    name: string;
-    indicators: number;
-    reports: number;
-    coeff: string;
-    old_department_id?: string | number;
-    resolvedDeptName?: string;
-    resolvedTerritory?: string;
-    [key: string]: any;
-}
-
-interface PaginationLink {
-    url: string | null;
-    label: string;
-    active: boolean;
-}
-
-interface PaginatedForms {
-    data: StatisticalForm[];
-    links: PaginationLink[];
-    total: number;
-    current_page: number;
-}
-
-interface ExtendedPageProps extends PageProps {
-    departments: Department[];
-    forms: PaginatedForms;
-    versionId: number;
-    filters: {
-        territory?: string;
-        search?: string;
-    };
-}
 
 export default function Index({ departments, forms, versionId, filters }: ExtendedPageProps) {
     const [selectedTerritory, setSelectedTerritory] = useState<string>(filters.territory || 'all');
