@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Department extends Model
 {
-    protected $fillable = ['code', 'name', 'territory', 'state', 'versions_id'];
+    protected $fillable = ['code', 'name', 'territory', 'state', 'version_id'];
 
     // app/Models/Department.php
     public function version()

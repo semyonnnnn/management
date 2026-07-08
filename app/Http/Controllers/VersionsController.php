@@ -27,7 +27,7 @@ class VersionsController extends Controller
         ]);
     }
 
-    public function apply(int | string $id)
+    public function update(int | string $id)
     {
         DB::transaction(function () use ($id) {
             // 1. Set every version to false

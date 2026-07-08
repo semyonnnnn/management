@@ -22,7 +22,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained()
                 ->nullOnDelete();
-            $table->foreignId('versions_id')
+            $table->foreignId('version_id')
                 ->constrained()
                 ->cascadeOnDelete();
             $table->timestamps();

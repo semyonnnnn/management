@@ -65,7 +65,7 @@ class UploadService
         DB::transaction(function () use ($data, $versionName) {
 
             // 1. Deactivate old current version
-            DB::table('versionss')
+            DB::table('versions')
                 ->where('isCurrent', true)
                 ->update(['isCurrent' => false, 'updated_at' => now()]);
 
