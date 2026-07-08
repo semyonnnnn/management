@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
 import { router } from '@inertiajs/react';
@@ -22,7 +22,7 @@ interface StatisticalForm {
     indicators: number;
     reports: number;
     coeff: string;
-    old_department_id?: string | number; // Remapped baseline key reference
+    old_department_id?: string | number;
     resolvedDeptName?: string;
     resolvedTerritory?: string;
     [key: string]: any;
@@ -44,7 +44,7 @@ interface PaginatedForms {
 interface ExtendedPageProps extends PageProps {
     departments: Department[];
     forms: PaginatedForms;
-    versionId: number; // Added to capture explicit version bounds
+    versionId: number;
     filters: {
         territory?: string;
         search?: string;
@@ -54,7 +54,7 @@ interface ExtendedPageProps extends PageProps {
 export default function Index({ departments, forms, versionId, filters }: ExtendedPageProps) {
     const [selectedTerritory, setSelectedTerritory] = useState<string>(filters.territory || 'all');
     const [searchQuery, setSearchQuery] = useState<string>(filters.search || '');
-    const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false); // Modal state switch
+    const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
 
     const territoryBadge = {
         ekb: 'text-indigo-600/90 font-mono text-sm font-bold tracking-tight bg-indigo-50/60 px-2.5 py-1 border border-indigo-100',
