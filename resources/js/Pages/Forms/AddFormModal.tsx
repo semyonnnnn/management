@@ -1,19 +1,8 @@
 import React from 'react';
 import Modal from "@/components/custom/Modal";
 import { useForm } from '@inertiajs/react';
-
-interface Department {
-    id: string;
-    name: string;
-    territory: string;
-}
-
-interface AddFormModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    departments: Department[];
-    versionId: number;
-}
+//////////////////////////////////////////////
+import { AddFormModalProps } from '@/types';
 
 export const AddFormModal = ({ isOpen, onClose, departments, versionId }: AddFormModalProps) => {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -21,7 +10,7 @@ export const AddFormModal = ({ isOpen, onClose, departments, versionId }: AddFor
         indicators: 0,
         reports: 1,
         coeff: '1.0',
-        old_department_id: '',
+        department_id: '',
         versions_id: versionId
     });
 
@@ -79,8 +68,8 @@ export const AddFormModal = ({ isOpen, onClose, departments, versionId }: AddFor
                             Привязка к Ведомству
                         </label>
                         <select
-                            value={data.old_department_id}
-                            onChange={e => setData('old_department_id', e.target.value)}
+                            value={data.department_id}
+                            onChange={e => setData('department_id', e.target.value)}
                             className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-600 focus:ring-0"
                         >
                             <option value="">Без ведомства (Null)</option>
@@ -90,8 +79,8 @@ export const AddFormModal = ({ isOpen, onClose, departments, versionId }: AddFor
                                 </option>
                             ))}
                         </select>
-                        {errors.old_department_id && (
-                            <div className="text-xs text-red-600 mt-1 font-bold">{errors.old_department_id}</div>
+                        {errors.department_id && (
+                            <div className="text-xs text-red-600 mt-1 font-bold">{errors.department_id}</div>
                         )}
                     </div>
 

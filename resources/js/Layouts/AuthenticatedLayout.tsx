@@ -27,6 +27,9 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
         if (routePath === 'old_forms' && url.includes('/old_forms')) {
             return true;
         }
+        if (routePath === 'forms.index' && url.includes('/forms')) {
+            return true;
+        }
         if (routePath === 'state.index' && url.includes('/state')) {
             return true;
         }
@@ -50,7 +53,6 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
 
                         {/* Navigation Links */}
                         <div className='flex gap-5'>
-
                             <MenuItem _route="main.index" isActive={isActive} name="главная" />
                             <MenuItem _route="uploadFiles.get" isActive={isActive} name="загрузить" />
                             <MenuItem _route="versions.get" isActive={isActive} name="версии" />

@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 ////////////////////////////////////////
-use App\Http\Controllers\DepartmentsController;
-use App\Http\Controllers\UploadController;
+use App\Http\Controllers\OldDepartmentsController;
+use App\Http\Controllers\UploadFilesController;
 use App\Http\Controllers\VersionsController;
 use App\Http\Controllers\OldFormsController;
 use App\Http\Controllers\FormsController;
@@ -13,14 +13,12 @@ Route::get('/', function () {
     return redirect('/main');
 });
 
-
-
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/main', [DepartmentsController::class, 'index'])->name('main.index');
+    Route::get('/main', [OldDepartmentsController::class, 'index'])->name('main.index');
 
-    Route::get('/uploadFiles', [UploadController::class, 'index'])->name('uploadFiles.get');
-    Route::post('/uploadFiles', [UploadController::class, 'store'])->name('uploadFiles.upload');
-    Route::put('/uploadFiles', [UploadController::class, 'update'])->name('uploadFiles.update');
+    Route::get('/uploadFiles', [UploadFilesController::class, 'index'])->name('uploadFiles.get');
+    Route::post('/uploadFiles', [UploadFilesController::class, 'store'])->name('uploadFiles.upload');
+    Route::put('/uploadFiles', [UploadFilesController::class, 'update'])->name('uploadFiles.update');
 
     Route::get('/versions', [VersionsController::class, 'index'])->name('versions.get');
     Route::post('/versions', [VersionsController::class, 'create'])->name('versions.create');

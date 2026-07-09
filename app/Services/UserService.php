@@ -2,14 +2,10 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-///////////////////////////////////////
 use App\Models\User;
 use App\Enum\RolesEnum;
-use App\Http\Resources\AuthUserResource;
 
-class UserListService
+class UserService
 {
     public function edit(User $user)
     {
@@ -90,7 +86,7 @@ class UserListService
             }
 
 
-            $forbidden = User::whereIn('id', $requestedIds)
+            $forbidden = User::query()->whereIn('id', $requestedIds)
                 ->whereHas('sensei', fn($q) => $q->where('users.id', '!=', $user->id))
                 ->whereNotIn('id', $user->gakusei()->pluck('users.id'))
                 ->pluck('id');
@@ -106,7 +102,6 @@ class UserListService
             if ($requestedIds->isNotEmpty()) {
                 $user->gakusei()->attach($requestedIds);
             }
-
         } else if ($isGakusei) {
             if (!$user->hasRole($requestedRole)) {
                 $user->sensei()->detach();
@@ -117,5 +112,4 @@ class UserListService
             $user->sensei()->sync($requestedIds[0] ?? null);
         }
     }
-
 }

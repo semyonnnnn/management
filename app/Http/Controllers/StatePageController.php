@@ -12,8 +12,9 @@ class StatePageController extends Controller
 {
     public function index()
     {
-        $state = Department::whereHas('version', fn($q) => $q->where('isCurrent', true))
-            ->orderBy('name')
+        $currentVersionId = Version::query()->where('isCurrent', true)->firstOrFail()->id;
+        $state = Department::query()->where('version_id', $currentVersionId)
+            ->orderBy('id', 'asc')
             ->get(['id', 'territory', 'name', 'state', 'code']);
 
         return Inertia::render('State/Index', [

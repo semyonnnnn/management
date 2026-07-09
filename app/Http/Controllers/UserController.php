@@ -9,7 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use App\Http\Resources\AuthUserResource;
-use App\Services\UserListService;
+use App\Services\UserService;
 
 class UserController extends Controller
 {
@@ -38,7 +38,7 @@ class UserController extends Controller
 
         $isAdminPage = $user->hasRole(RolesEnum::Admin->value);
         if (!$isAdminPage) {
-            $relations = (new UserListService)->edit($user);
+            $relations = (new UserService)->edit($user);
 
             $data['related_users'] = $relations['related_users'];
             $data['ours'] = $relations['ours'];
@@ -46,7 +46,6 @@ class UserController extends Controller
 
 
         return Inertia::render('User/Edit', $data);
-
     }
 
     public function update(Request $request, User $user)
@@ -70,7 +69,7 @@ class UserController extends Controller
 
 
         if (!$isAdminPage) {
-            (new UserListService)->update($related_users, $user, $request['roles'][0]);
+            (new UserService)->update($related_users, $user, $request['roles'][0]);
         }
         $user->syncRoles($data['roles']);
 

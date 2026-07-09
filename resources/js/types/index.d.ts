@@ -207,7 +207,19 @@ export interface PaginatedForms {
     current_page: number;
 }
 
-export interface ExtendedPageProps extends PageProps {
+export interface Department {
+    id: string;
+    name: string;
+    territory: string;
+}
+
+interface AddFormModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    departments: Department[];
+    versionId: number;
+}
+interface ExtendedPageProps extends PageProps {
     departments: Department[];
     forms: PaginatedForms;
     versionId: number;
@@ -215,4 +227,16 @@ export interface ExtendedPageProps extends PageProps {
         territory?: string;
         search?: string;
     };
+}
+export interface Department {
+    id: string;
+    name: string;
+    territory: string;
+}
+
+export interface AddFormModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    departments: Department[];
+    versionId: number;
 }

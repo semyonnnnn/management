@@ -6,23 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Form extends Model
 {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'indicators',
-        'reports',
-        'coeff',
-        'final',
-        'department_id',
-        'versions_id',
-    ];
+    protected $fillable = ['name', 'indicators', 'reports', 'coeff', 'final', 'version_id'];
 
-    public function department()
+    public function departments()
     {
-        return $this->hasMany(Department::class, 'department_id');
+        return $this->belongsToMany(Department::class, 'department_form');
     }
 }

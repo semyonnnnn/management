@@ -3,25 +3,23 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Services\UploadService;
+/////////////////////////////////////
+use App\Services\UploadFilesService;
+use App\Models\Version;
 
-class DepartmentsController extends Controller
+class OldDepartmentsController extends Controller
 {
-    protected UploadService $uploadService;
+    protected UploadFilesService $uploadFilesService;
 
-    public function __construct(UploadService $uploadService)
+    public function __construct(UploadFilesService $uploadFilesService)
     {
-        $this->uploadService = $uploadService;
+        $this->uploadFilesService = $uploadFilesService;
     }
 
-    public function index(Request $request)
+    public function index()
     {
-        // 1. Get the current version
-        $currentVersion = DB::table('versions')
-            ->where('isCurrent', true)
-            ->first();
+        $currentVersion = Version::query()->where('isCurrent', true)->firstOrFail();
 
         // Handle case where no version exists
         if (!$currentVersion) {
