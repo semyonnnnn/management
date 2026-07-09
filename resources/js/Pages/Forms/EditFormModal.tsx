@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from "@/components/custom/Modal";
 import { useForm } from '@inertiajs/react';
+import { DepartmentsPartial } from './Partials/DepartmentsPartial';
+import { OkvedPartial } from './Partials/OkvedPartial';
 
 interface EditFormModalProps {
     isOpen: boolean;
@@ -11,167 +13,273 @@ interface EditFormModalProps {
 }
 
 export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }: EditFormModalProps) => {
-    const { data, setData, put, processing, errors, reset } = useForm({
+    const { data, setData, put, processing, reset } = useForm({
         id: '',
         name: '',
         indicators: 0,
         reports: 1,
         coeff: '1.0',
-        department_id: '',
+        departments: [] as Array<{ department_id: string; okveds: string[] }>,
         version_id: versionId
     });
 
-    console.log('form', form);
+    const [selectedDeptId, setSelectedDeptId] = useState<string>('');
+    const [activeDeptIndex, setActiveDeptIndex] = useState<number | null>(null);
 
-    // Sync form state when the selected form modal target changes
+    // OKVED builder segment inputs
+    const [ov1, setOv1] = useState('');
+    const [ov2, setOv2] = useState('');
+    const [ov3, setOv3] = useState('');
+
+    // OKVED inline editing segments
+    const [editingOkvedIdx, setEditingOkvedIdx] = useState<number | null>(null);
+    const [editOv1, setEditOv1] = useState('');
+    const [editOv2, setEditOv2] = useState('');
+    const [editOv3, setEditOv3] = useState('');
+
     useEffect(() => {
-        if (form) {
+        if (form && isOpen) {
+            const mappedDepartments = Array.isArray(form.departments)
+                ? form.departments.map((d: any) => ({
+                    department_id: String(d.department_id || d.id),
+                    okveds: Array.isArray(d.okveds) ? d.okveds : ['10:20:30', '45:11:12']
+                }))
+                : (form.department_id ? [{ department_id: String(form.department_id), okveds: ['10:20:30'] }] : []);
+
             setData({
                 id: form.id,
                 name: form.name,
                 indicators: form.indicators,
                 reports: form.reports,
                 coeff: form.coeff,
-                department_id: form.department_id || '',
+                departments: mappedDepartments,
                 version_id: versionId
             });
+            setActiveDeptIndex(null);
+            setEditingOkvedIdx(null);
         }
     }, [form, isOpen]);
 
+    const handleAddDepartment = () => {
+        if (!selectedDeptId) return;
+        if (data.departments.some(d => d.department_id === selectedDeptId)) {
+            setSelectedDeptId('');
+            return;
+        }
+        const updatedDepts = [...data.departments, { department_id: selectedDeptId, okveds: [] }];
+        setData('departments', updatedDepts);
+        setSelectedDeptId('');
+        setActiveDeptIndex(updatedDepts.length - 1);
+    };
+
+    const handleRemoveDepartment = (indexToRemove: number) => {
+        const updatedDepts = data.departments.filter((_, idx) => idx !== indexToRemove);
+        setData('departments', updatedDepts);
+        if (activeDeptIndex === indexToRemove) {
+            setActiveDeptIndex(null);
+            setEditingOkvedIdx(null);
+        } else if (activeDeptIndex !== null && activeDeptIndex > indexToRemove) {
+            setActiveDeptIndex(activeDeptIndex - 1);
+        }
+    };
+
+    const handleAddOkved = () => {
+        if (!ov1 || !ov2 || !ov3 || activeDeptIndex === null) return;
+        const combined = `${ov1.trim()}:${ov2.trim()}:${ov3.trim()}`;
+
+        const updatedDepts = [...data.departments];
+        if (!updatedDepts[activeDeptIndex].okveds.includes(combined)) {
+            updatedDepts[activeDeptIndex].okveds = [...updatedDepts[activeDeptIndex].okveds, combined];
+            setData('departments', updatedDepts);
+        }
+        setOv1('');
+        setOv2('');
+        setOv3('');
+    };
+
+    const startEditingOkved = (idx: number, currentVal: string) => {
+        const segments = currentVal.split(':');
+        setEditOv1(segments[0] || '');
+        setEditOv2(segments[1] || '');
+        setEditOv3(segments[2] || '');
+        setEditingOkvedIdx(idx);
+    };
+
+    const handleSaveOkvedEdit = (okvedIdx: number) => {
+        if (!editOv1 || !editOv2 || !editOv3 || activeDeptIndex === null) return;
+        const combined = `${editOv1.trim()}:${editOv2.trim()}:${editOv3.trim()}`;
+
+        const updatedDepts = [...data.departments];
+        updatedDepts[activeDeptIndex].okveds[okvedIdx] = combined;
+        setData('departments', updatedDepts);
+        setEditingOkvedIdx(null);
+    };
+
+    const handleRemoveOkved = (okvedIdx: number) => {
+        if (activeDeptIndex === null) return;
+        const updated = [...data.departments];
+        updated[activeDeptIndex].okveds = updated[activeDeptIndex].okveds.filter((_, i) => i !== okvedIdx);
+        setData('departments', updated);
+        if (editingOkvedIdx === okvedIdx) setEditingOkvedIdx(null);
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
         put('/forms', {
             onSuccess: () => {
                 reset();
+                setActiveDeptIndex(null);
+                setEditingOkvedIdx(null);
                 onClose();
             },
         });
     };
 
+    const isPanel3Open = activeDeptIndex !== null && data.departments[activeDeptIndex];
+
+    const handleOutsideClick = (e: React.MouseEvent) => {
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
+    const currentDepartmentName = activeDeptIndex !== null
+        ? departments.find(dept => dept.id === data.departments[activeDeptIndex]?.department_id)?.name || 'Выбрано'
+        : '';
+
     return (
-        <Modal show={isOpen} onClose={onClose} maxWidth="md">
-            <form onSubmit={handleSubmit} className="p-6 bg-white font-mono text-gray-900" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+        <Modal show={isOpen} onClose={onClose} maxWidth="fit">
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                #modal div[class*="bg-white"][class*="shadow-xl"] {
+                    background-color: transparent !important;
+                    box-shadow: none !important;
+                    width: fit-content !important;
+                    max-width: fit-content !important;
+                }
+                #modal div[class*="dark:bg-gray-800"] {
+                    background-color: transparent !important;
+                }
+            `}} />
 
-                {/* Header */}
-                <div className="border-b border-gray-200 pb-4 mb-5 flex justify-between items-center">
-                    <h3 className="text-lg font-bold uppercase tracking-tight text-gray-900 flex items-center gap-2">
-                        <span className="text-indigo-600">[*]</span> Редактировать Форму #{data.id}
-                    </h3>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 text-xl font-bold cursor-pointer focus:outline-none"
-                    >
-                        ×
-                    </button>
-                </div>
-
-                {/* Body Form Controls */}
-                <div className="space-y-4">
-
-                    {/* Form Title */}
-                    <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
-                            Наименование Формы *
-                        </label>
-                        <input
-                            type="text"
-                            value={data.name}
-                            onChange={e => setData('name', e.target.value)}
-                            className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-600 focus:ring-0"
-                            required
-                        />
-                        {errors.name && <div className="text-xs text-red-600 mt-1 font-bold">{errors.name}</div>}
-                    </div>
-
-                    {/* Department Select Matrix */}
-                    <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
-                            Привязка к Ведомству
-                        </label>
-                        <select
-                            value={data.department_id}
-                            onChange={e => setData('department_id', e.target.value)}
-                            className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-600 focus:ring-0"
-                        >
-                            <option value="">Без ведомства (Null)</option>
-                            {departments.map((dept) => (
-                                <option key={dept.id} value={dept.id}>
-                                    {dept.name} [{dept.territory.toUpperCase()}]
-                                </option>
-                            ))}
-                        </select>
-                        {errors.department_id && (
-                            <div className="text-xs text-red-600 mt-1 font-bold">{errors.department_id}</div>
-                        )}
-                    </div>
-
-                    {/* Metrics Numerical Row Elements */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
-                                Показатели
-                            </label>
-                            <input
-                                type="number"
-                                min="0"
-                                value={data.indicators}
-                                onChange={e => setData('indicators', parseInt(e.target.value) || 0)}
-                                className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-600 focus:ring-0"
-                            />
-                            {errors.indicators && <div className="text-xs text-red-600 mt-1 font-bold">{errors.indicators}</div>}
+            <div
+                onClick={handleOutsideClick}
+                className="font-mono text-gray-900 select-none p-1 w-fit h-fit"
+                style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            >
+                <form
+                    onSubmit={handleSubmit}
+                    onClick={handleOutsideClick}
+                    className="flex flex-row items-start w-fit cursor-default"
+                >
+                    {/* PANEL 1: Core Fields */}
+                    <div className="w-95 border border-gray-300 p-5 bg-gray-50 flex flex-col shadow-sm shrink-0 mr-5">
+                        <div className="space-y-5">
+                            <h3 className="text-sm font-bold uppercase tracking-tight text-indigo-900 border-b border-indigo-200 pb-3">
+                                [*] Редактировать #{data.id}
+                            </h3>
+                            <div>
+                                <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Название</label>
+                                <input
+                                    type="text"
+                                    value={data.name}
+                                    onChange={e => setData('name', e.target.value)}
+                                    className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
+                                    required
+                                />
+                            </div>
+                            <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Пок.</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={data.indicators}
+                                        onChange={e => setData('indicators', parseInt(e.target.value) || 0)}
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Отч.</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={data.reports}
+                                        onChange={e => setData('reports', parseInt(e.target.value) || 0)}
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Коэф.</label>
+                                    <input
+                                        type="text"
+                                        value={data.coeff}
+                                        onChange={e => setData('coeff', e.target.value)}
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
-                                Отчеты
-                            </label>
-                            <input
-                                type="number"
-                                min="0"
-                                value={data.reports}
-                                onChange={e => setData('reports', parseInt(e.target.value) || 0)}
-                                className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-600 focus:ring-0"
-                            />
-                            {errors.reports && <div className="text-xs text-red-600 mt-1 font-bold">{errors.reports}</div>}
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
-                                Коэф. (Coeff)
-                            </label>
-                            <input
-                                type="text"
-                                value={data.coeff}
-                                onChange={e => setData('coeff', e.target.value)}
-                                className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-600 focus:ring-0"
-                            />
-                            {errors.coeff && <div className="text-xs text-red-600 mt-1 font-bold">{errors.coeff}</div>}
+                        <div className="pt-5 border-t border-gray-200 grid grid-cols-2 gap-3 mt-6">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="px-3 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-bold uppercase cursor-pointer"
+                            >
+                                Отмена
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="px-3 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold uppercase cursor-pointer disabled:opacity-50 shadow-sm"
+                            >
+                                Сохранить
+                            </button>
                         </div>
                     </div>
-                </div>
 
-                {/* Footer Control Actions */}
-                <div className="mt-6 border-t border-gray-100 pt-4 flex justify-end gap-2">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        disabled={processing}
-                        className="px-4 py-2 bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
-                    >
-                        Отмена
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={processing}
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer disabled:opacity-50"
-                    >
-                        {processing ? 'Сохранение...' : 'Обновить запись'}
-                    </button>
-                </div>
+                    {/* PANEL 2: Departments List */}
+                    <DepartmentsPartial
+                        departments={departments}
+                        dataDepartments={data.departments}
+                        selectedDeptId={selectedDeptId}
+                        activeDeptIndex={activeDeptIndex}
+                        onSelectDept={setSelectedDeptId}
+                        onAddDepartment={handleAddDepartment}
+                        onRemoveDepartment={handleRemoveDepartment}
+                        onSelectActiveDept={setActiveDeptIndex}
+                        isPanel3Open={isPanel3Open}
+                    />
 
-            </form>
+                    {/* PANEL 3: OKVED Control Panel */}
+                    <OkvedPartial
+                        isOpen={isPanel3Open}
+                        departmentName={currentDepartmentName}
+                        okveds={isPanel3Open ? data.departments[activeDeptIndex!].okveds : []}
+                        activeDeptIndex={activeDeptIndex}
+                        editingOkvedIdx={editingOkvedIdx}
+                        ov1={ov1}
+                        ov2={ov2}
+                        ov3={ov3}
+                        editOv1={editOv1}
+                        editOv2={editOv2}
+                        editOv3={editOv3}
+                        onOv1Change={setOv1}
+                        onOv2Change={setOv2}
+                        onOv3Change={setOv3}
+                        onEditOv1Change={setEditOv1}
+                        onEditOv2Change={setEditOv2}
+                        onEditOv3Change={setEditOv3}
+                        onAddOkved={handleAddOkved}
+                        onStartEditing={startEditingOkved}
+                        onSaveEdit={handleSaveOkvedEdit}
+                        onCancelEdit={() => setEditingOkvedIdx(null)}
+                        onRemoveOkved={handleRemoveOkved}
+                        onClearBuilder={() => { setOv1(''); setOv2(''); setOv3(''); }}
+                    />
+                </form>
+            </div>
         </Modal>
     );
 };

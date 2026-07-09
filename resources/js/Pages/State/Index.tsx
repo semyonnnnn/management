@@ -5,7 +5,6 @@ import { PageProps } from '@/types';
 import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/700.css';
 import { AddDepartment } from './AddDepartment';
-import Modal from "@/components/custom/Modal";
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 
 interface DepartmentState {
