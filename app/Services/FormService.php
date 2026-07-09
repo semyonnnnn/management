@@ -22,7 +22,6 @@ class FormService
             ];
         }
 
-        // Handle Forms
         $formsQuery = Form::query()->with('departments')->where('version_id', $currentVersion->id);
 
         if ($territory !== 'all') {
@@ -41,6 +40,7 @@ class FormService
         }
 
         $forms = $formsQuery->paginate(12)->withQueryString();
+
         $forms->through(fn($form) => [
             'id' => $form->id,
             'name' => $form->name,
@@ -48,11 +48,11 @@ class FormService
             'reports' => (int)$form->reports,
             'coeff' => $form->coeff,
             'final' => (int)$form->final,
-            // Accessing the first one if you expect only one, or use a collection
             'resolvedDeptName' => $form->departments->first()?->name ?? 'Неизвестное ведомство',
             'resolvedTerritory' => strtolower(trim($form->departments->first()?->territory ?? 'all')),
+            'department_id' => $form->departments->first()?->id ?? null,
         ]);
-        // Handle Departments
+
         $departments = Department::query()->where('version_id', $currentVersion->id)
             ->orderBy('name', 'asc')
             ->get()

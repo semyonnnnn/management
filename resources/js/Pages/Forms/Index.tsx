@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import '@fontsource/jetbrains-mono/700.css';
 import '@fontsource/jetbrains-mono/400.css';
-//////////////////////////////////////////////////
-import { AddFormModal } from './AddFormModal'; // Imported the new modal context
+import { AddFormModal } from './AddFormModal';
+import { EditFormModal } from './EditFormModal';
 import { ExtendedPageProps } from '@/types';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-
 
 export default function Index({ departments, forms, versionId, filters }: ExtendedPageProps) {
     const [selectedTerritory, setSelectedTerritory] = useState<string>(filters.territory || 'all');
     const [searchQuery, setSearchQuery] = useState<string>(filters.search || '');
     const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+    const [selectedForm, setSelectedForm] = useState<any | null>(null);
 
     const territoryBadge = {
         ekb: 'text-indigo-600/90 font-mono text-sm font-bold tracking-tight bg-indigo-50/60 px-2.5 py-1 border border-indigo-100',
@@ -52,23 +53,21 @@ export default function Index({ departments, forms, versionId, filters }: Extend
         applyFilters(searchQuery, territory);
     };
 
+    const handleFormCardClick = (form: any) => {
+        setSelectedForm(form);
+        setIsEditModalOpen(true);
+    };
+
     return (
         <AuthenticatedLayout>
             <div className="space-y-6" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-
-                {/* Control Panel Console Block Header */}
                 <div className="bg-white border border-indigo-200/50 p-6 flex flex-col xl:flex-row gap-4 justify-between items-stretch xl:items-center shadow-sm">
-                    {/* Changed items-center to items-stretch so both elements share the exact same height */}
                     <div className="flex items-stretch gap-4">
-
-                        {/* The border is now on this wrapper, which stretches completely. flex items-center keeps the text centered inside it */}
                         <div className="border-l-6 border-indigo-600 pl-4 flex items-center">
                             <div className="text-2xl font-bold text-gray-900 uppercase tracking-tight flex items-center gap-2">
                                 Формы
                                 <span className="text-indigo-600">
-                                    [
-                                    {forms.total}
-                                    ]
+                                    [{forms.total}]
                                 </span>
                                 {filters.search && (
                                     <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200/70 px-2 py-0.5 tracking-wider animate-pulse">
@@ -78,7 +77,6 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                             </div>
                         </div>
 
-                        {/* Glassy Action Control Block Element */}
                         <button
                             onClick={() => setIsAddModalOpen(true)}
                             className="px-4 py-1 bg-white/60 backdrop-blur-md hover:bg-white/90 border border-indigo-200 text-indigo-600 hover:text-indigo-700 hover:border-indigo-400 font-mono text-md font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer flex items-center gap-1.5 shadow-sm/50"
@@ -89,8 +87,6 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
-
-                        {/* Interactive Text Search */}
                         <div className="relative flex-1 md:w-80">
                             <input
                                 type="text"
@@ -109,7 +105,6 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                             )}
                         </div>
 
-                        {/* Preserved Industrial Territory Filter Options */}
                         <div className="flex gap-1.5 bg-white border border-gray-300 p-1 shrink-0">
                             {['all', 'ekb', 'krg'].map((t) => (
                                 <button
@@ -127,12 +122,12 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                     </div>
                 </div>
 
-                {/* 4-Column Clear Grid Interface */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {forms.data.map((form, index) => (
                         <div
                             key={`form-card-${form.id}-${index}`}
-                            className="bg-white/90 backdrop-blur-sm border border-indigo-200/80 flex flex-col justify-between hover:border-indigo-400 transition-colors duration-200 shadow-sm group"
+                            onClick={() => handleFormCardClick(form)}
+                            className="bg-white/90 backdrop-blur-sm border border-indigo-200/80 flex flex-col justify-between hover:border-indigo-400 transition-colors duration-200 shadow-sm group cursor-pointer"
                         >
                             <div className="p-4 bg-slate-50/60 border-b border-gray-200/60 min-h-[4.2rem] flex items-center">
                                 <div className="text-sm font-bold text-gray-600 uppercase tracking-tight leading-snug line-clamp-2" title={form.resolvedDeptName}>
@@ -178,7 +173,6 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                     </div>
                 )}
 
-                {/* Tactical Footer Paginator Element */}
                 {forms.links && forms.links.length > 3 && (
                     <div className="bg-white border border-indigo-200/50 p-4 flex justify-center items-center shadow-sm">
                         <div className="flex gap-1 bg-white border border-gray-300 p-1">
@@ -208,7 +202,6 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                     </div>
                 )}
 
-                {/* Mounted AddFormModal Overlay Portal Anchor Context */}
                 <AddFormModal
                     isOpen={isAddModalOpen}
                     onClose={() => setIsAddModalOpen(false)}
@@ -216,6 +209,16 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                     versionId={versionId}
                 />
 
+                <EditFormModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => {
+                        setIsEditModalOpen(false);
+                        setSelectedForm(null);
+                    }}
+                    departments={departments}
+                    versionId={versionId}
+                    form={selectedForm}
+                />
             </div>
         </AuthenticatedLayout>
     );

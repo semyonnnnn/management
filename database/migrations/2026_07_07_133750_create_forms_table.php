@@ -18,10 +18,6 @@ return new class extends Migration
             $table->integer('reports')->default(1);
             $table->decimal('coeff', 8, 2)->default(1.0);
             $table->integer('final')->default(0);
-            $table->foreignId('department_id')
-                ->nullable()
-                ->constrained()
-                ->nullOnDelete();
             $table->foreignId('version_id')
                 ->constrained()
                 ->cascadeOnDelete();
