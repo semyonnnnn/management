@@ -203,6 +203,7 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                 )}
 
                 <AddFormModal
+                    isConsolidated={true}
                     isOpen={isAddModalOpen}
                     onClose={() => setIsAddModalOpen(false)}
                     departments={departments}

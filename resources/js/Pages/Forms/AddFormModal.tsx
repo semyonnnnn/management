@@ -90,7 +90,7 @@ export const AddFormModal = ({ isOpen, onClose, departments, versionId, isConsol
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
 
                     {/* COLUMN 1: Core Form Parameters & Actions */}
-                    <div className="md:col-span-4 border border-gray-300 p-4 bg-gray-50 flex flex-col justify-between min-h-[400px]">
+                    <div className="md:col-span-4 border border-gray-300 p-4 bg-gray-50 flex flex-col justify-between min-h-100">
                         <div className="space-y-4">
                             <h3 className="text-sm font-bold uppercase tracking-tight text-gray-900 border-b border-gray-200 pb-2">
                                 [+] Создать
@@ -159,7 +159,7 @@ export const AddFormModal = ({ isOpen, onClose, departments, versionId, isConsol
                     </div>
 
                     {/* COLUMN 2: Departments ("отделы") list */}
-                    <div className="md:col-span-4 border border-gray-300 p-4 bg-white min-h-[400px] flex flex-col">
+                    <div className="md:col-span-4 border border-gray-300 p-4 bg-white min-h-100 flex flex-col">
                         <h3 className="text-sm font-bold uppercase tracking-tight text-gray-900 border-b-2 border-gray-900 pb-1 mb-3">
                             Отделы
                         </h3>
@@ -188,7 +188,7 @@ export const AddFormModal = ({ isOpen, onClose, departments, versionId, isConsol
                             </button>
                         </div>
 
-                        <div className="flex-1 space-y-1 overflow-y-auto max-h-[280px] pr-1">
+                        <div className="flex-1 space-y-1 overflow-y-auto max-h-70 pr-1">
                             {data.departments.map((d, index) => {
                                 const match = departments.find(dept => dept.id === d.department_id);
                                 const isSelected = activeDeptIndex === index;
@@ -216,7 +216,7 @@ export const AddFormModal = ({ isOpen, onClose, departments, versionId, isConsol
                     </div>
 
                     {/* COLUMN 3: Segmented OKVED Block */}
-                    <div className="md:col-span-4 border border-gray-300 p-4 bg-gray-50 min-h-[400px] flex flex-col justify-between">
+                    <div className="md:col-span-4 border border-gray-300 p-4 bg-gray-50 min-h-100 flex flex-col justify-between">
                         {activeDeptIndex !== null && data.departments[activeDeptIndex] ? (
                             <div className="space-y-4 flex flex-col justify-between h-full">
                                 <div>
@@ -225,7 +225,7 @@ export const AddFormModal = ({ isOpen, onClose, departments, versionId, isConsol
                                     </h4>
 
                                     {/* Display area for added OKVED codes */}
-                                    <div className="space-y-1 max-h-[160px] overflow-y-auto mb-4 bg-white p-2 border border-gray-200 min-h-[80px]">
+                                    <div className="space-y-1 max-h-40 overflow-y-auto mb-4 bg-white p-2 border border-gray-200 min-h-20">
                                         {data.departments[activeDeptIndex].okveds.length === 0 ? (
                                             <div className="text-[11px] text-gray-400 italic">Нет кодов</div>
                                         ) : (

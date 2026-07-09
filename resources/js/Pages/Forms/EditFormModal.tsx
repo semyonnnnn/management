@@ -135,7 +135,7 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
         });
     };
 
-    const isPanel3Open = activeDeptIndex !== null && data.departments[activeDeptIndex];
+    const isPanel3Open = !!(activeDeptIndex !== null && data.departments[activeDeptIndex]);
 
     const handleOutsideClick = (e: React.MouseEvent) => {
         if (e.target === e.currentTarget) {
