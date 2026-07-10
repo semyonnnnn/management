@@ -22,6 +22,9 @@ interface DepartmentsPartialProps {
     onSelectActiveDept: (index: number | null) => void;
     isPanel3Open: boolean;
     onConfirmRemove: (index: number) => void;
+    onSave: () => void;
+    onReset: () => void;
+    showActions: boolean;
 }
 
 const CustomSelect = ({
@@ -119,7 +122,10 @@ export const DepartmentsPartial = ({
     onRemoveDepartment,
     onSelectActiveDept,
     isPanel3Open,
-    onConfirmRemove
+    onConfirmRemove,
+    onSave,
+    onReset,
+    showActions
 }: DepartmentsPartialProps) => {
 
     const availableDepartments = departments.filter(
@@ -200,6 +206,25 @@ export const DepartmentsPartial = ({
                         </div>
                     );
                 })}
+                {showActions && (
+                    <div className="flex gap-2 mt-5 pt-5 border-t border-gray-200">
+                        <button
+                            type="button"
+                            onClick={onReset}
+                            className="flex-1 h-11 border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 font-bold transition-colors cursor-pointer"
+                        >
+                            Отменить
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={onSave}
+                            className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-colors cursor-pointer"
+                        >
+                            Сохранить
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

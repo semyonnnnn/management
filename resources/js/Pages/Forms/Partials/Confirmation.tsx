@@ -49,7 +49,6 @@ export const Confirmation = ({
                             e.stopPropagation();
                             e.nativeEvent.stopImmediatePropagation();
                             onConfirm();
-                            onClose();
                         }}
                         className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase cursor-pointer shadow-sm"
                     >

@@ -47,4 +47,9 @@ class FormsController extends Controller
 
         return redirect()->back();
     }
+
+    public function update()
+    {
+        dd('потом сделаю');
+    }
 }
