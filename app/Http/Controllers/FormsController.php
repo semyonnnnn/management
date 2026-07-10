@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 //////////////////////////////
 use App\Services\FormService;
 use App\Http\Requests\FormRequest;
+use App\Http\Requests\FormUpdateRequest;
 use App\Models\Form;
 use App\Models\Version;
 
@@ -43,13 +45,32 @@ class FormsController extends Controller
 
 
         $form->departments()->sync($data['department_id']);
-        // $form->versions()->attach($currentVersionId);
 
         return redirect()->back();
     }
-
-    public function update()
+    public function update(FormUpdateRequest $r)
     {
-        dd('потом сделаю');
+        $data = $r->validated();
+
+        $form = Form::findOrFail($r->input('id'));
+
+        DB::transaction(function () use ($form, $data) {
+            $form->update([
+                'name'       => $data['name'],
+                'indicators' => $data['indicators'],
+                'reports'    => $data['reports'],
+                'coeff'      => $data['coeff'],
+                'version_id' => $data['version_id'],
+            ]);
+
+            $departmentIds = collect($data['departments'] ?? [])
+                ->pluck('department_id')
+                ->filter()
+                ->toArray();
+
+            $form->departments()->sync($departmentIds);
+        });
+
+        return redirect()->back();
     }
 }

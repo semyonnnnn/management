@@ -50,7 +50,7 @@ class FormService
             'final' => (int)$form->final,
             'resolvedDeptName' => $form->departments->first()?->name ?? 'Неизвестное ведомство',
             'resolvedTerritory' => strtolower(trim($form->departments->first()?->territory ?? 'all')),
-            'department_id' => $form->departments->first()?->id ?? null,
+            'department_ids' => $form->departments->pluck('id')->values(),
         ]);
 
         $departments = Department::query()->where('version_id', $currentVersion->id)

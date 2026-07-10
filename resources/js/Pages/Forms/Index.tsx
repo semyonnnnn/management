@@ -15,8 +15,8 @@ export default function Index({ departments, forms, versionId, filters }: Extend
     const [selectedForm, setSelectedForm] = useState<any | null>(null);
 
     const sortedForms = [...forms.data].sort((a, b) => {
-        const aHas = !!a.department_id;
-        const bHas = !!b.department_id;
+        const aHas = (a.department_ids && a.department_ids.length > 0);
+        const bHas = (b.department_ids && b.department_ids.length > 0);
         if (aHas === bHas) return 0;
         return aHas ? -1 : 1;
     });
@@ -128,7 +128,9 @@ export default function Index({ departments, forms, versionId, filters }: Extend
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {sortedForms.map((form, index) => {
-                        const isFirstNoDept = !form.department_id && (index === 0 || !!sortedForms[index - 1].department_id);
+                        const hasDepartments = form.department_ids && form.department_ids.length > 0;
+                        const prevHasDepartments = index > 0 && sortedForms[index - 1].department_ids && sortedForms[index - 1].department_ids.length > 0;
+                        const isFirstNoDept = !hasDepartments && (index === 0 || prevHasDepartments);
 
                         return (
                             <React.Fragment key={form.id}>

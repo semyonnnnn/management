@@ -90,9 +90,8 @@ export const OkvedPartial = ({
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-1">
                                             {[0, 1, 2].map((i) => (
-                                                <>
+                                                <React.Fragment key={i}>
                                                     <input
-                                                        key={i}
                                                         type="text"
                                                         maxLength={2}
                                                         // Trigger edit mode when user clicks/focuses any segment
@@ -107,7 +106,7 @@ export const OkvedPartial = ({
                                                         className="w-10 text-center border border-indigo-200 py-1 text-sm font-bold bg-transparent focus:border-indigo-600 focus:outline-none"
                                                     />
                                                     {i < 2 && ":"}
-                                                </>
+                                                </React.Fragment>
                                             ))}
                                         </div>
 
