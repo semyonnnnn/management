@@ -21,6 +21,7 @@ interface DepartmentsPartialProps {
     onRemoveDepartment: (index: number) => void;
     onSelectActiveDept: (index: number | null) => void;
     isPanel3Open: boolean;
+    onConfirmRemove: (index: number) => void;
 }
 
 const CustomSelect = ({
@@ -117,7 +118,8 @@ export const DepartmentsPartial = ({
     onAddDepartment,
     onRemoveDepartment,
     onSelectActiveDept,
-    isPanel3Open
+    isPanel3Open,
+    onConfirmRemove
 }: DepartmentsPartialProps) => {
 
     const availableDepartments = departments.filter(
@@ -189,7 +191,7 @@ export const DepartmentsPartial = ({
                                 type="button"
                                 onClick={e => {
                                     e.stopPropagation();
-                                    onRemoveDepartment(index);
+                                    onConfirmRemove(index);
                                 }}
                                 className="absolute right-0 top-0 bottom-0 w-11 m-1 flex items-center justify-center text-4xl font-light leading-none border border-red-500 bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all shrink-0 select-none"
                             >

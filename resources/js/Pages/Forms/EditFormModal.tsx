@@ -3,6 +3,7 @@ import Modal from "@/components/custom/Modal";
 import { useForm } from '@inertiajs/react';
 import { DepartmentsPartial } from './Partials/DepartmentsPartial';
 import { OkvedPartial } from './Partials/OkvedPartial';
+import { Confirmation } from './Partials/Confirmation';
 
 interface EditFormModalProps {
     isOpen: boolean;
@@ -23,19 +24,36 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
         version_id: versionId
     });
 
+    const [isDeptConfirmOpen, setIsDeptConfirmOpen] = useState(false);
+    const [deptToDelete, setDeptToDelete] = useState<number | null>(null);
+
     const [selectedDeptId, setSelectedDeptId] = useState<string>('');
     const [activeDeptIndex, setActiveDeptIndex] = useState<number | null>(null);
 
-    // OKVED builder segment inputs
     const [ov1, setOv1] = useState('');
     const [ov2, setOv2] = useState('');
     const [ov3, setOv3] = useState('');
 
-    // OKVED inline editing segments
     const [editingOkvedIdx, setEditingOkvedIdx] = useState<number | null>(null);
     const [editOv1, setEditOv1] = useState('');
     const [editOv2, setEditOv2] = useState('');
     const [editOv3, setEditOv3] = useState('');
+
+    const [isOkvedConfirmOpen, setIsOkvedConfirmOpen] = useState(false);
+    const [okvedToDelete, setOkvedToDelete] = useState<number | null>(null);
+
+    const handleRequestDelete = (index: number) => {
+        setDeptToDelete(index);
+        setIsDeptConfirmOpen(true);
+    };
+
+    const executeDelete = () => {
+        if (deptToDelete !== null) {
+            handleRemoveDepartment(deptToDelete); // Your actual remove logic
+            setIsDeptConfirmOpen(false);
+            setDeptToDelete(null);
+        }
+    };
 
     useEffect(() => {
         if (form && isOpen) {
@@ -115,12 +133,18 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
         setEditingOkvedIdx(null);
     };
 
-    const handleRemoveOkved = (okvedIdx: number) => {
-        if (activeDeptIndex === null) return;
+    const handleRemoveOkvedRequest = (okvedIdx: number) => {
+        setOkvedToDelete(okvedIdx);
+        setIsOkvedConfirmOpen(true);
+    };
+
+    const handleConfirmRemoveOkved = () => {
+        if (activeDeptIndex === null || okvedToDelete === null) return;
         const updated = [...data.departments];
-        updated[activeDeptIndex].okveds = updated[activeDeptIndex].okveds.filter((_, i) => i !== okvedIdx);
+        updated[activeDeptIndex].okveds = updated[activeDeptIndex].okveds.filter((_, i) => i !== okvedToDelete);
         setData('departments', updated);
-        if (editingOkvedIdx === okvedIdx) setEditingOkvedIdx(null);
+        if (editingOkvedIdx === okvedToDelete) setEditingOkvedIdx(null);
+        setOkvedToDelete(null);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -139,6 +163,8 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
 
     const handleOutsideClick = (e: React.MouseEvent) => {
         if (e.target === e.currentTarget) {
+            if (isOkvedConfirmOpen) return; // Ignore if confirmation is open
+            if (isDeptConfirmOpen) return;
             onClose();
         }
     };
@@ -148,138 +174,159 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
         : '';
 
     return (
-        <Modal show={isOpen} onClose={onClose} maxWidth="fit">
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                #modal div[class*="bg-white"][class*="shadow-xl"] {
-                    background-color: transparent !important;
-                    box-shadow: none !important;
-                    width: fit-content !important;
-                    max-width: fit-content !important;
-                }
-                #modal div[class*="dark:bg-gray-800"] {
-                    background-color: transparent !important;
-                }
-            `}} />
+        <>
+            <Modal show={isOpen}
+                onClose={() => {
+                    if (isOkvedConfirmOpen) return;
+                    if (isDeptConfirmOpen) return;
+                    onClose();
+                }}
+                maxWidth="fit">
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                    #modal div[class*="bg-white"][class*="shadow-xl"] {
+                        background-color: transparent !important;
+                        box-shadow: none !important;
+                        width: fit-content !important;
+                        max-width: fit-content !important;
+                    }
+                    #modal div[class*="dark:bg-gray-800"] {
+                        background-color: transparent !important;
+                    }
+                `}} />
 
-            <div
-                onClick={handleOutsideClick}
-                className="font-mono text-gray-900 select-none p-1 w-fit h-fit"
-                style={{ fontFamily: "'JetBrains Mono', monospace" }}
-            >
-                <form
-                    onSubmit={handleSubmit}
+                <div
                     onClick={handleOutsideClick}
-                    className="flex flex-row items-start w-fit cursor-default"
+                    className="font-mono text-gray-900 select-none p-1 w-fit h-fit"
+                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
                 >
-                    {/* PANEL 1: Core Fields */}
-                    <div className="w-95 border border-gray-300 p-5 bg-gray-50 flex flex-col shadow-sm shrink-0 mr-5">
-                        <div className="space-y-5">
-                            <h3 className="text-sm font-bold uppercase tracking-tight text-indigo-900 border-b border-indigo-200 pb-3">
-                                [*] Редактировать #{data.id}
-                            </h3>
-                            <div>
-                                <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Название</label>
-                                <input
-                                    type="text"
-                                    value={data.name}
-                                    onChange={e => setData('name', e.target.value)}
-                                    className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
-                                    required
-                                />
-                            </div>
-                            <div className="grid grid-cols-3 gap-3">
+                    <form
+                        onSubmit={handleSubmit}
+                        onClick={handleOutsideClick}
+                        className="flex flex-row items-start w-fit cursor-default"
+                    >
+                        <div className="w-95 border border-gray-300 p-5 bg-gray-50 flex flex-col shadow-sm shrink-0 mr-5">
+                            <div className="space-y-5">
+                                <h3 className="text-sm font-bold uppercase tracking-tight text-indigo-900 border-b border-indigo-200 pb-3">
+                                    [*] Редактировать #{data.id}
+                                </h3>
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Пок.</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={data.indicators}
-                                        onChange={e => setData('indicators', parseInt(e.target.value) || 0)}
-                                        className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Отч.</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={data.reports}
-                                        onChange={e => setData('reports', parseInt(e.target.value) || 0)}
-                                        className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Коэф.</label>
+                                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Название</label>
                                     <input
                                         type="text"
-                                        value={data.coeff}
-                                        onChange={e => setData('coeff', e.target.value)}
+                                        value={data.name}
+                                        onChange={e => setData('name', e.target.value)}
                                         className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
+                                        required
                                     />
                                 </div>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Пок.</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={data.indicators}
+                                            onChange={e => setData('indicators', parseInt(e.target.value) || 0)}
+                                            className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Отч.</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={data.reports}
+                                            onChange={e => setData('reports', parseInt(e.target.value) || 0)}
+                                            className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Коэф.</label>
+                                        <input
+                                            type="text"
+                                            value={data.coeff}
+                                            onChange={e => setData('coeff', e.target.value)}
+                                            className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="pt-5 border-t border-gray-200 grid grid-cols-2 gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
+                                    className="px-3 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-bold uppercase cursor-pointer"
+                                >
+                                    Отмена
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="px-3 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold uppercase cursor-pointer disabled:opacity-50 shadow-sm"
+                                >
+                                    Сохранить
+                                </button>
                             </div>
                         </div>
 
-                        <div className="pt-5 border-t border-gray-200 grid grid-cols-2 gap-3 mt-6">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="px-3 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-bold uppercase cursor-pointer"
-                            >
-                                Отмена
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="px-3 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold uppercase cursor-pointer disabled:opacity-50 shadow-sm"
-                            >
-                                Сохранить
-                            </button>
-                        </div>
-                    </div>
+                        <DepartmentsPartial
+                            onConfirmRemove={handleRequestDelete}
+                            departments={departments}
+                            dataDepartments={data.departments}
+                            selectedDeptId={selectedDeptId}
+                            activeDeptIndex={activeDeptIndex}
+                            onSelectDept={setSelectedDeptId}
+                            onAddDepartment={handleAddDepartment}
+                            onRemoveDepartment={handleRemoveDepartment}
+                            onSelectActiveDept={setActiveDeptIndex}
+                            isPanel3Open={isPanel3Open}
+                        />
 
-                    {/* PANEL 2: Departments List */}
-                    <DepartmentsPartial
-                        departments={departments}
-                        dataDepartments={data.departments}
-                        selectedDeptId={selectedDeptId}
-                        activeDeptIndex={activeDeptIndex}
-                        onSelectDept={setSelectedDeptId}
-                        onAddDepartment={handleAddDepartment}
-                        onRemoveDepartment={handleRemoveDepartment}
-                        onSelectActiveDept={setActiveDeptIndex}
-                        isPanel3Open={isPanel3Open}
-                    />
+                        <OkvedPartial
+                            isOpen={isPanel3Open}
+                            departmentName={currentDepartmentName}
+                            okveds={isPanel3Open ? data.departments[activeDeptIndex!].okveds : []}
+                            activeDeptIndex={activeDeptIndex}
+                            editingOkvedIdx={editingOkvedIdx}
+                            ov1={ov1}
+                            ov2={ov2}
+                            ov3={ov3}
+                            editOv1={editOv1}
+                            editOv2={editOv2}
+                            editOv3={editOv3}
+                            onOv1Change={setOv1}
+                            onOv2Change={setOv2}
+                            onOv3Change={setOv3}
+                            onEditOv1Change={setEditOv1}
+                            onEditOv2Change={setEditOv2}
+                            onEditOv3Change={setEditOv3}
+                            onAddOkved={handleAddOkved}
+                            onStartEditing={startEditingOkved}
+                            onSaveEdit={handleSaveOkvedEdit}
+                            onCancelEdit={() => setEditingOkvedIdx(null)}
+                            onRemoveOkved={handleRemoveOkvedRequest}
+                            onClearBuilder={() => { setOv1(''); setOv2(''); setOv3(''); }}
+                        />
+                    </form>
+                </div>
+            </Modal>
 
-                    {/* PANEL 3: OKVED Control Panel */}
-                    <OkvedPartial
-                        isOpen={isPanel3Open}
-                        departmentName={currentDepartmentName}
-                        okveds={isPanel3Open ? data.departments[activeDeptIndex!].okveds : []}
-                        activeDeptIndex={activeDeptIndex}
-                        editingOkvedIdx={editingOkvedIdx}
-                        ov1={ov1}
-                        ov2={ov2}
-                        ov3={ov3}
-                        editOv1={editOv1}
-                        editOv2={editOv2}
-                        editOv3={editOv3}
-                        onOv1Change={setOv1}
-                        onOv2Change={setOv2}
-                        onOv3Change={setOv3}
-                        onEditOv1Change={setEditOv1}
-                        onEditOv2Change={setEditOv2}
-                        onEditOv3Change={setEditOv3}
-                        onAddOkved={handleAddOkved}
-                        onStartEditing={startEditingOkved}
-                        onSaveEdit={handleSaveOkvedEdit}
-                        onCancelEdit={() => setEditingOkvedIdx(null)}
-                        onRemoveOkved={handleRemoveOkved}
-                        onClearBuilder={() => { setOv1(''); setOv2(''); setOv3(''); }}
-                    />
-                </form>
-            </div>
-        </Modal>
+            <Confirmation
+                show={isOkvedConfirmOpen}
+                onClose={() => setIsOkvedConfirmOpen(false)}
+                onConfirm={handleConfirmRemoveOkved}
+                message="Вы уверены, что хотите удалить этот код ОКВЭД?"
+            />
+
+            <Confirmation
+                show={isDeptConfirmOpen}
+                onClose={() => setIsDeptConfirmOpen(false)}
+                onConfirm={executeDelete}
+                title="Удаление отдела"
+                message="Вы уверены, что хотите удалить этот отдел? Все связанные с ним коды также будут удалены."
+            />
+        </>
     );
 };

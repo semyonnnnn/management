@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import '@fontsource/jetbrains-mono/700.css';
 import '@fontsource/jetbrains-mono/400.css';
@@ -14,12 +14,19 @@ export default function Index({ departments, forms, versionId, filters }: Extend
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [selectedForm, setSelectedForm] = useState<any | null>(null);
 
-    const territoryBadge = {
+    const sortedForms = [...forms.data].sort((a, b) => {
+        const aHas = !!a.department_id;
+        const bHas = !!b.department_id;
+        if (aHas === bHas) return 0;
+        return aHas ? -1 : 1;
+    });
+
+    const territoryBadge: Record<string, string> = {
         ekb: 'text-indigo-600/90 font-mono text-sm font-bold tracking-tight bg-indigo-50/60 px-2.5 py-1 border border-indigo-100',
         krg: 'text-purple-600/90 font-mono text-sm font-bold tracking-tight bg-purple-50/60 px-2.5 py-1 border border-purple-100',
     };
 
-    const localTerritoryName = {
+    const localTerritoryName: Record<string, string> = {
         ekb: 'Екатеринбург',
         krg: 'Курган'
     };
@@ -66,9 +73,7 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                         <div className="border-l-6 border-indigo-600 pl-4 flex items-center">
                             <div className="text-2xl font-bold text-gray-900 uppercase tracking-tight flex items-center gap-2">
                                 Формы
-                                <span className="text-indigo-600">
-                                    [{forms.total}]
-                                </span>
+                                <span className="text-indigo-600">[{forms.total}]</span>
                                 {filters.search && (
                                     <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200/70 px-2 py-0.5 tracking-wider animate-pulse">
                                         [ВашПоиск]
@@ -76,7 +81,6 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                                 )}
                             </div>
                         </div>
-
                         <button
                             onClick={() => setIsAddModalOpen(true)}
                             className="px-4 py-1 bg-white/60 backdrop-blur-md hover:bg-white/90 border border-indigo-200 text-indigo-600 hover:text-indigo-700 hover:border-indigo-400 font-mono text-md font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer flex items-center gap-1.5 shadow-sm/50"
@@ -123,48 +127,59 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {forms.data.map((form, index) => (
-                        <div
-                            key={`form-card-${form.id}-${index}`}
-                            onClick={() => handleFormCardClick(form)}
-                            className="bg-white/90 backdrop-blur-sm border border-indigo-200/80 flex flex-col justify-between hover:border-indigo-400 transition-colors duration-200 shadow-sm group cursor-pointer"
-                        >
-                            <div className="p-4 bg-slate-50/60 border-b border-gray-200/60 min-h-[4.2rem] flex items-center">
-                                <div className="text-sm font-bold text-gray-600 uppercase tracking-tight leading-snug line-clamp-2" title={form.resolvedDeptName}>
-                                    {form.resolvedDeptName}
-                                </div>
-                            </div>
+                    {sortedForms.map((form, index) => {
+                        const isFirstNoDept = !form.department_id && (index === 0 || !!sortedForms[index - 1].department_id);
 
-                            <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
-                                <div className="text-xl font-bold text-gray-950 tracking-tight leading-tight group-hover:text-indigo-600 transition-colors line-clamp-3" title={form.name}>
-                                    {form.name}
-                                </div>
-
-                                <div className="grid grid-cols-3 gap-1.5 pt-2">
-                                    <div className="bg-indigo-50/30 border border-indigo-100/70 p-2 text-center">
-                                        <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-0.5">ПОКАЗ.</span>
-                                        <span className="text-base font-bold text-gray-900 tracking-tighter">{form.indicators}</span>
-                                    </div>
-                                    <div className="bg-indigo-50/30 border border-indigo-100/70 p-2 text-center">
-                                        <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-0.5">ОТЧЕТЫ</span>
-                                        <span className="text-base font-bold text-gray-900 tracking-tighter">{form.reports}</span>
-                                    </div>
-                                    <div className="bg-indigo-50/30 border border-indigo-100/70 p-2 text-center flex flex-col justify-center items-center">
-                                        <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-0.5">КЭФ</span>
-                                        <span className="text-base font-bold text-indigo-600 tracking-tighter">{form.coeff}</span>
-                                    </div>
-                                </div>
-
-                                {form.resolvedTerritory && form.resolvedTerritory !== 'all' && (
-                                    <div className="flex justify-end pt-1">
-                                        <div className={territoryBadge[form.resolvedTerritory as keyof typeof territoryBadge] || ''}>
-                                            {localTerritoryName[form.resolvedTerritory as keyof typeof localTerritoryName] || form.resolvedTerritory}
-                                        </div>
+                        return (
+                            <React.Fragment key={form.id}>
+                                {isFirstNoDept && (
+                                    <div className="col-span-full py-8 flex items-center gap-4">
+                                        <div className="h-px flex-1 bg-indigo-600" />
+                                        <span className="text-[10px] font-mono font-bold text-indigo-600 uppercase tracking-widest px-2">
+                                            Без ведомства
+                                        </span>
+                                        <div className="h-px flex-1 bg-indigo-600" />
                                     </div>
                                 )}
-                            </div>
-                        </div>
-                    ))}
+                                <div
+                                    onClick={() => handleFormCardClick(form)}
+                                    className="bg-white/90 backdrop-blur-sm border border-indigo-200/80 flex flex-col justify-between hover:border-indigo-400 transition-colors duration-200 shadow-sm group cursor-pointer"
+                                >
+                                    <div className="p-4 bg-slate-50/60 border-b border-gray-200/60 min-h-[4.2rem] flex items-center">
+                                        <div className="text-sm font-bold text-gray-600 uppercase tracking-tight leading-snug line-clamp-2" title={form.resolvedDeptName}>
+                                            {form.resolvedDeptName || 'БЕЗ ВЕДОМСТВА'}
+                                        </div>
+                                    </div>
+                                    <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
+                                        <div className="text-xl font-bold text-gray-950 tracking-tight leading-tight group-hover:text-indigo-600 transition-colors line-clamp-3" title={form.name}>
+                                            {form.name}
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-1.5 pt-2">
+                                            <div className="bg-indigo-50/30 border border-indigo-100/70 p-2 text-center">
+                                                <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-0.5">ПОКАЗ.</span>
+                                                <span className="text-base font-bold text-gray-900 tracking-tighter">{form.indicators}</span>
+                                            </div>
+                                            <div className="bg-indigo-50/30 border border-indigo-100/70 p-2 text-center">
+                                                <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-0.5">ОТЧЕТЫ</span>
+                                                <span className="text-base font-bold text-gray-900 tracking-tighter">{form.reports}</span>
+                                            </div>
+                                            <div className="bg-indigo-50/30 border border-indigo-100/70 p-2 text-center flex flex-col justify-center items-center">
+                                                <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-0.5">КЭФ</span>
+                                                <span className="text-base font-bold text-indigo-600 tracking-tighter">{form.coeff}</span>
+                                            </div>
+                                        </div>
+                                        {form.resolvedTerritory && form.resolvedTerritory !== 'all' && (
+                                            <div className="flex justify-end pt-1">
+                                                <div className={territoryBadge[form.resolvedTerritory as keyof typeof territoryBadge] || ''}>
+                                                    {localTerritoryName[form.resolvedTerritory as keyof typeof localTerritoryName] || form.resolvedTerritory}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </React.Fragment>
+                        );
+                    })}
                 </div>
 
                 {forms.data.length === 0 && (
@@ -177,23 +192,12 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                     <div className="bg-white border border-indigo-200/50 p-4 flex justify-center items-center shadow-sm">
                         <div className="flex gap-1 bg-white border border-gray-300 p-1">
                             {forms.links.map((link, k) => {
-                                if (link.url === null) {
-                                    return (
-                                        <div
-                                            key={`pag-disabled-${k}`}
-                                            className="px-3 py-1.5 text-[11px] font-mono font-bold text-gray-300 border border-transparent select-none"
-                                            dangerouslySetInnerHTML={{ __html: link.label }}
-                                        />
-                                    );
-                                }
+                                if (link.url === null) return <div key={k} className="px-3 py-1.5 text-[11px] font-mono font-bold text-gray-300 border border-transparent select-none" dangerouslySetInnerHTML={{ __html: link.label }} />;
                                 return (
                                     <button
-                                        key={`pag-link-${k}`}
+                                        key={k}
                                         onClick={() => router.get(link.url!, {}, { preserveState: true })}
-                                        className={`px-3 py-1.5 text-[11px] font-mono font-bold transition-all duration-150 cursor-pointer ${link.active
-                                            ? 'bg-indigo-600 text-white border border-indigo-600'
-                                            : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-                                            }`}
+                                        className={`px-3 py-1.5 text-[11px] font-mono font-bold transition-all duration-150 cursor-pointer ${link.active ? 'bg-indigo-600 text-white border border-indigo-600' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                     />
                                 );
@@ -202,24 +206,8 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                     </div>
                 )}
 
-                <AddFormModal
-                    isConsolidated={true}
-                    isOpen={isAddModalOpen}
-                    onClose={() => setIsAddModalOpen(false)}
-                    departments={departments}
-                    versionId={versionId}
-                />
-
-                <EditFormModal
-                    isOpen={isEditModalOpen}
-                    onClose={() => {
-                        setIsEditModalOpen(false);
-                        setSelectedForm(null);
-                    }}
-                    departments={departments}
-                    versionId={versionId}
-                    form={selectedForm}
-                />
+                <AddFormModal isConsolidated={true} isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} departments={departments} versionId={versionId} />
+                <EditFormModal isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedForm(null); }} departments={departments} versionId={versionId} form={selectedForm} />
             </div>
         </AuthenticatedLayout>
     );
