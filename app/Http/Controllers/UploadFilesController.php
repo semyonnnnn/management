@@ -14,9 +14,9 @@ class UploadFilesController extends Controller
         return Inertia::render('UploadFiles/Index');
     }
 
-    public function store(Request $request)
+    public function store(Request $r)
     {
-        (new UploadFilesService)->store($request);
+        (new UploadFilesService)->store($r);
         return redirect('/old_forms');
     }
 

@@ -17,7 +17,10 @@ class UploadFilesService
         $this->validateSheetNames($request);
 
         $res = $this->python($request);
+
+        dd($res);
         $clean = $this->validatePythonResponse($res);
+
 
         $this->storeDataRaw($clean, $request->input('version'));
 
