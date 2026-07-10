@@ -132,13 +132,14 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                         const prevHasDepartments = index > 0 && sortedForms[index - 1].department_ids && sortedForms[index - 1].department_ids.length > 0;
                         const isFirstNoDept = !hasDepartments && (index === 0 || prevHasDepartments);
 
+                        // console.log("form", form);
                         return (
                             <React.Fragment key={form.id}>
                                 {isFirstNoDept && (
                                     <div className="col-span-full py-8 flex items-center gap-4">
                                         <div className="h-px flex-1 bg-indigo-600" />
                                         <span className="text-[10px] font-mono font-bold text-indigo-600 uppercase tracking-widest px-2">
-                                            Без ведомства
+                                            Без отдела
                                         </span>
                                         <div className="h-px flex-1 bg-indigo-600" />
                                     </div>
@@ -147,11 +148,11 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                                     onClick={() => handleFormCardClick(form)}
                                     className="bg-white/90 backdrop-blur-sm border border-indigo-200/80 flex flex-col justify-between hover:border-indigo-400 transition-colors duration-200 shadow-sm group cursor-pointer"
                                 >
-                                    <div className="p-4 bg-slate-50/60 border-b border-gray-200/60 min-h-[4.2rem] flex items-center">
+                                    {/* <div className="p-4 bg-slate-50/60 border-b border-gray-200/60 min-h-[4.2rem] flex items-center">
                                         <div className="text-sm font-bold text-gray-600 uppercase tracking-tight leading-snug line-clamp-2" title={form.resolvedDeptName}>
                                             {form.resolvedDeptName || 'БЕЗ ВЕДОМСТВА'}
                                         </div>
-                                    </div>
+                                    </div> */}
                                     <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
                                         <div className="text-xl font-bold text-gray-950 tracking-tight leading-tight group-hover:text-indigo-600 transition-colors line-clamp-3" title={form.name}>
                                             {form.name}
@@ -169,6 +170,24 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                                                 <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-0.5">КЭФ</span>
                                                 <span className="text-base font-bold text-indigo-600 tracking-tighter">{form.coeff}</span>
                                             </div>
+                                        </div>
+
+                                        <div
+                                            className="text-sm font-bold text-gray-600 uppercase tracking-tight leading-snug line-clamp-2"
+                                            title={
+                                                form.department_ids
+                                                    ?.map((id: any) => departments.find((d: any) => String(d.id) === String(id))?.name)
+                                                    .filter(Boolean)
+                                                    .join(', ') || 'БЕЗ ВЕДОМСТВА'
+                                            }
+                                        >
+                                            {form.department_ids && form.department_ids.length > 0
+                                                ? form.department_ids
+                                                    .map((id: any) => departments.find((d: any) => String(d.id) === String(id))?.name)
+                                                    .filter(Boolean)
+                                                    .join(', ')
+                                                : 'БЕЗ ВЕДОМСТВА'
+                                            }
                                         </div>
                                         {form.resolvedTerritory && form.resolvedTerritory !== 'all' && (
                                             <div className="flex justify-end pt-1">

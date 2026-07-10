@@ -94,9 +94,14 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
                 department_id: String(d.department_id || d.id),
                 okveds: Array.isArray(d.okveds) ? d.okveds : ['10:20:30', '45:11:12']
             }))
-            : (form.department_id
-                ? [{ department_id: String(form.department_id), okveds: ['10:20:30'] }]
-                : []);
+            : Array.isArray(form.department_ids) // <-- Added check for multiple IDs
+                ? form.department_ids.map((id: any) => ({
+                    department_id: String(id),
+                    okveds: ['10:20:30']
+                }))
+                : (form.department_id
+                    ? [{ department_id: String(form.department_id), okveds: ['10:20:30'] }]
+                    : []);
 
         setData({
             id: form.id,
