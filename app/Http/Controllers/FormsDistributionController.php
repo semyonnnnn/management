@@ -12,7 +12,7 @@ use App\Http\Requests\FormDistributionRequest;
 use App\Models\Form;
 use App\Models\Version;
 
-class FormsController extends Controller
+class FormsDistributionController extends Controller
 {
     public function index(Request $request, FormService $formService): Response
     {

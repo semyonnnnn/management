@@ -19,7 +19,7 @@ class OldDepartmentsController extends Controller
 
     public function index()
     {
-        $currentVersion = Version::query()->where('isCurrent', true)->firstOrFail();
+        $currentVersion = Version::query()->where('isCurrent', true)->first();
 
         // Handle case where no version exists
         if (!$currentVersion) {
@@ -73,11 +73,11 @@ class OldDepartmentsController extends Controller
         // 4. Build response
         $departmentsWithForms = $departments->map(function ($dep) use ($formsGroupedByName) {
             return [
-                'id' => (string)$dep->id,
+                'id' => (string) $dep->id,
                 'name' => $dep->name,
                 'territory' => $dep->territory,
-                'staff' => (int)$dep->staff,
-                'workload' => (int)$dep->workload,
+                'staff' => (int) $dep->staff,
+                'workload' => (int) $dep->workload,
                 'forms' => $formsGroupedByName->get($dep->name, collect([]))->values(),
                 'state' => $dep->state
             ];

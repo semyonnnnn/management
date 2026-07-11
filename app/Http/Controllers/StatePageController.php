@@ -12,7 +12,8 @@ class StatePageController extends Controller
 {
     public function index()
     {
-        $currentVersionId = Version::query()->where('isCurrent', true)->firstOrFail()->id;
+        $currentVersion = Version::query()->where('isCurrent', true)->first();
+        $currentVersionId = $currentVersion?->id;
         $state = Department::query()->where('version_id', $currentVersionId)
             ->orderBy('id', 'asc')
             ->get(['id', 'territory', 'name', 'state', 'code']);

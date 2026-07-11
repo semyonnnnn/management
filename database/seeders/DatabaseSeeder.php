@@ -5,9 +5,11 @@ namespace Database\Seeders;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Illuminate\Database\Seeder;
+/////////////////////////
 use App\Models\User;
 use App\Enum\RolesEnum;
 use App\Enum\PermissionsEnum;
+use App\Models\Version;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,8 +18,6 @@ class DatabaseSeeder extends Seeder
         // Create or get roles
         $rootRole = Role::firstOrCreate(['name' => RolesEnum::Root->value]);
         $adminRole = Role::firstOrCreate(['name' => RolesEnum::Admin->value]);
-        $senseiRole = Role::firstOrCreate(['name' => RolesEnum::Sensei->value]);
-        $gakuseiRole = Role::firstOrCreate(['name' => RolesEnum::Gakusei->value]);
 
         // Create or get permissions
         $manageAdminsPermission = Permission::firstOrCreate([
@@ -41,15 +41,9 @@ class DatabaseSeeder extends Seeder
         $adminRole->syncPermissions([
             $manageUsersPermission,
         ]);
-        $senseiRole->syncPermissions([
-            $assignTasksPermission
-        ]);
-        $gakuseiRole->syncPermissions([
-            $completeTasksPermission
-        ]);
 
         // Create users only if they don't exist
-        if (!User::where('email', 'boss@boss.com')->exists()) {
+        if (!User::query()->where('email', 'boss@boss.com')->exists()) {
             User::factory()->create([
                 'name' => 'VS',
                 'email' => 'boss@boss.com',
@@ -57,12 +51,17 @@ class DatabaseSeeder extends Seeder
             ])->assignRole(RolesEnum::Root);
         }
 
-        if (!User::where('email', 'root@root.com')->exists()) {
+        if (!User::query()->where('email', 'root@root.com')->exists()) {
             User::factory()->create([
                 'name' => 'root',
                 'email' => 'root@root.com',
                 'password' => 'root',
             ])->assignRole(RolesEnum::Root);
         }
+
+        Version::firstOrCreate(
+            ['name' => 'start'],
+            ['isCurrent' => true]
+        );
     }
 }

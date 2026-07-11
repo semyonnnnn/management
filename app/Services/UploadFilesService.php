@@ -18,7 +18,7 @@ class UploadFilesService
 
         $res = $this->python($request);
 
-        dd($res);
+        // dd($res);
         $clean = $this->validatePythonResponse($res);
 
 
