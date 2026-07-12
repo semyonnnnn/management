@@ -216,7 +216,6 @@ export interface Department {
 interface AddFormModalProps {
     isOpen: boolean;
     onClose: () => void;
-    departments: Department[];
     versionId: number;
 }
 interface ExtendedPageProps extends PageProps {
@@ -232,11 +231,4 @@ export interface Department {
     id: string;
     name: string;
     territory: string;
-}
-
-export interface AddFormModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    departments: Department[];
-    versionId: number;
 }

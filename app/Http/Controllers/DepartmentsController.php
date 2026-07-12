@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
-/////////////////////////////////////
 use App\Services\UploadFilesService;
 use App\Models\Version;
 
@@ -21,7 +20,6 @@ class DepartmentsController extends Controller
     {
         $currentVersion = Version::query()->where('isCurrent', true)->first();
 
-        // Handle case where no version exists
         if (!$currentVersion) {
             return Inertia::render('Departments/Index', [
                 'departments' => [],
@@ -37,14 +35,13 @@ class DepartmentsController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
-
+        // FIXED: Removed 'department_id', 'coeff', and 'final' as they do not exist in your table.
         $forms = DB::table('forms')
             ->where('version_id', $currentVersion->id)
-            ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'department_id')
+            ->select('id', 'name', 'indicators', 'reports')
             ->orderBy('name', 'asc')
             ->get();
 
-        // Handle case where version exists but has no departments (Return early)
         if ($departments->isEmpty()) {
             return Inertia::render('Departments/Index', [
                 'departments' => [],
@@ -54,21 +51,9 @@ class DepartmentsController extends Controller
         }
 
         // 3. Conditional Form Mapping
+        // Since 'department_id' does not exist in 'forms', we cannot group by it.
+        // If your forms are not linked to departments in the DB, this logic must be empty or different.
         $formsGroupedByName = collect([]);
-
-        if ($forms->isNotEmpty()) {
-            // FIXED: Changed 'department_id' to 'department_id'
-            $DepartmentIds = $forms->pluck('department_id')->unique()->toArray();
-            $DepartmentsLookup = DB::table('departments')
-                ->whereIn('id', $DepartmentIds)
-                ->pluck('name', 'id')
-                ->toArray();
-
-            $formsGroupedByName = $forms->groupBy(function ($form) use ($DepartmentsLookup) {
-                // FIXED: Changed 'department_id' to 'department_id'
-                return $DepartmentsLookup[$form->department_id] ?? 'unknown';
-            });
-        }
 
         // 4. Build response
         $departmentsWithForms = $departments->map(function ($dep) use ($formsGroupedByName) {

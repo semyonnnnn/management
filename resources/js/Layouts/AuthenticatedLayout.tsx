@@ -18,18 +18,18 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
         if (routePath === 'main.index' && (url.endsWith('/main') || url.includes('/main/'))) {
             return true;
         }
-        if (routePath === 'old_main.index' && (url === '/' || url === '/old_main')) {
-            return true;
-        }
-        if (routePath === 'uploadFiles.get' && url.includes('/upload')) {
-            return true;
-        }
-        if (routePath === 'versions.get' && url.includes('/versions')) {
-            return true;
-        }
-        if (routePath === 'old_forms' && url.includes('/old_forms')) {
-            return true;
-        }
+        // if (routePath === 'old_main.index' && (url === '/' || url === '/old_main')) {
+        //     return true;
+        // }
+        // if (routePath === 'uploadFiles.get' && url.includes('/upload')) {
+        //     return true;
+        // }
+        // if (routePath === 'versions.get' && url.includes('/versions')) {
+        //     return true;
+        // }
+        // if (routePath === 'old_forms' && url.includes('/old_forms')) {
+        //     return true;
+        // }
         if (routePath === 'forms_distribution.index' && url.includes('/forms_distribution')) {
             return true;
         }
@@ -60,10 +60,10 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                         {/* Navigation Links */}
                         <div className='flex gap-5'>
                             <MenuItem _route="main.index" isActive={isActive} name="главная" />
-                            <MenuItem _route="old_main.index" isActive={isActive} name="старая главная" />
-                            <MenuItem _route="uploadFiles.get" isActive={isActive} name="загрузить" />
-                            <MenuItem _route="versions.get" isActive={isActive} name="версии" />
-                            <MenuItem _route="old_forms" isActive={isActive} name="старые формы" />
+                            {/* <MenuItem _route="old_main.index" isActive={isActive} name="старая главная" /> */}
+                            {/* <MenuItem _route="uploadFiles.get" isActive={isActive} name="загрузить" /> */}
+                            {/* <MenuItem _route="versions.get" isActive={isActive} name="версии" /> */}
+                            {/* <MenuItem _route="old_forms" isActive={isActive} name="старые формы" /> */}
                             <MenuItem _route="forms_distribution.index" isActive={isActive} name="распределение форм" />
                             <MenuItem _route="forms.index" isActive={isActive} name="формы" />
                             <MenuItem _route="state.index" isActive={isActive} name="штатное" />

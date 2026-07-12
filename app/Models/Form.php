@@ -6,10 +6,36 @@ use Illuminate\Database\Eloquent\Model;
 
 class Form extends Model
 {
-    protected $fillable = ['name', 'indicators', 'reports', 'coeff', 'final', 'version_id'];
+    protected $fillable = [
+        'name',
+        'total',
+        'indicators',
+        'reports',
+        'k1',
+        'k2',
+        'k3',
+        'k4',
+        'k5',
+        'k6',
+        'is_consolidated',
+        'version_id',
+    ];
+
+    protected $guarded = [];
+    // Внутри модели Form.php
+// App\Models\Form.php
 
     public function departments()
     {
-        return $this->belongsToMany(Department::class, 'department_form');
+        return $this->belongsToMany(Department::class, 'department_form')
+            ->withPivot('version_id')
+            ->withTimestamps();
+    }
+
+    public function okveds()
+    {
+        return $this->belongsToMany(Okved::class, 'form_okved')
+            ->withPivot('version_id')
+            ->withTimestamps();
     }
 }

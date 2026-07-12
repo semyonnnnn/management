@@ -5,6 +5,7 @@ import Modal from '@/components/custom/Modal';
 interface DeleteConfirmationModalProps {
     show: boolean;
     onClose: () => void;
+    onConfirm: () => void;
     item: { id: string | number; name: string } | null;
 }
 

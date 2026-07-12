@@ -24,7 +24,6 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
         version_id: versionId
     });
 
-
     const [drafts, setDrafts] = useState<
         Record<
             string,
@@ -46,17 +45,7 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
     const [selectedDeptId, setSelectedDeptId] = useState<string>('');
     const [activeDeptIndex, setActiveDeptIndex] = useState<number | null>(null);
 
-    const [ov1, setOv1] = useState('');
-    const [ov2, setOv2] = useState('');
-    const [ov3, setOv3] = useState('');
-
-    const [editingOkvedIdx, setEditingOkvedIdx] = useState<number | null>(null);
-    const [editOv1, setEditOv1] = useState('');
-    const [editOv2, setEditOv2] = useState('');
-    const [editOv3, setEditOv3] = useState('');
-
     const [hasUnsavedDepartment, setHasUnsavedDepartment] = useState(false);
-
     const [addedDepartmentIndex, setAddedDepartmentIndex] = useState<number | null>(null);
 
     const [isOkvedConfirmOpen, setIsOkvedConfirmOpen] = useState(false);
@@ -92,15 +81,15 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
         const mappedDepartments = Array.isArray(form.departments)
             ? form.departments.map((d: any) => ({
                 department_id: String(d.department_id || d.id),
-                okveds: Array.isArray(d.okveds) ? d.okveds : ['10:20:30', '45:11:12']
+                okveds: Array.isArray(d.okveds) ? d.okveds : []
             }))
-            : Array.isArray(form.department_ids) // <-- Added check for multiple IDs
+            : Array.isArray(form.department_ids)
                 ? form.department_ids.map((id: any) => ({
                     department_id: String(id),
-                    okveds: ['10:20:30']
+                    okveds: []
                 }))
                 : (form.department_id
-                    ? [{ department_id: String(form.department_id), okveds: ['10:20:30'] }]
+                    ? [{ department_id: String(form.department_id), okveds: [] }]
                     : []);
 
         setData({
@@ -114,7 +103,6 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
         });
 
         setActiveDeptIndex(null);
-        setEditingOkvedIdx(null);
         setAddedDepartmentIndex(null);
         setHasUnsavedDepartment(false);
     }, [form?.id]);
@@ -138,6 +126,8 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
 
     const handleAddDepartment = () => {
         if (!selectedDeptId) return;
+
+        // Prevent adding duplicates
         if (data.departments.some(d => d.department_id === selectedDeptId)) {
             setSelectedDeptId('');
             return;
@@ -145,68 +135,25 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
 
         const updatedDepts = [...data.departments, { department_id: selectedDeptId, okveds: [] }];
 
+        // Update local state ONLY (no onSave call here)
         updateFormData('departments', updatedDepts);
         setAddedDepartmentIndex(updatedDepts.length - 1);
         setHasUnsavedDepartment(true);
         setSelectedDeptId('');
+
+        // Immediately highlight the new department so the OKVED panel opens
         setActiveDeptIndex(updatedDepts.length - 1);
     };
 
     const handleRemoveDepartment = (indexToRemove: number) => {
         const updatedDepts = data.departments.filter((_, idx) => idx !== indexToRemove);
         updateFormData('departments', updatedDepts);
+
         if (activeDeptIndex === indexToRemove) {
             setActiveDeptIndex(null);
-            setEditingOkvedIdx(null);
         } else if (activeDeptIndex !== null && activeDeptIndex > indexToRemove) {
             setActiveDeptIndex(activeDeptIndex - 1);
         }
-    };
-
-    const handleAddOkved = () => {
-        if (!ov1 || !ov2 || !ov3 || activeDeptIndex === null) return;
-        const combined = `${ov1.trim()}:${ov2.trim()}:${ov3.trim()}`;
-
-        const updatedDepts = [...data.departments];
-        if (!updatedDepts[activeDeptIndex].okveds.includes(combined)) {
-            updatedDepts[activeDeptIndex].okveds = [...updatedDepts[activeDeptIndex].okveds, combined];
-            updateFormData('departments', updatedDepts);
-        }
-        setOv1('');
-        setOv2('');
-        setOv3('');
-    };
-
-    const startEditingOkved = (idx: number, currentVal: string) => {
-        const segments = currentVal.split(':');
-        setEditOv1(segments[0] || '');
-        setEditOv2(segments[1] || '');
-        setEditOv3(segments[2] || '');
-        setEditingOkvedIdx(idx);
-    };
-
-    const handleSaveOkvedEdit = (okvedIdx: number) => {
-        if (!editOv1 || !editOv2 || !editOv3 || activeDeptIndex === null) return;
-        const combined = `${editOv1.trim()}:${editOv2.trim()}:${editOv3.trim()}`;
-
-        const updatedDepts = [...data.departments];
-        updatedDepts[activeDeptIndex].okveds[okvedIdx] = combined;
-        updateFormData('departments', updatedDepts);
-        setEditingOkvedIdx(null);
-    };
-
-    const handleRemoveOkvedRequest = (okvedIdx: number) => {
-        setOkvedToDelete(okvedIdx);
-        setIsOkvedConfirmOpen(true);
-    };
-
-    const handleConfirmRemoveOkved = () => {
-        if (activeDeptIndex === null || okvedToDelete === null) return;
-        const updated = [...data.departments];
-        updated[activeDeptIndex].okveds = updated[activeDeptIndex].okveds.filter((_, i) => i !== okvedToDelete);
-        updateFormData('departments', updated);
-        if (editingOkvedIdx === okvedToDelete) setEditingOkvedIdx(null);
-        setOkvedToDelete(null);
     };
 
     const handleCancel = () => {
@@ -218,17 +165,18 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
         onClose();
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
 
+        // This is the ONLY place that actually sends the request to Laravel
         put('/forms_distribution', {
+            preserveScroll: true,
             onSuccess: () => {
                 setAddedDepartmentIndex(null);
                 setHasUnsavedDepartment(false);
                 reset();
                 setActiveDeptIndex(null);
-                setEditingOkvedIdx(null);
-                onClose();
+                onClose(); // Close modal only upon successful save
             },
         });
     };
@@ -237,22 +185,16 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
 
     const handleOutsideClick = (e: React.MouseEvent) => {
         if (e.target === e.currentTarget) {
-            if (isOkvedConfirmOpen) return; // Ignore if confirmation is open
-            if (isDeptConfirmOpen) return;
+            if (isOkvedConfirmOpen || isDeptConfirmOpen) return;
             onClose();
         }
     };
-
-    const currentDepartmentName = activeDeptIndex !== null
-        ? departments.find(dept => dept.id === data.departments[activeDeptIndex]?.department_id)?.name || 'Выбрано'
-        : '';
 
     return (
         <>
             <Modal show={isOpen}
                 onClose={() => {
-                    if (isOkvedConfirmOpen) return;
-                    if (isDeptConfirmOpen) return;
+                    if (isOkvedConfirmOpen || isDeptConfirmOpen) return;
                     onClose();
                 }}
                 maxWidth="fit">
@@ -279,6 +221,7 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
                         onClick={handleOutsideClick}
                         className="flex flex-row items-start w-fit cursor-default"
                     >
+                        {/* Main Settings Panel */}
                         <div className="w-95 border border-gray-300 p-5 bg-gray-50 flex flex-col shadow-sm shrink-0 mr-5">
                             <div className="space-y-5">
                                 <h3 className="text-sm font-bold uppercase tracking-tight text-indigo-900 border-b border-indigo-200 pb-3">
@@ -340,11 +283,12 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
                                     disabled={processing}
                                     className="px-3 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold uppercase cursor-pointer disabled:opacity-50 shadow-sm"
                                 >
-                                    Сохранить
+                                    {processing ? '...' : 'Сохранить'}
                                 </button>
                             </div>
                         </div>
 
+                        {/* Departments Panel */}
                         <DepartmentsPartial
                             onConfirmRemove={handleRequestDelete}
                             departments={departments}
@@ -356,48 +300,28 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
                             onRemoveDepartment={handleRemoveDepartment}
                             onSelectActiveDept={setActiveDeptIndex}
                             isPanel3Open={isPanel3Open}
-                            onSave={() =>
-                                handleSubmit({
-                                    preventDefault: () => { }
-                                } as React.FormEvent)
-                            }
                             onReset={handleCancel}
                             showActions={hasUnsavedDepartment}
+                            onSave={() => handleSubmit()} // <-- Add this back right here
                         />
 
-                        <OkvedPartial
+                        {/* OKVEDs Panel */}
+                        {/* <OkvedPartial
                             isOpen={isPanel3Open}
-                            departmentName={currentDepartmentName}
-                            okveds={isPanel3Open ? data.departments[activeDeptIndex!].okveds : []}
                             activeDeptIndex={activeDeptIndex}
-                            editingOkvedIdx={editingOkvedIdx}
-                            ov1={ov1}
-                            ov2={ov2}
-                            ov3={ov3}
-                            editOv1={editOv1}
-                            editOv2={editOv2}
-                            editOv3={editOv3}
-                            onOv1Change={setOv1}
-                            onOv2Change={setOv2}
-                            onOv3Change={setOv3}
-                            onEditOv1Change={setEditOv1}
-                            onEditOv2Change={setEditOv2}
-                            onEditOv3Change={setEditOv3}
-                            onAddOkved={handleAddOkved}
-                            onStartEditing={startEditingOkved}
-                            onSaveEdit={handleSaveOkvedEdit}
-                            onCancelEdit={() => setEditingOkvedIdx(null)}
-                            onRemoveOkved={handleRemoveOkvedRequest}
-                            onClearBuilder={() => { setOv1(''); setOv2(''); setOv3(''); }}
-                        />
+                            form={{ data, setData, processing, put }}
+                            okveds={isPanel3Open && activeDeptIndex !== null ? data.departments[activeDeptIndex].okveds : []}
+                            onClose={onClose}
+                        /> */}
                     </form>
                 </div>
             </Modal>
 
+            {/* Confirmations */}
             <Confirmation
                 show={isOkvedConfirmOpen}
                 onClose={() => setIsOkvedConfirmOpen(false)}
-                onConfirm={handleConfirmRemoveOkved}
+                onConfirm={() => { }}
                 message="Вы уверены, что хотите удалить этот код ОКВЭД?"
             />
 

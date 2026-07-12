@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import '@fontsource/jetbrains-mono/700.css';
 import '@fontsource/jetbrains-mono/400.css';
-import { AddFormModal } from './AddFormDistributionModal';
 import { EditFormModal } from './EditFormDistributionModal';
 import { ExtendedPageProps } from '@/types';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -10,13 +9,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 export default function Index({ departments, forms, versionId, filters }: ExtendedPageProps) {
     const [selectedTerritory, setSelectedTerritory] = useState<string>(filters.territory || 'all');
     const [searchQuery, setSearchQuery] = useState<string>(filters.search || '');
-    const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [selectedForm, setSelectedForm] = useState<any | null>(null);
 
     const sortedForms = [...forms.data].sort((a, b) => {
-        const aHas = (a.department_ids && a.department_ids.length > 0);
-        const bHas = (b.department_ids && b.department_ids.length > 0);
+        const aHas = (a.departments && a.departments.length > 0);
+        const bHas = (b.departments && b.departments.length > 0);
         if (aHas === bHas) return 0;
         return aHas ? -1 : 1;
     });
@@ -69,27 +67,6 @@ export default function Index({ departments, forms, versionId, filters }: Extend
         <AuthenticatedLayout>
             <div className="space-y-6" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                 <div className="bg-white border border-indigo-200/50 p-6 flex flex-col xl:flex-row gap-4 justify-between items-stretch xl:items-center shadow-sm">
-                    <div className="flex items-stretch gap-4">
-                        <div className="border-l-6 border-indigo-600 pl-4 flex items-center">
-                            <div className="text-2xl font-bold text-gray-900 uppercase tracking-tight flex items-center gap-2">
-                                Формы
-                                <span className="text-indigo-600">[{forms.total}]</span>
-                                {filters.search && (
-                                    <span className="text-[11px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200/70 px-2 py-0.5 tracking-wider animate-pulse">
-                                        [ВашПоиск]
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                        <button
-                            onClick={() => setIsAddModalOpen(true)}
-                            className="px-4 py-1 bg-white/60 backdrop-blur-md hover:bg-white/90 border border-indigo-200 text-indigo-600 hover:text-indigo-700 hover:border-indigo-400 font-mono text-md font-bold uppercase tracking-wider transition-all duration-150 cursor-pointer flex items-center gap-1.5 shadow-sm/50"
-                        >
-                            <span className="text-2xl font-normal text-indigo-500/80">+</span>
-                            Добавить форму
-                        </button>
-                    </div>
-
                     <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
                         <div className="relative flex-1 md:w-80">
                             <input
@@ -128,19 +105,16 @@ export default function Index({ departments, forms, versionId, filters }: Extend
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {sortedForms.map((form, index) => {
-                        const hasDepartments = form.department_ids && form.department_ids.length > 0;
-                        const prevHasDepartments = index > 0 && sortedForms[index - 1].department_ids && sortedForms[index - 1].department_ids.length > 0;
+                        const hasDepartments = form.departments && form.departments.length > 0;
+                        const prevHasDepartments = index > 0 && sortedForms[index - 1].departments && sortedForms[index - 1].departments.length > 0;
                         const isFirstNoDept = !hasDepartments && (index === 0 || prevHasDepartments);
 
-                        // console.log("form", form);
                         return (
                             <React.Fragment key={form.id}>
                                 {isFirstNoDept && (
                                     <div className="col-span-full py-8 flex items-center gap-4">
                                         <div className="h-px flex-1 bg-indigo-600" />
-                                        <span className="text-[10px] font-mono font-bold text-indigo-600 uppercase tracking-widest px-2">
-                                            Без отдела
-                                        </span>
+                                        <span className="text-[10px] font-mono font-bold text-indigo-600 uppercase tracking-widest px-2">Без отдела</span>
                                         <div className="h-px flex-1 bg-indigo-600" />
                                     </div>
                                 )}
@@ -148,11 +122,6 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                                     onClick={() => handleFormCardClick(form)}
                                     className="bg-white/90 backdrop-blur-sm border border-indigo-200/80 flex flex-col justify-between hover:border-indigo-400 transition-colors duration-200 shadow-sm group cursor-pointer"
                                 >
-                                    {/* <div className="p-4 bg-slate-50/60 border-b border-gray-200/60 min-h-[4.2rem] flex items-center">
-                                        <div className="text-sm font-bold text-gray-600 uppercase tracking-tight leading-snug line-clamp-2" title={form.resolvedDeptName}>
-                                            {form.resolvedDeptName || 'БЕЗ ВЕДОМСТВА'}
-                                        </div>
-                                    </div> */}
                                     <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
                                         <div className="text-xl font-bold text-gray-950 tracking-tight leading-tight group-hover:text-indigo-600 transition-colors line-clamp-3" title={form.name}>
                                             {form.name}
@@ -174,21 +143,11 @@ export default function Index({ departments, forms, versionId, filters }: Extend
 
                                         <div
                                             className="text-sm font-bold text-gray-600 uppercase tracking-tight leading-snug line-clamp-2"
-                                            title={
-                                                form.department_ids
-                                                    ?.map((id: any) => departments.find((d: any) => String(d.id) === String(id))?.name)
-                                                    .filter(Boolean)
-                                                    .join(', ') || 'БЕЗ ВЕДОМСТВА'
-                                            }
+                                            title={form.departments?.length > 0 ? form.departments.map((d: any) => d.name).join(', ') : 'БЕЗ ВЕДОМСТВА'}
                                         >
-                                            {form.department_ids && form.department_ids.length > 0
-                                                ? form.department_ids
-                                                    .map((id: any) => departments.find((d: any) => String(d.id) === String(id))?.name)
-                                                    .filter(Boolean)
-                                                    .join(', ')
-                                                : 'БЕЗ ВЕДОМСТВА'
-                                            }
+                                            {form.departments?.length > 0 ? form.departments.map((d: any) => d.name).join(', ') : 'БЕЗ ВЕДОМСТВА'}
                                         </div>
+
                                         {form.resolvedTerritory && form.resolvedTerritory !== 'all' && (
                                             <div className="flex justify-end pt-1">
                                                 <div className={territoryBadge[form.resolvedTerritory as keyof typeof territoryBadge] || ''}>
@@ -203,31 +162,6 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                     })}
                 </div>
 
-                {forms.data.length === 0 && (
-                    <div className="p-12 text-center text-sm font-bold text-gray-400 border border-dashed border-indigo-200 bg-white/50 uppercase tracking-widest font-mono">
-                        Данные по запросу отсутствуют
-                    </div>
-                )}
-
-                {forms.links && forms.links.length > 3 && (
-                    <div className="bg-white border border-indigo-200/50 p-4 flex justify-center items-center shadow-sm">
-                        <div className="flex gap-1 bg-white border border-gray-300 p-1">
-                            {forms.links.map((link, k) => {
-                                if (link.url === null) return <div key={k} className="px-3 py-1.5 text-[11px] font-mono font-bold text-gray-300 border border-transparent select-none" dangerouslySetInnerHTML={{ __html: link.label }} />;
-                                return (
-                                    <button
-                                        key={k}
-                                        onClick={() => router.get(link.url!, {}, { preserveState: true })}
-                                        className={`px-3 py-1.5 text-[11px] font-mono font-bold transition-all duration-150 cursor-pointer ${link.active ? 'bg-indigo-600 text-white border border-indigo-600' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                    />
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-
-                <AddFormModal isConsolidated={true} isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} departments={departments} versionId={versionId} />
                 <EditFormModal isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedForm(null); }} departments={departments} versionId={versionId} form={selectedForm} />
             </div>
         </AuthenticatedLayout>

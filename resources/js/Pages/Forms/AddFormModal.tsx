@@ -85,7 +85,7 @@ export const AddFormModal = ({ isOpen, onClose, versionId, isConsolidated }: Ext
                                     onChange={e => setData('is_consolidated', e.target.checked)}
                                     className="w-4 h-4 border-gray-300 text-indigo-600 focus:ring-0 focus:outline-none cursor-pointer"
                                 />
-                                <span className="text-gray-700 text-[10px] uppercase tracking-wider">Консолидированная (Consolidated)</span>
+                                <span className="text-gray-700 text-[10px] uppercase tracking-wider">Сводная</span>
                             </label>
                             {errors.is_consolidated && <div className="text-[10px] text-red-600 mt-1 font-bold">{errors.is_consolidated}</div>}
                         </div>

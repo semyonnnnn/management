@@ -60,31 +60,40 @@ class FormsController extends Controller
 
     public function update(FormRequest $r)
     {
-        $data = $r->validated();
-        $form = Form::findOrFail($r->input('id'));
+        // 1. Get the validated nested data structure
+        $validated = $r->validated();
 
-        DB::transaction(function () use ($form, $data) {
-            $form->update([
-                'name' => $data['name'],
-                'total' => $data['total'] ?? 0,
-                'indicators' => $data['indicators'] ?? 0,
-                'reports' => $data['reports'],
-                'k1' => $data['k1'] ?? 1.0,
-                'k2' => $data['k2'] ?? 1.0,
-                'k3' => $data['k3'] ?? 1.0,
-                'k4' => $data['k4'] ?? 1.0,
-                'k5' => $data['k5'] ?? 1.0,
-                'k6' => $data['k6'] ?? 1.0,
-                'is_consolidated' => $data['is_consolidated'] ?? false,
-                'version_id' => $data['version_id'],
-            ]);
+        // 2. Wrap everything in a single transaction to update all forms together safely
+        DB::transaction(function () use ($validated) {
+            // Loop through each individual form array in the request
+            foreach ($validated['forms'] as $formData) {
 
-            $departmentIds = collect($data['departments'] ?? [])
-                ->pluck('department_id')
-                ->filter()
-                ->toArray();
+                // Find the specific form using the ID inside the current loop element
+                $form = Form::findOrFail($formData['id']);
 
-            $form->departments()->sync($departmentIds);
+                $form->update([
+                    'name' => $formData['name'],
+                    'total' => $formData['total'] ?? 0,
+                    'indicators' => $formData['indicators'] ?? 0,
+                    'reports' => $formData['reports'],
+                    'k1' => $formData['k1'],
+                    'k2' => $formData['k2'],
+                    'k3' => $formData['k3'],
+                    'k4' => $formData['k4'],
+                    'k5' => $formData['k5'],
+                    'k6' => $formData['k6'],
+                    'is_consolidated' => $formData['is_consolidated'] ?? false,
+                    'version_id' => $formData['version_id'] ?? $form->version_id,
+                ]);
+
+                // Clean up and sync department relationships for this specific form
+                $departmentIds = collect($formData['departments'] ?? [])
+                    ->pluck('department_id')
+                    ->filter()
+                    ->toArray();
+
+                $form->departments()->sync($departmentIds);
+            }
         });
 
         return redirect()->back();

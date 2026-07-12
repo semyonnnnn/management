@@ -8,19 +8,23 @@ use App\Models\Department;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
-class FormService
+class FormDistributionService
 {
     public function index(string $search, string $territory): array
     {
+        $departments = Department::all();
         $currentVersion = Version::query()->where('isCurrent', true)->first();
 
         if (!$currentVersion) {
             return [
                 'forms' => new LengthAwarePaginator([], 0, 12),
+                'departments' => $departments,
             ];
         }
 
-        $formsQuery = Form::query()->where('version_id', $currentVersion->id);
+        $formsQuery = Form::query()
+            ->with(['departments', 'okveds'])
+            ->where('version_id', $currentVersion->id);
 
         if ($territory !== 'all') {
             $formsQuery->whereHas('departments', function ($query) use ($territory) {
@@ -42,23 +46,15 @@ class FormService
         $forms->through(fn($form) => [
             'id' => $form->id,
             'name' => $form->name,
-            'total' => (int) $form->total,
             'indicators' => (int) $form->indicators,
-            'k1' => (float) $form->k1,
-            'k2' => (float) $form->k2,
-            'k3' => (float) $form->k3,
-            'k4' => (float) $form->k4,
-            'k5' => (float) $form->k5,
-            'k6' => (float) $form->k6,
             'reports' => (int) $form->reports,
+            'coeff' => $form->coeff,
             'version_id' => $form->version_id,
-            'is_consolidated' => (bool) $form->is_consolidated,
-            'created_at' => $form->created_at,
-            'updated_at' => $form->updated_at,
+            'resolvedTerritory' => $form->departments->first()?->territory ?? 'all',
+            'departments' => $form->departments->map(fn($d) => ['id' => $d->id, 'name' => $d->name]),
+            'okveds' => $form->okveds->map(fn($o) => ['id' => $o->id, 'code' => $o->code]),
         ]);
 
-        return [
-            'forms' => $forms,
-        ];
+        return ['forms' => $forms, 'departments' => $departments];
     }
 }

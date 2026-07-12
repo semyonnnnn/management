@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface AddDepartmentProps {
     data: any;
     setData: any;
@@ -15,15 +17,14 @@ const AddDepartment = ({ data, setData, processing, handleAdd, handleCancel }: A
     };
 
     return (
-        // The container wrapper with a subtle indigo stripe pattern
         <div className="mt-4 p-4 border border-indigo-300 shadow-xl bg-[repeating-linear-gradient(45deg,#f5f3ff,#f5f3ff_10px,#e0e7ff_10px,#e0e7ff_20px)]">
 
-            {/* The table stays clean with a solid background */}
             <div className="bg-white p-2 border border-indigo-200 shadow-sm">
                 <table className="min-w-full">
                     <thead className="bg-indigo-50/80 border-b border-indigo-200/80">
                         <tr className="align-bottom">
                             <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 w-24">КОД</th>
+                            <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 w-40">ОКУД</th>
                             <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700">НАЗВАНИЕ</th>
                             <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 w-32">ТЕРРИТОРИЯ</th>
                             <th className="text-right px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 w-24">ШТАТНОЕ</th>
@@ -31,25 +32,40 @@ const AddDepartment = ({ data, setData, processing, handleAdd, handleCancel }: A
                     </thead>
                     <tbody>
                         <tr className="bg-white">
+                            {/* CODE */}
                             <td className="px-1 py-1">
                                 <input
                                     placeholder="КОД"
-                                    value={data.code}
+                                    value={data.code || ''}
                                     onChange={e => handleNumberChange('code', e.target.value)}
                                     className="w-24 bg-white border border-gray-300 p-1 text-sm font-mono focus:border-indigo-600 outline-none"
                                 />
                             </td>
+
+                            {/* OKUD TEXT INPUT */}
+                            <td className="px-1 py-1">
+                                <input
+                                    placeholder="ОКУД"
+                                    value={data.okud || ''}
+                                    onChange={e => setData('okud', e.target.value)}
+                                    className="w-40 bg-white border border-gray-300 p-1 text-sm font-mono focus:border-indigo-600 outline-none"
+                                />
+                            </td>
+
+                            {/* NAME */}
                             <td className="px-1 py-1">
                                 <input
                                     placeholder="НАЗВАНИЕ"
-                                    value={data.name}
+                                    value={data.name || ''}
                                     onChange={e => setData('name', e.target.value)}
                                     className="w-full bg-white border border-gray-300 p-1 text-sm font-mono focus:border-indigo-600 outline-none"
                                 />
                             </td>
+
+                            {/* TERRITORY */}
                             <td className="px-1 py-1">
                                 <select
-                                    value={data.territory}
+                                    value={data.territory || 'ekb'}
                                     onChange={e => setData('territory', e.target.value)}
                                     className="w-32 bg-white border border-gray-300 p-1 text-sm font-mono uppercase focus:border-indigo-600 outline-none"
                                 >
@@ -57,11 +73,13 @@ const AddDepartment = ({ data, setData, processing, handleAdd, handleCancel }: A
                                     <option value="krg">КРГ</option>
                                 </select>
                             </td>
+
+                            {/* STATE */}
                             <td className="px-1 py-1 text-right">
                                 <div className="flex justify-end">
                                     <input
                                         type="text"
-                                        value={data.state}
+                                        value={data.state || ''}
                                         onChange={e => handleNumberChange('state', e.target.value)}
                                         className="w-20 bg-white border border-gray-300 p-1 text-sm font-mono text-right focus:border-indigo-600 outline-none"
                                     />

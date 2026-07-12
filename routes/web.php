@@ -12,22 +12,22 @@ use App\Http\Controllers\FormsController;
 use App\Http\Controllers\StatePageController;
 
 Route::get('/', function () {
-    return redirect('/old_main');
+    return redirect('/forms');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/main', [DepartmentsController::class, 'index'])->name('main.index');
 
-    Route::get('/old_main', [OldDepartmentsController::class, 'index'])->name('old_main.index');
+    // Route::get('/old_main', [OldDepartmentsController::class, 'index'])->name('old_main.index');
 
-    Route::get('/uploadFiles', [UploadFilesController::class, 'index'])->name('uploadFiles.get');
-    Route::post('/uploadFiles', [UploadFilesController::class, 'store'])->name('uploadFiles.upload');
-    Route::put('/uploadFiles', [UploadFilesController::class, 'update'])->name('uploadFiles.update');
+    // Route::get('/uploadFiles', [UploadFilesController::class, 'index'])->name('uploadFiles.get');
+    // Route::post('/uploadFiles', [UploadFilesController::class, 'store'])->name('uploadFiles.upload');
+    // Route::put('/uploadFiles', [UploadFilesController::class, 'update'])->name('uploadFiles.update');
 
-    Route::get('/versions', [VersionsController::class, 'index'])->name('versions.get');
-    Route::post('/versions', [VersionsController::class, 'create'])->name('versions.create');
-    Route::put('/versions/{id}', [VersionsController::class, 'update'])->name('versions.update');
-    Route::delete('/versions/{id}', [VersionsController::class, 'delete'])->name('versions.delete');
+    // Route::get('/versions', [VersionsController::class, 'index'])->name('versions.get');
+    // Route::post('/versions', [VersionsController::class, 'create'])->name('versions.create');
+    // Route::put('/versions/{id}', [VersionsController::class, 'update'])->name('versions.update');
+    // Route::delete('/versions/{id}', [VersionsController::class, 'delete'])->name('versions.delete');
 
     // Route::get('/old_forms', [OldFormsController::class, 'index'])->name('old_forms');
 
@@ -44,7 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/state', [StatePageController::class, 'index'])->name('state.index');
     Route::post('/state', [StatePageController::class, 'create'])->name('state.create');
-    Route::put('/state', [StatePageController::class, 'update'])->name('state.update');
+    Route::put('/state/{id}', [StatePageController::class, 'update'])->name('state.update');
     Route::delete('/state/{id}', [StatePageController::class, 'delete'])->name('state.delete');
 });
 

@@ -128,8 +128,8 @@ export const DepartmentsPartial = ({
     showActions
 }: DepartmentsPartialProps) => {
 
-    const availableDepartments = departments.filter(
-        dept => !dataDepartments.some(d => d.department_id === dept.id)
+    const availableDepartments = (departments ?? []).filter(
+        dept => !(dataDepartments ?? []).some(d => d?.department_id === dept.id)
     );
 
     const defaultSelectText = dataDepartments.length === 0
