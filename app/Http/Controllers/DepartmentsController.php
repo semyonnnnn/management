@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\UploadFilesService;
 use App\Models\Version;
 
-class OldDepartmentsController extends Controller
+class DepartmentsController extends Controller
 {
     protected UploadFilesService $uploadFilesService;
 
@@ -23,7 +23,7 @@ class OldDepartmentsController extends Controller
 
         // Handle case where no version exists
         if (!$currentVersion) {
-            return Inertia::render('OldDepartments/Index', [
+            return Inertia::render('Departments/Index', [
                 'departments' => [],
                 'forms' => [],
                 'versionId' => 0,
@@ -31,22 +31,22 @@ class OldDepartmentsController extends Controller
         }
 
         // 2. Fetch Data
-        $departments = DB::table('old_departments')
+        $departments = DB::table('departments')
             ->where('version_id', $currentVersion->id)
             ->select('id', 'name', 'territory', 'staff', 'workload', 'state')
             ->orderBy('name', 'asc')
             ->get();
 
 
-        $forms = DB::table('old_forms')
+        $forms = DB::table('forms')
             ->where('version_id', $currentVersion->id)
-            ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'old_department_id')
+            ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'department_id')
             ->orderBy('name', 'asc')
             ->get();
 
         // Handle case where version exists but has no departments (Return early)
         if ($departments->isEmpty()) {
-            return Inertia::render('OldDepartments/Index', [
+            return Inertia::render('Departments/Index', [
                 'departments' => [],
                 'forms' => [],
                 'versionId' => $currentVersion->id,
@@ -57,16 +57,16 @@ class OldDepartmentsController extends Controller
         $formsGroupedByName = collect([]);
 
         if ($forms->isNotEmpty()) {
-            // FIXED: Changed 'department_id' to 'old_department_id'
-            $oldDepartmentIds = $forms->pluck('old_department_id')->unique()->toArray();
-            $oldDepartmentsLookup = DB::table('old_departments')
-                ->whereIn('id', $oldDepartmentIds)
+            // FIXED: Changed 'department_id' to 'department_id'
+            $DepartmentIds = $forms->pluck('department_id')->unique()->toArray();
+            $DepartmentsLookup = DB::table('departments')
+                ->whereIn('id', $DepartmentIds)
                 ->pluck('name', 'id')
                 ->toArray();
 
-            $formsGroupedByName = $forms->groupBy(function ($form) use ($oldDepartmentsLookup) {
-                // FIXED: Changed 'department_id' to 'old_department_id'
-                return $oldDepartmentsLookup[$form->old_department_id] ?? 'unknown';
+            $formsGroupedByName = $forms->groupBy(function ($form) use ($DepartmentsLookup) {
+                // FIXED: Changed 'department_id' to 'department_id'
+                return $DepartmentsLookup[$form->department_id] ?? 'unknown';
             });
         }
 
@@ -83,7 +83,7 @@ class OldDepartmentsController extends Controller
             ];
         })->values();
 
-        return Inertia::render('OldDepartments/Index', [
+        return Inertia::render('Departments/Index', [
             'departments' => $departmentsWithForms,
             'forms' => $forms,
             'versionId' => $currentVersion->id

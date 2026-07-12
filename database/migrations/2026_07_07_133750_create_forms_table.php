@@ -24,6 +24,8 @@ return new class extends Migration {
             $table->decimal('k5', 8, 2)->default(1.0);
             $table->decimal('k6', 8, 2)->default(1.0);
 
+            $table->integer('reports');
+
             $table->foreignId('version_id')
                 ->constrained()
                 ->cascadeOnDelete();

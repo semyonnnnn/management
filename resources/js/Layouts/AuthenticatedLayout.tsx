@@ -15,7 +15,10 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
 
     // Function to check if a route is active
     const isActive = (routePath: string) => {
-        if (routePath === 'main.index' && (url === '/' || url === '/main')) {
+        if (routePath === 'main.index' && (url.endsWith('/main') || url.includes('/main/'))) {
+            return true;
+        }
+        if (routePath === 'old_main.index' && (url === '/' || url === '/old_main')) {
             return true;
         }
         if (routePath === 'uploadFiles.get' && url.includes('/upload')) {
@@ -57,6 +60,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
                         {/* Navigation Links */}
                         <div className='flex gap-5'>
                             <MenuItem _route="main.index" isActive={isActive} name="главная" />
+                            <MenuItem _route="old_main.index" isActive={isActive} name="старая главная" />
                             <MenuItem _route="uploadFiles.get" isActive={isActive} name="загрузить" />
                             <MenuItem _route="versions.get" isActive={isActive} name="версии" />
                             <MenuItem _route="old_forms" isActive={isActive} name="старые формы" />

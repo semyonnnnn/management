@@ -44,10 +44,16 @@ class FormService
         $forms->through(fn($form) => [
             'id' => $form->id,
             'name' => $form->name,
-            'indicators' => (int)$form->indicators,
-            'reports' => (int)$form->reports,
-            'coeff' => $form->coeff,
-            'final' => (int)$form->final,
+            'total' => (int) $form->total,
+            'indicators' => (int) $form->indicators,
+            'reports' => (int) $form->reports,
+            'k1' => (float) $form->k1,
+            'k2' => (float) $form->k2,
+            'k3' => (float) $form->k3,
+            'k4' => (float) $form->k4,
+            'k5' => (float) $form->k5,
+            'k6' => (float) $form->k6,
+            'is_consolidated' => (bool) $form->is_consolidated,
             'resolvedDeptName' => $form->departments->first()?->name ?? 'Неизвестное ведомство',
             'resolvedTerritory' => strtolower(trim($form->departments->first()?->territory ?? 'all')),
             'department_ids' => $form->departments->pluck('id')->values(),
@@ -57,11 +63,11 @@ class FormService
             ->orderBy('name', 'asc')
             ->get()
             ->map(fn($dep) => [
-                'id' => (string)$dep->id,
+                'id' => (string) $dep->id,
                 'name' => $dep->name,
                 'territory' => $dep->territory,
-                'staff' => (int)$dep->staff,
-                'workload' => (int)$dep->workload,
+                'staff' => (int) $dep->staff,
+                'workload' => (int) $dep->workload,
                 'state' => $dep->state
             ]);
 
