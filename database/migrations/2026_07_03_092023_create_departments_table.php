@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,11 +12,20 @@ return new class extends Migration
     {
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
-            $table->string('code');
             $table->string('name');
+            $table->string('code');
+            $table->integer('okud')->default(0);
             $table->string('territory', 3);
-            $table->integer('state');
-            $table->foreignId('version_id')->constrained();
+
+            // Both staff and state set as integers
+            $table->integer('staff')->default(0);
+            $table->integer('state')->default(0);
+
+            $table->integer('workload')->default(0);
+
+            $table->foreignId('version_id')
+                ->constrained()
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

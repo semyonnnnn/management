@@ -10,17 +10,26 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('okveds', function (Blueprint $table) {
+        Schema::create('form_okved', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
 
-            // Stored as a string to preserve dots and leading zeros (e.g., "01.11", "62.01")
-            $table->string('okved')->unique();
+            // Foreign keys connecting to forms and okveds tables
+            $table->foreignId('form_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignId('okved_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
             $table->foreignId('version_id')
                 ->constrained()
                 ->cascadeOnDelete();
+
             $table->timestamps();
+
+            // Prevent duplicate entries for the same form and okved combination
+            $table->unique(['form_id', 'okved_id']);
         });
     }
 
@@ -29,6 +38,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('okveds');
+        Schema::dropIfExists('form_okved');
     }
 };

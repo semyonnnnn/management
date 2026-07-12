@@ -9,12 +9,12 @@ return new class extends Migration {
     public function up(): void
     {
         // Only table tracking uploads / manual saves
-        Schema::create('versions', function (Blueprint $table) {
-            $table->id();
-            $table->boolean('isCurrent');
-            $table->string('name');
-            $table->timestamps();
-        });
+        // Schema::create('versions', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->boolean('isCurrent');
+        //     $table->string('name');
+        //     $table->timestamps();
+        // });
 
         // Departments are independent of versions
         Schema::create('old_departments', function (Blueprint $table) {
@@ -51,6 +51,6 @@ return new class extends Migration {
     {
         Schema::dropIfExists('old_forms');
         Schema::dropIfExists('old_departments');
-        Schema::dropIfExists('versions');
+        // Schema::dropIfExists('versions');
     }
 };
