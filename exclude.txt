@@ -1,0 +1,6 @@
+compose.yaml
+python.Dockerfile
+vendor
+node_modules
+.git
+.env

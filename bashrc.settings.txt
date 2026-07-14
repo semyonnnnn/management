@@ -14,6 +14,18 @@ clean_up() {
     sudo docker compose -f compose.prod.yaml down --remove-orphans
 }
 
+prodm() {
+    # 1. Sync the files
+    # Note: Ensure the path '../management_dev/' is correct relative to where you usually run this
+    rsync -av --delete --exclude-from='../management_dev/exclude.txt' ../management_dev/ .
+
+    # 2. Sail down, up, and build
+    # Using '&&' ensures execution stops if any step fails
+    ./vendor/bin/sail down && \
+    ./vendor/bin/sail up -d && \
+    ./vendor/bin/sail npm run build
+}
+
 # Standardized Aliases
 alias sailup='sudo $DEV_COMPOSE up -d'
 alias saildown='sudo $DEV_COMPOSE down --remove-orphans'
