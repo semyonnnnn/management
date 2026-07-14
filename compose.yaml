@@ -60,9 +60,7 @@ services:
             - sail
 
     python:
-        build:
-            context: .
-            dockerfile: python.Dockerfile
+        image: management-python:latest
         volumes:
             - ./app/Python:/app
         working_dir: /app
