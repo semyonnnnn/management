@@ -3,7 +3,6 @@ import { useForm, router } from '@inertiajs/react';
 
 interface DepartmentForm {
     code: string;
-    okud: string;
     name: string;
     territory: string;
     state: string;
@@ -17,7 +16,6 @@ interface AddDepartmentProps {
 const AddDepartment = ({ handleCancel }: AddDepartmentProps) => {
     const { data, errors, setData, post, processing, reset } = useForm<DepartmentForm>({
         code: '',
-        okud: '',
         name: '',
         territory: 'ekb',
         state: '',
@@ -48,10 +46,6 @@ const AddDepartment = ({ handleCancel }: AddDepartmentProps) => {
         }
     };
 
-    const handleOkudChange = (value: string) => {
-        if (/^\d{0,7}$/.test(value)) setData('okud', value);
-    };
-
     const handleNameChange = (value: string) => {
         if (/^(?!\s)(?!.*\s\s)[а-яА-ЯёЁ0-9,.\(\)\s)]*$/.test(value)) setData('name', value);
     };
@@ -72,7 +66,6 @@ const AddDepartment = ({ handleCancel }: AddDepartmentProps) => {
                     <thead className="bg-indigo-50/80 border-b border-indigo-200/80">
                         <tr className="align-bottom">
                             <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 w-24">КОД</th>
-                            <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 w-40">ОКУД</th>
                             <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700">НАЗВАНИЕ</th>
                             <th className="text-left px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 w-32">ТЕРРИТОРИЯ</th>
                             <th className="text-right px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 w-24">ШТАТНОЕ</th>
@@ -82,9 +75,6 @@ const AddDepartment = ({ handleCancel }: AddDepartmentProps) => {
                         <tr className="bg-white">
                             <td className="px-1 py-1">
                                 <input placeholder="01/02к" value={data.code} onChange={e => handleCodeChange(e.target.value)} className={`w-24 bg-white border p-1 text-sm font-mono outline-none ${getBorderClass('code')}`} />
-                            </td>
-                            <td className="px-1 py-1">
-                                <input placeholder="1234567" value={data.okud} onChange={e => handleOkudChange(e.target.value)} className={`w-40 bg-white border p-1 text-sm font-mono outline-none ${getBorderClass('okud')}`} />
                             </td>
                             <td className="px-1 py-1">
                                 <input placeholder="название.." value={data.name} onChange={e => handleNameChange(e.target.value)} className={`w-full bg-white border p-1 text-sm font-mono outline-none ${getBorderClass('name')}`} />
@@ -107,7 +97,6 @@ const AddDepartment = ({ handleCancel }: AddDepartmentProps) => {
                 {/* Error Display Section */}
                 <div className="px-1 mt-2 space-y-1">
                     {renderError('code')}
-                    {renderError('okud')}
                     {renderError('name')}
                     {renderError('state')}
                     {renderError('territory')}

@@ -16,7 +16,6 @@ class StatePageRequest extends FormRequest
     {
         return [
             'code' => ['required', 'string', 'regex:/^[0-9]{0,2}к?$/iu', 'min:1', 'max:3'],
-            'okud' => ['required', 'string', 'regex:/^[0-9]{7}$/'],
             'name' => ['required', 'string', 'max:255', 'regex:/^(?![\s.])(?!.*\s\s)[а-яА-ЯёЁ0-9,.\(\)\s]+$/u'],
             'state' => ['required', 'integer', 'min:1', 'max:999'],
             'territory' => ['required', 'string', Rule::in(['ekb', 'krg'])],
@@ -32,11 +31,6 @@ class StatePageRequest extends FormRequest
             'code.regex'         => 'Код должен состоять из цифр и может заканчиваться на букву "к".',
             'code.min'           => 'Код слишком короткий (минимум 1 символ).',
             'code.max'           => 'Код слишком длинный (максимум 3 символа).',
-
-            // OKUD messages
-            'okud.required'      => 'ОКУД обязателен для заполнения.',
-            'okud.string'        => 'ОКУД должен быть строкой.',
-            'okud.regex'         => 'ОКУД должен состоять ровно из 7 цифр.',
 
             // Name messages
             'name.required'      => 'Название обязательно для заполнения.',

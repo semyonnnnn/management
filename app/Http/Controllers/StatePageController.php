@@ -11,13 +11,11 @@ class StatePageController extends Controller
 {
     public function index()
     {
-        $currentVersion = Version::query()->where('isCurrent', true)->first();
-        $currentVersionId = $currentVersion?->id;
+        $currentVersionId = Version::query()->where('isCurrent', true)->first()?->id;
 
-        // FIXED: Added 'okud' to the fetched columns list so the frontend table can read it
         $state = Department::query()->where('version_id', $currentVersionId)
             ->orderBy('id', 'asc')
-            ->get(['id', 'territory', 'name', 'state', 'code', 'okud']);
+            ->get(['id', 'territory', 'name', 'state', 'code']);
 
         // MAGIC: Fetch the versions so the dropdown actually has data to map over!
         $versions = Version::query()->orderBy('name', 'asc')->get(['id', 'name']);
@@ -30,13 +28,10 @@ class StatePageController extends Controller
 
     public function create(StatePageRequest $r)
     {
-        $version = Version::firstOrCreate(
-            ['isCurrent' => true],
-            ['id' => 1, 'name' => '1', 'isCurrent' => true]
-        );
+        $currentVersionId = Version::query()->where('isCurrent', true)->first()?->id;;
 
         Department::create(array_merge($r->validated(), [
-            'version_id' => $version->id
+            'version_id' => $currentVersionId
         ]));
 
         return to_route('state.index')
@@ -46,7 +41,6 @@ class StatePageController extends Controller
     // ADDED: Handles the PUT state route updates from the inline inputs
     public function update(StatePageRequest $r, int $id)
     {
-        // dd($r->all());
         $department = Department::findOrFail($id);
         $department->update($r->validated());
 
