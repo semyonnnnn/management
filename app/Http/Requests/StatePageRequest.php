@@ -7,60 +7,53 @@ use Illuminate\Validation\Rule;
 
 class StatePageRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        // Set this to true to allow authenticated users to submit
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
         return [
-            'code' => [
-                'required',
-                'string',
-                'max:50',
-            ],
-            'okud' => [
-                'nullable',
-                'numeric', // Enforces only numbers (digits/decimals)
-                'regex:/^\d+$/', // Strict fallback to ensure no dots/signs if you want pure digits
-            ],
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'state' => [
-                'required',
-                'integer', // Enforces whole numbers
-                'min:0',
-            ],
-            'territory' => [
-                'required',
-                'string',
-                Rule::in(['ekb', 'krg']), // Validates against your exact allowed territory codes
-            ],
+            'code' => ['required', 'string', 'regex:/^[0-9]{0,2}к?$/iu', 'min:1', 'max:3'],
+            'okud' => ['required', 'string', 'regex:/^[0-9]{7}$/'],
+            'name' => ['required', 'string', 'max:255', 'regex:/^(?![\s.])(?!.*\s\s)[а-яА-ЯёЁ0-9,.\(\)\s]+$/u'],
+            'state' => ['required', 'integer', 'min:1', 'max:999'],
+            'territory' => ['required', 'string', Rule::in(['ekb', 'krg'])],
         ];
     }
 
-    /**
-     * Get custom messages for validator errors.
-     */
     public function messages(): array
     {
         return [
-            'okud.numeric' => 'Поле ОКУД должно содержать только числа.',
-            'okud.regex' => 'Поле ОКУД должно состоять только из цифр.',
-            'state.integer' => 'Количество штатных единиц должно быть целым числом.',
-            'state.min' => 'Количество штатных единиц не может быть отрицательным.',
-            'territory.in' => 'Выбрана некорректная территория.',
+            // Code messages
+            'code.required'      => 'Код обязателен для заполнения.',
+            'code.string'        => 'Код должен быть текстовой строкой.',
+            'code.regex'         => 'Код должен состоять из цифр и может заканчиваться на букву "к".',
+            'code.min'           => 'Код слишком короткий (минимум 1 символ).',
+            'code.max'           => 'Код слишком длинный (максимум 3 символа).',
+
+            // OKUD messages
+            'okud.required'      => 'ОКУД обязателен для заполнения.',
+            'okud.string'        => 'ОКУД должен быть строкой.',
+            'okud.regex'         => 'ОКУД должен состоять ровно из 7 цифр.',
+
+            // Name messages
+            'name.required'      => 'Название обязательно для заполнения.',
+            'name.string'        => 'Название должно быть текстовой строкой.',
+            'name.max'           => 'Название не может превышать 255 символов.',
+            'name.regex'         => 'Название содержит недопустимые символы, двойные пробелы или начинается с неверного знака.',
+
+            // State messages
+            'state.required'     => 'Количество штатных единиц обязательно.',
+            'state.integer'      => 'Количество должно быть целым числом.',
+            'state.min'          => 'Количество не может быть меньше 1.',
+            'state.max'          => 'Количество не может превышать 999.',
+
+            // Territory messages
+            'territory.required' => 'Необходимо выбрать территорию.',
+            'territory.string'   => 'Территория должна быть строкой.',
+            'territory.in'       => 'Выбрана некорректная территория (доступны только ЕКБ и КРГ).',
         ];
     }
 }

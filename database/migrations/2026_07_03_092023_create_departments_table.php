@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->string('code');
-            $table->integer('okud')->default(0);
+            $table->integer('okud');
             $table->string('territory', 3);
 
             // Both staff and state set as integers

@@ -36,7 +36,7 @@ export default function Index({ state, versions }: StatePageProps) {
     // TRACKS CURRENT ACTIVE EDIT ID
     const [editingId, setEditingId] = useState<string | number | null>(null);
 
-    const { data, setData, post, put, delete: destroy, processing, reset } = useForm({
+    const { data, setData, errors, post, put, delete: destroy, processing, reset } = useForm({
         code: '',
         version_id: '', // Used version_id for consistency with backend
         name: '',
@@ -289,12 +289,12 @@ export default function Index({ state, versions }: StatePageProps) {
                                 reset();
                                 setIsAdding(false);
                             }}
-                            data={data}
-                            setData={setData}
-                            // Remove or comment out the versions line below:
-                            // versions={versions} 
-                            processing={processing}
-                            handleAdd={handleAdd}
+                        // data={data}
+                        // setData={setData}
+                        // // Remove or comment out the versions line below:
+                        // // versions={versions} 
+                        // processing={processing}
+                        // handleAdd={handleAdd}
                         />
                     )}
                 </div>
