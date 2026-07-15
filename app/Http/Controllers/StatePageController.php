@@ -13,7 +13,7 @@ class StatePageController extends Controller
     {
         $currentVersionId = Version::query()->where('isCurrent', true)->first()?->id;
 
-        $state = Department::query()->where('version_id', $currentVersionId)
+        $departments = Department::query()->where('version_id', $currentVersionId)
             ->orderBy('id', 'asc')
             ->get(['id', 'territory', 'name', 'state', 'code']);
 
@@ -21,8 +21,8 @@ class StatePageController extends Controller
         $versions = Version::query()->orderBy('name', 'asc')->get(['id', 'name']);
 
         return Inertia::render('State/Index', [
-            'state' => $state->isNotEmpty() ? $state : null,
-            'versions' => $versions // <--- Passing it to the frontend props
+            'departments' => $departments->isNotEmpty() ? $departments : null,
+            'versions' => $versions
         ]);
     }
 

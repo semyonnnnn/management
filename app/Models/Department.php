@@ -14,7 +14,6 @@ class Department extends Model
      */
     protected $fillable = [
         'code',
-        'okud',
         'name',
         'territory',
         'state',
