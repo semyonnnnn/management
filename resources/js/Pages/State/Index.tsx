@@ -30,6 +30,7 @@ export default function Index({ departments }: StatePageProps) {
         return JSON.stringify(data.departments) !== JSON.stringify(departments);
     }, [data.departments, departments]);
 
+
     const filteredState = useMemo(() => {
         if (!data.departments) return [];
         return data.departments.filter((dept) => {

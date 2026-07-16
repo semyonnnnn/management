@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StateBulkRequest;
 use Inertia\Inertia;
-use Illuminate\Http\Request;
 /////////////////////////////////
 use App\Models\Department;
 use App\Models\Version;
