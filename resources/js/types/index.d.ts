@@ -229,6 +229,18 @@ interface ExtendedPageProps extends PageProps {
 }
 export interface Department {
     id: string;
+    code: string;
     name: string;
-    territory: string;
+    state: string;
+    territory: 'ekb' | 'krg';
+}
+
+export interface DepartmentRowProps {
+    dept: Department;
+    index: number;
+    setData: (
+        key: string,
+        action: (prev: Department[]) => Department[],
+    ) => void;
+    onDelete: (dept: Department) => void;
 }

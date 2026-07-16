@@ -1,53 +1,50 @@
-import React, { useState, useMemo } from 'react';
-import { Head, InertiaForm } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { PageProps } from '@/types';
-import '@fontsource/jetbrains-mono/400.css';
+import { useState, useMemo } from 'react';
+import { Head, useForm, InertiaFormProps } from '@inertiajs/react';
 import '@fontsource/jetbrains-mono/700.css';
+import '@fontsource/jetbrains-mono/400.css';
+////////////////////////////////////////////////////////////////
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { PageProps, Department } from '@/types';
 import { AddDepartment } from './AddDepartment';
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { DepartmentRow } from './DepartmentRow';
 
-interface DepartmentState {
-    id: number;
-    code: string;
-    name: string;
-    state: number;
-    territory: 'ekb' | 'krg';
-    put: InertiaForm<DepartmentState[]>['put']
-}
-
 interface StatePageProps extends PageProps {
-    departments: DepartmentState[] | null;
+    departments: Department[] | null;
 }
 
 export default function Index({ departments }: StatePageProps) {
-    const [buffer, setBuffer] = useState<DepartmentState[]>(departments || []);
+    // const [data.departments, setData] = useState<DepartmentState[]>(departments || []);
     const [selectedTerritory, setSelectedTerritory] = useState<string>("all");
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [isAdding, setIsAdding] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState<DepartmentState | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<Department | null>(null);
+
+    const { put, setData, data } = useForm({
+        departments: departments
+    });
+
 
     const hasChanges = useMemo(() => {
-        return JSON.stringify(buffer) !== JSON.stringify(departments);
-    }, [buffer, departments]);
+        return JSON.stringify(data.departments) !== JSON.stringify(departments);
+    }, [data.departments, departments]);
 
     const filteredState = useMemo(() => {
-        if (!buffer) return [];
-        return buffer.filter((dept) => {
+        if (!data.departments) return [];
+        return data.departments.filter((dept) => {
             const matchTerritory = selectedTerritory === "all" || dept.territory === selectedTerritory;
             const matchSearch = dept.name.toLowerCase().includes(searchQuery.toLowerCase());
             return matchTerritory && matchSearch;
         });
-    }, [buffer, selectedTerritory, searchQuery]);
+    }, [data.departments, selectedTerritory, searchQuery]);
 
     const handleApply = () => {
-        put(route('state.bulkUpdate'), { items: buffer });
+        put(route('state.update'));
     };
 
     const handleReset = () => {
-        setBuffer(departments || []);
+        setData({ departments: departments || [] });
     };
 
     const handleDeleteConfirm = () => {
@@ -108,7 +105,7 @@ export default function Index({ departments }: StatePageProps) {
                                     key={dept.id}
                                     dept={dept}
                                     index={index}
-                                    setBuffer={setBuffer}
+                                    setData={setData}
                                     onDelete={(d) => { setItemToDelete(d); setIsDeleting(true); }}
                                 />
                             ))}

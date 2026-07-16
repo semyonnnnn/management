@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StatePageRequest extends FormRequest
+class StateCreateRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -25,6 +25,9 @@ class StatePageRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'id.required'        => 'ID обязателен',
+            'id.integer'         => 'ID должен быть числом.',
+
             // Code messages
             'code.required'      => 'Код обязателен для заполнения.',
             'code.string'        => 'Код должен быть текстовой строкой.',

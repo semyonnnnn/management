@@ -44,7 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/state', [StatePageController::class, 'index'])->name('state.index');
     Route::post('/state', [StatePageController::class, 'create'])->name('state.create');
-    Route::put('/state/{id}', [StatePageController::class, 'update'])->name('state.update');
+    Route::put('/state', [StatePageController::class, 'update'])->name('state.update');
     Route::delete('/state/{id}', [StatePageController::class, 'delete'])->name('state.delete');
 });
 

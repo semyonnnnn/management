@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StateBulkRequest;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
+/////////////////////////////////
 use App\Models\Department;
 use App\Models\Version;
-use App\Http\Requests\StatePageRequest; // Swapped to use your new request validator
+use App\Http\Requests\StateCreateRequest;
+use App\Http\Requests\StateUpdateRequest;
 
 class StatePageController extends Controller
 {
@@ -26,9 +30,9 @@ class StatePageController extends Controller
         ]);
     }
 
-    public function create(StatePageRequest $r)
+    public function create(StateCreateRequest $r)
     {
-        $currentVersionId = Version::query()->where('isCurrent', true)->first()?->id;;
+        $currentVersionId = Version::query()->where('isCurrent', true)->first()?->id;
 
         Department::create(array_merge($r->validated(), [
             'version_id' => $currentVersionId
@@ -39,10 +43,16 @@ class StatePageController extends Controller
     }
 
     // ADDED: Handles the PUT state route updates from the inline inputs
-    public function update(StatePageRequest $r, int $id)
+    public function update(StateUpdateRequest $r)
     {
-        $department = Department::findOrFail($id);
-        $department->update($r->validated());
+        $r_ids = array_column($r->validated()['items'], 'id');
+
+        // dd($r->all());
+        // $department = Department::findOrFail($id);
+        // $department->update($r->validated());
+
+        $departments = Department::whereIn('id', $r_ids)->get();
+        dd($departments);
 
         return redirect()->back()
             ->with('message', 'Данные успешно обновлены');

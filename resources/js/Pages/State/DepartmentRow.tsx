@@ -1,18 +1,22 @@
-import React from 'react';
+import { DepartmentRowProps, Department } from '@/types';
 
-interface DepartmentRowProps {
-    dept: any;
-    index: number;
-    setBuffer: React.Dispatch<React.SetStateAction<any[]>>;
-    onDelete: (dept: any) => void;
-}
+export const DepartmentRow = ({ dept, index, setData, onDelete }: DepartmentRowProps) => {
 
-export const DepartmentRow = ({ dept, index, setBuffer, onDelete }: DepartmentRowProps) => {
+    const updateField = (field: keyof Department, value: any) => {
+        setData('departments', (prev) => {
+            // map() creates a new array reference, which is crucial for reactivity
+            return prev.map((item) => {
+                // If this isn't the row we're editing, return it unchanged
+                if (item.id !== dept.id) return item;
 
-    const updateField = (field: string, value: any) => {
-        setBuffer(prev => prev.map(item =>
-            item.id === dept.id ? { ...item, [field]: value } : item
-        ));
+                // Return a fresh object for the row being edited
+                // This ensures the ID is preserved and the new value is applied
+                return {
+                    ...item,
+                    [field]: value
+                };
+            });
+        });
     };
 
     const territoryColor: Record<string, string> = {
@@ -22,6 +26,7 @@ export const DepartmentRow = ({ dept, index, setBuffer, onDelete }: DepartmentRo
 
     return (
         <div className={`flex items-center border-b border-indigo-900/10 ${index % 2 === 0 ? 'bg-slate-50/60' : 'bg-white'}`}>
+            {/* CODE */}
             <div className="w-24 border-r border-indigo-200 px-2">
                 <input
                     type="text"
@@ -30,7 +35,7 @@ export const DepartmentRow = ({ dept, index, setBuffer, onDelete }: DepartmentRo
                     className="w-full border-b border-black/20 h-7 px-1.5 text-base font-bold text-indigo-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
                 />
             </div>
-
+            {/* NAME */}
             <div className="flex-1 px-2 border-r">
                 <input
                     type="text"
@@ -39,16 +44,16 @@ export const DepartmentRow = ({ dept, index, setBuffer, onDelete }: DepartmentRo
                     className="w-full h-7 border-b border-black/20 px-2 text-base font-bold text-gray-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
                 />
             </div>
-
+            {/* STATE */}
             <div className="w-24 px-1.5 py-1">
                 <input
                     type="text"
                     value={dept.state}
-                    onChange={(e) => updateField('state', parseInt(e.target.value) || 0)}
+                    onChange={(e) => updateField('state', e.target.value)}
                     className="w-full h-7 border-b px-1.5 border-black/20 text-right font-mono text-sm font-bold bg-transparent text-indigo-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
                 />
             </div>
-
+            {/* TERRITORY */}
             <div className="w-40 px-1.5 py-1 flex justify-end">
                 <select
                     value={dept.territory}
@@ -59,14 +64,12 @@ export const DepartmentRow = ({ dept, index, setBuffer, onDelete }: DepartmentRo
                     <option value="krg">КУРГАН</option>
                 </select>
             </div>
-
+            {/* DELETE */}
             <div className="w-24 px-1.5 py-1 flex justify-end">
                 <button
                     onClick={() => onDelete(dept)}
                     className="w-7 h-7 flex items-center justify-center bg-pink-100 border cursor-pointer border-red-300 text-3xl text-center text-red-600 hover:bg-pink-200"
-                >
-                    ×
-                </button>
+                >×</button>
             </div>
         </div>
     );
