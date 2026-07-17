@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use Illuminate\Http\Request;
 /////////////////////////////////
 use App\Models\Department;
 use App\Models\Version;
@@ -41,19 +42,26 @@ class StatePageController extends Controller
     }
 
     // ADDED: Handles the PUT state route updates from the inline inputs
+    //StateUpdateRequest
     public function update(StateUpdateRequest $r)
     {
-        $r_ids = array_column($r->validated()['items'], 'id');
+        // Step 1: Get raw validated data
+        $data = $r->validated()['departments'];
 
-        // dd($r->all());
-        // $department = Department::findOrFail($id);
-        // $department->update($r->validated());
+        // Step 2: Extract IDs
+        $ids = array_column($data, 'id');
 
-        $departments = Department::whereIn('id', $r_ids)->get();
-        dd($departments);
+        // Step 3: Query & Key by ID
+        $departments = Department::whereIn('id', $ids)->get()->keyBy('id');
 
-        return redirect()->back()
-            ->with('message', 'Данные успешно обновлены');
+        // Step 4: Loop, Match, and Save
+        foreach ($data as $item) {
+            if ($dept = $departments->get($item['id'])) {
+                $dept->update($item);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Данные успешно обновлены');
     }
 
     public function delete(int $id)

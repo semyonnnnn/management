@@ -2,52 +2,40 @@
 
 namespace App\Http\Requests;
 
-class StateUpdateRequest extends StateCreateRequest
+use Illuminate\Foundation\Http\FormRequest;
+
+class StateUpdateRequest extends FormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     */
-    public function rules(): array
+    public function authorize(): bool
     {
-        $parentRules = parent::rules();
-
-        // Inject the ID validation rule since bulk items need an existing reference
-        $parentRules['id'] = ['required', 'integer'];
-
-        $rules = [
-            'items' => ['required', 'array'],
-        ];
-
-        // Apply rules to the wildcard array syntax (e.g., items.*.id, items.*.name)
-        foreach ($parentRules as $field => $rule) {
-            $rules["items.*.$field"] = $rule;
-        }
-
-        return $rules;
+        return true;
     }
 
-    /**
-     * Get the error messages for the defined validation rules.
-     */
+    public function rules(): array
+    {
+        return [
+            // 1. Ensure 'departments' is passed and is indeed an array of items
+            'departments' => ['required', 'array'],
+
+            // 2. Validate every single item inside that array using wildcards (*)
+            'departments.*.id' => ['required', 'exists:departments,id'],
+            'departments.*.code' => ['required', 'string', 'regex:/^[0-9]{0,2}к?$/iu', 'max:3'],
+            'departments.*.name' => ['required', 'string', 'max:255'],
+
+            // This rules that EVERY sent department MUST have a state value
+            'departments.*.state' => ['required', 'integer', 'min:0'],
+            'departments.*.territory' => ['required', 'string', 'in:ekb,krg'],
+        ];
+    }
+
     public function messages(): array
     {
-        $parentMessages = parent::messages();
-
-        $messages = [
-            'items.required'      => 'Список элементов обязателен.',
-            'items.array'         => 'Неверный формат данных.',
-            
-            // Define custom messages for the newly injected ID field
-            'items.*.id.required' => 'ID обязателен для каждого элемента.',
-            'items.*.id.integer'  => 'ID каждого элемента должен быть целым числом.',
+        return [
+            // The wildcard translates to precise feedback on the frontend
+            'departments.*.state.required' => 'Поле не может быть пустым',
+            'departments.*.state.integer' => 'Должно быть числом',
+            'departments.*.code.required' => 'Код обязателен',
+            'departments.*.name.required' => 'Название обязательно',
         ];
-
-        // Map parent messages like 'code.required' to 'items.*.code.required'
-        // This is crucial, otherwise Laravel won't match your custom translation keys to nested inputs
-        foreach ($parentMessages as $key => $message) {
-            $messages["items.*.$key"] = $message;
-        }
-
-        return $messages;
     }
 }

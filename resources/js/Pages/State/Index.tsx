@@ -1,56 +1,127 @@
-import { useState, useMemo } from 'react';
-import { Head, useForm, InertiaFormProps } from '@inertiajs/react';
+import { useState, useMemo, useEffect } from 'react';
+import { Head, useForm } from '@inertiajs/react';
 import '@fontsource/jetbrains-mono/700.css';
 import '@fontsource/jetbrains-mono/400.css';
-////////////////////////////////////////////////////////////////
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps, Department } from '@/types';
 import { AddDepartment } from './AddDepartment';
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { DepartmentRow } from './DepartmentRow';
+import { FlashMessage } from '@/components/custom/FlashMessage';
 
 interface StatePageProps extends PageProps {
     departments: Department[] | null;
 }
 
 export default function Index({ departments }: StatePageProps) {
-    // const [data.departments, setData] = useState<DepartmentState[]>(departments || []);
+    const [localDepartments, setLocalDepartments] = useState<Department[]>([]);
     const [selectedTerritory, setSelectedTerritory] = useState<string>("all");
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [isAdding, setIsAdding] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<Department | null>(null);
 
-    const { put, setData, data } = useForm({
-        departments: departments
+    // Track errors mapped directly to stable Department IDs: { [deptId]: { [fieldName]: "error msg" } }
+    const [localErrors, setLocalErrors] = useState<Record<string, Record<string, string>>>({});
+
+    const { put, delete: destroy, setData, data, errors } = useForm<{ departments: Department[] }>({
+        departments: [] as Department[]
     });
 
+    // Map Inertia's volatile array index errors to stable Department IDs
+    useEffect(() => {
+        if (Object.keys(errors).length > 0) {
+            const mapped: Record<string, Record<string, string>> = {};
+
+            Object.keys(errors).forEach((key) => {
+                const match = key.match(/^departments\.(\d+)\.(.+)$/);
+                if (match) {
+                    const index = parseInt(match[1], 10);
+                    const field = match[2];
+                    const dept = data.departments[index]; // Locate the dept submitted at this index
+                    if (dept) {
+                        if (!mapped[dept.id]) {
+                            mapped[dept.id] = {};
+                        }
+                        mapped[dept.id][field] = errors[key];
+                    }
+                }
+            });
+            setLocalErrors(mapped);
+        } else {
+            setLocalErrors({});
+        }
+    }, [errors]);
+
+    useEffect(() => {
+        if (departments) {
+            setLocalDepartments(prevLocal => {
+                if (data.departments.length > 0) {
+                    return prevLocal.map(localDept => {
+                        const incoming = departments.find(d => d.id === localDept.id);
+                        const isDirty = data.departments.some(d => d.id === localDept.id);
+                        return isDirty ? localDept : (incoming || localDept);
+                    });
+                }
+                return departments;
+            });
+        } else {
+            setLocalDepartments([]);
+        }
+    }, [departments]);
+
+    const handleDepartmentChange = (updatedDept: Department) => {
+        const nextLocal = localDepartments.map(d => d.id === updatedDept.id ? updatedDept : d);
+        setLocalDepartments(nextLocal);
+
+        const originalList = departments || [];
+        const diffOnly = nextLocal.filter(localDept => {
+            const originalDept = originalList.find(d => d.id === localDept.id);
+            if (!originalDept) return true;
+            return JSON.stringify(localDept) !== JSON.stringify(originalDept);
+        });
+
+        setData('departments', diffOnly);
+
+        // Instantly clear the error for this row as soon as the user makes any edits
+        if (localErrors[updatedDept.id]) {
+            setLocalErrors(prev => {
+                const copy = { ...prev };
+                delete copy[updatedDept.id];
+                return copy;
+            });
+        }
+    };
 
     const hasChanges = useMemo(() => {
-        return JSON.stringify(data.departments) !== JSON.stringify(departments);
-    }, [data.departments, departments]);
-
+        return data.departments.length > 0;
+    }, [data.departments]);
 
     const filteredState = useMemo(() => {
-        if (!data.departments) return [];
-        return data.departments.filter((dept) => {
+        return localDepartments.filter((dept) => {
             const matchTerritory = selectedTerritory === "all" || dept.territory === selectedTerritory;
             const matchSearch = dept.name.toLowerCase().includes(searchQuery.toLowerCase());
             return matchTerritory && matchSearch;
         });
-    }, [data.departments, selectedTerritory, searchQuery]);
+    }, [localDepartments, selectedTerritory, searchQuery]);
 
     const handleApply = () => {
-        put(route('state.update'));
+        put(route('state.update'), {
+            onSuccess: () => {
+                setData('departments', []);
+                setLocalErrors({});
+            }
+        });
     };
 
     const handleReset = () => {
-        setData({ departments: departments || [] });
+        setLocalDepartments(departments || []);
+        setData('departments', []);
+        setLocalErrors({});
     };
 
     const handleDeleteConfirm = () => {
         if (!itemToDelete) return;
-        // @ts-ignore
         destroy(route('state.destroy', itemToDelete.id), {
             onSuccess: () => {
                 setIsDeleting(false);
@@ -106,13 +177,16 @@ export default function Index({ departments }: StatePageProps) {
                                     key={dept.id}
                                     dept={dept}
                                     index={index}
-                                    setData={setData}
+                                    onDeptChange={handleDepartmentChange}
                                     onDelete={(d) => { setItemToDelete(d); setIsDeleting(true); }}
+                                    // Pass ONLY the error mapping specific to this row!
+                                    rowErrors={localErrors[dept.id] || {}}
                                 />
                             ))}
                         </div>
                     </div>
                 </div>
+                <FlashMessage />
 
                 {isAdding && <AddDepartment handleCancel={() => setIsAdding(false)} />}
                 <DeleteConfirmationModal show={isDeleting} onClose={() => { setIsDeleting(false); setItemToDelete(null); }} onConfirm={handleDeleteConfirm} item={itemToDelete} />

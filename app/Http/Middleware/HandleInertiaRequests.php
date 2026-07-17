@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 use App\Http\Resources\AuthUserResource;
+
 class HandleInertiaRequests extends Middleware
 {
     /**
@@ -40,6 +41,11 @@ class HandleInertiaRequests extends Middleware
             'ziggy' => fn() => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
+            ],
+            // Map the flash messages from Laravel's session store to Inertia global props
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
             ],
         ];
     }
