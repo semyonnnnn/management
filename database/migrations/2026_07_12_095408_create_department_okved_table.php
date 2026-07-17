@@ -10,11 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('form_okved', function (Blueprint $table) {
+        Schema::create('department_okved', function (Blueprint $table) {
             $table->id();
 
-            // Foreign keys connecting to forms and okveds tables
-            $table->foreignId('form_id')
+            $table->foreignId('department_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
@@ -28,8 +27,7 @@ return new class extends Migration {
 
             $table->timestamps();
 
-            // Prevent duplicate entries for the same form and okved combination
-            $table->unique(['form_id', 'okved_id']);
+            $table->unique(['department_id', 'okved_id']);
         });
     }
 
@@ -38,6 +36,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('form_okved');
+        Schema::dropIfExists('department_okved');
     }
 };
