@@ -33,7 +33,10 @@ export default function Index({ departments }: StatePageProps) {
         if (Object.keys(errors).length > 0) {
             const mapped: Record<string, Record<string, string>> = {};
 
-            Object.keys(errors).forEach((key) => {
+            // Cast errors to a indexable record so TypeScript stops complaining
+            const errorsRecord = errors as Record<string, string>;
+
+            Object.keys(errorsRecord).forEach((key) => {
                 const match = key.match(/^departments\.(\d+)\.(.+)$/);
                 if (match) {
                     const index = parseInt(match[1], 10);
@@ -43,7 +46,8 @@ export default function Index({ departments }: StatePageProps) {
                         if (!mapped[dept.id]) {
                             mapped[dept.id] = {};
                         }
-                        mapped[dept.id][field] = errors[key];
+                        // TypeScript is now happy because errorsRecord is a standard Record<string, string>
+                        mapped[dept.id][field] = errorsRecord[key];
                     }
                 }
             });
@@ -188,7 +192,10 @@ export default function Index({ departments }: StatePageProps) {
                 </div>
                 <FlashMessage />
 
-                {isAdding && <AddDepartment handleCancel={() => setIsAdding(false)} />}
+                <AddDepartment
+                    isOpen={isAdding}
+                    handleCancel={() => setIsAdding(false)}
+                />
                 <DeleteConfirmationModal show={isDeleting} onClose={() => { setIsDeleting(false); setItemToDelete(null); }} onConfirm={handleDeleteConfirm} item={itemToDelete} />
 
                 <button onClick={() => setIsAdding(!isAdding)} className="fixed bottom-8 right-8 w-12 h-12 bg-indigo-600 text-white shadow-xl flex items-center justify-center text-5xl hover:bg-indigo-700 transition-all z-50 cursor-pointer">

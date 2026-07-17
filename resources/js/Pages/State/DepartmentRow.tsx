@@ -77,7 +77,7 @@ export const DepartmentRow = ({
                         className={`w-full border-b h-7 px-1.5 text-base font-bold text-indigo-700 bg-transparent outline-none transition-colors ${getBorderClass('code')}`}
                     />
                     {renderError('code')}
-                    <div className="absolute right-0 top-0 w-[1px] h-7 bg-indigo-200" />
+                    <div className="absolute right-0 top-0 w-px h-7 bg-indigo-200" />
                 </div>
 
                 {/* NAME CELL */}
@@ -89,7 +89,7 @@ export const DepartmentRow = ({
                         className={`w-full h-7 border-b px-2 text-base font-bold text-gray-900 bg-transparent outline-none transition-colors ${getBorderClass('name')}`}
                     />
                     {renderError('name')}
-                    <div className="absolute right-0 top-0 w-[1px] h-7 bg-indigo-200" />
+                    <div className="absolute right-0 top-0 w-px h-7 bg-indigo-200" />
                 </div>
 
                 {/* STATE CELL */}
