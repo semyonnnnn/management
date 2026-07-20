@@ -7,7 +7,7 @@ interface ExtendedAddProps extends AddFormModalProps {
     isConsolidated: boolean;
 }
 
-export const AddFormModal = ({ isOpen, onClose, versionId, isConsolidated }: ExtendedAddProps) => {
+export const AddFormModal = ({ isOpen, onClose, isConsolidated }: ExtendedAddProps) => {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         indicators: 0,
@@ -18,7 +18,6 @@ export const AddFormModal = ({ isOpen, onClose, versionId, isConsolidated }: Ext
         k4: '1.0',
         k5: '1.0',
         k6: '1.0',
-        version_id: versionId,
         is_consolidated: isConsolidated
     });
 

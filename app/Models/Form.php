@@ -18,7 +18,6 @@ class Form extends Model
         'k5',
         'k6',
         'is_consolidated',
-        'version_id',
     ];
 
     protected $guarded = [];
@@ -28,14 +27,6 @@ class Form extends Model
     public function departments()
     {
         return $this->belongsToMany(Department::class, 'department_form')
-            ->withPivot('version_id')
-            ->withTimestamps();
-    }
-
-    public function okveds()
-    {
-        return $this->belongsToMany(Okved::class, 'form_okved')
-            ->withPivot('version_id')
             ->withTimestamps();
     }
 }

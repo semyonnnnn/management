@@ -6,7 +6,6 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 /////////////////////////////////////
 use App\Services\UploadFilesService;
-use App\Models\Version;
 
 class OldDepartmentsController extends Controller
 {
@@ -19,37 +18,23 @@ class OldDepartmentsController extends Controller
 
     public function index()
     {
-        $currentVersion = Version::query()->where('isCurrent', true)->first();
-
-        // Handle case where no version exists
-        if (!$currentVersion) {
-            return Inertia::render('OldDepartments/Index', [
-                'departments' => [],
-                'forms' => [],
-                'versionId' => 0,
-            ]);
-        }
 
         // 2. Fetch Data
         $departments = DB::table('old_departments')
-            ->where('version_id', $currentVersion->id)
             ->select('id', 'name', 'territory', 'staff', 'workload', 'state')
             ->orderBy('name', 'asc')
             ->get();
 
 
         $forms = DB::table('old_forms')
-            ->where('version_id', $currentVersion->id)
             ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'old_department_id')
             ->orderBy('name', 'asc')
             ->get();
 
-        // Handle case where version exists but has no departments (Return early)
         if ($departments->isEmpty()) {
             return Inertia::render('OldDepartments/Index', [
                 'departments' => [],
                 'forms' => [],
-                'versionId' => $currentVersion->id,
             ]);
         }
 
@@ -86,7 +71,6 @@ class OldDepartmentsController extends Controller
         return Inertia::render('OldDepartments/Index', [
             'departments' => $departmentsWithForms,
             'forms' => $forms,
-            'versionId' => $currentVersion->id
         ]);
     }
 }

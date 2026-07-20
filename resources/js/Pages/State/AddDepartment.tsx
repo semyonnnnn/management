@@ -7,7 +7,6 @@ interface DepartmentForm {
     name: string;
     territory: string;
     state: string;
-    version_id: string;
 }
 
 interface AddDepartmentProps {
@@ -21,7 +20,6 @@ const AddDepartment = ({ isOpen, handleCancel }: AddDepartmentProps) => {
         name: '',
         territory: 'ekb',
         state: '',
-        version_id: '',
     });
 
     // Helper to determine border/glow style for error fields

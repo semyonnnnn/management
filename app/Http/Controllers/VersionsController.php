@@ -27,7 +27,7 @@ class VersionsController extends Controller
         ]);
     }
 
-    public function update(int | string $id)
+    public function update(int|string $id)
     {
         DB::transaction(function () use ($id) {
             // 1. Set every version to false
@@ -64,77 +64,12 @@ class VersionsController extends Controller
                 'isCurrent' => false,
                 'updated_at' => now(),
             ]);
-
-            // 2. Insert the new version
-            $versionId = DB::table('versions')->insertGetId([
-                'name' => $request->input('name'),
-                'isCurrent' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // 3. Get the latest previous version (the one that was current before)
-            $previousVersion = DB::table('versions')
-                ->where('id', '<', $versionId)
-                ->orderByDesc('id')
-                ->first();
-
-            if ($previousVersion) {
-                $staffMap = $request->input('staff_map', []);
-
-                // 4. Clone departments with updated staff AND preserve state
-                $departments = DB::table('old_departments')
-                    ->where('versions_id', $previousVersion->id)
-                    ->get();
-
-                $newDepartments = [];
-                foreach ($departments as $dept) {
-                    $newDepartments[] = [
-                        'version_id' => $versionId,
-                        'name' => $dept->name,
-                        'territory' => $dept->territory,
-                        'staff' => isset($staffMap[$dept->id]) ? (int) $staffMap[$dept->id] : $dept->staff,
-                        'state' => $dept->state, // ← PRESERVE the original state value from previous version
-                        'workload' => $dept->workload,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                }
-
-                if (!empty($newDepartments)) {
-                    DB::table('old_departments')->insert($newDepartments);
-                }
-
-                // 5. Clone forms for the new version
-                $forms = DB::table('old_forms')
-                    ->where('versions_id', $previousVersion->id)
-                    ->get();
-
-                $newForms = [];
-                foreach ($forms as $form) {
-                    $newForms[] = [
-                        'versions_id' => $versionId,
-                        'old_department_id' => $form->old_department_id,
-                        'name' => $form->name,
-                        'indicators' => $form->indicators,
-                        'reports' => $form->reports,
-                        'coeff' => $form->coeff,
-                        'final' => $form->final,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                }
-
-                if (!empty($newForms)) {
-                    DB::table('old_forms')->insert($newForms);
-                }
-            }
         });
 
         return redirect()->back()->with('success', 'Новая версия успешно создана и применена');
     }
 
-    public function delete(int | string $id)
+    public function delete(int|string $id)
     {
         DB::transaction(function () use ($id) {
             // 1. Delete linked forms first (to avoid foreign key errors)

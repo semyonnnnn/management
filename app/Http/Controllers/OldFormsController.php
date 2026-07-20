@@ -11,34 +11,13 @@ class OldFormsController extends Controller
 {
     public function index(Request $request)
     {
-        $currentVersion = DB::table('versions')
-            ->where('isCurrent', true)
-            ->first();
-
-        if (!$currentVersion) {
-            return Inertia::render('OldForms/Index', [
-                'departments' => [],
-                'forms' => [
-                    'data' => [],
-                    'links' => [],
-                    'total' => 0,
-                    'current_page' => 1
-                ],
-                'versionId' => 0,
-                'filters' => ['search' => '', 'territory' => 'all']
-            ]);
-        }
-
         // Fetch departments for reference mapping
         $departments = DB::table('old_departments')
-            ->where('version_id', $currentVersion->id)
             ->select('id', 'name', 'territory', 'staff', 'workload', 'state')
             ->orderBy('name', 'asc')
             ->get();
 
-        // Fetch raw forms matching version baseline
         $forms = DB::table('old_forms')
-            ->where('version_id', $currentVersion->id)
             ->select('id', 'name', 'indicators', 'reports', 'coeff', 'final', 'old_department_id')
             ->get();
 
@@ -103,11 +82,11 @@ class OldFormsController extends Controller
 
         $departmentsDataProps = $departments->map(function ($dep) {
             return [
-                'id' => (string)$dep->id,
+                'id' => (string) $dep->id,
                 'name' => $dep->name,
                 'territory' => $dep->territory,
-                'staff' => (int)$dep->staff,
-                'workload' => (int)$dep->workload,
+                'staff' => (int) $dep->staff,
+                'workload' => (int) $dep->workload,
                 'state' => $dep->state
             ];
         })->values();
@@ -115,7 +94,6 @@ class OldFormsController extends Controller
         return Inertia::render('OldForms/Index', [
             'departments' => $departmentsDataProps,
             'forms' => $paginatedForms,
-            'versionId' => $currentVersion->id,
             'filters' => [
                 'search' => $search ?? '',
                 'territory' => $territory

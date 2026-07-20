@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\DB;
 use App\Services\FormDistributionService;
 use App\Http\Requests\FormDistributionRequest;
 use App\Models\Form;
-use App\Models\Version;
 
 class FormsDistributionController extends Controller
 {
@@ -33,24 +32,12 @@ class FormsDistributionController extends Controller
     {
         $data = $r->validated();
 
-        // Получаем ID текущей активной версии для пивот-таблицы
-        $currentVersionId = Version::query()->where('isCurrent', true)->value('id');
-
-        DB::transaction(function () use ($data, $currentVersionId) {
-            // Создаем саму форму (без version_id)
+        DB::transaction(function () use ($data) {
             $form = Form::create([
                 'name' => $data['name'],
             ]);
 
-            // Формируем структуру для пивота department_form
-            $syncData = [];
-            foreach ($data['departments'] ?? [] as $dept) {
-                if (!empty($dept['department_id'])) {
-                    $syncData[$dept['department_id']] = ['version_id' => $currentVersionId];
-                }
-            }
-
-            $form->departments()->sync($syncData);
+            $form->departments()->sync($data['departments']);
         });
 
         return redirect()->back();
@@ -61,10 +48,7 @@ class FormsDistributionController extends Controller
         $data = $r->validated();
         $form = Form::findOrFail($r->input('id'));
 
-        // Получаем ID текущей активной версии
-        $currentVersionId = Version::query()->where('isCurrent', true)->value('id');
-
-        DB::transaction(function () use ($form, $data, $currentVersionId) {
+        DB::transaction(function () use ($form, $data) {
             // 1. Обновляем базовые поля формы
             $form->update([
                 'name' => $data['name'],
@@ -73,39 +57,19 @@ class FormsDistributionController extends Controller
                 'coeff' => $data['coeff'] ?? '1.0',
             ]);
 
-            // 2. Собираем и синхронизируем Отделы (department_form)
-            $syncDepartments = [];
-            // Собираем все ОКВЭДы со всех отделов в один плоский список строк
-            $allOkvedCodes = [];
+            // Collect IDs and flatten OKVEDs directly
+            $departmentIds = collect($data['departments'])->pluck('department_id')->toArray();
+            $allOkvedCodes = collect($data['departments'])->pluck('okveds')->flatten()->unique()->toArray();
 
-            foreach ($data['departments'] ?? [] as $dept) {
-                if (!empty($dept['department_id'])) {
-                    $syncDepartments[$dept['department_id']] = ['version_id' => $currentVersionId];
+            // Sync departments without extra pivot data
+            $form->departments()->sync($departmentIds);
 
-                    if (!empty($dept['okveds']) && is_array($dept['okveds'])) {
-                        $allOkvedCodes = array_merge($allOkvedCodes, $dept['okveds']);
-                    }
-                }
-            }
-            // Синхронизируем связь с отделами
-            $form->departments()->sync($syncDepartments);
+            // Sync OKVEDs (assuming a similar relationship exists)
+            $form->okveds()->sync($allOkvedCodes);
 
             // 3. Собираем и синхронизируем ОКВЭДы (form_okved)
             $syncOkveds = [];
             $allOkvedCodes = array_unique($allOkvedCodes);
-
-            if (!empty($allOkvedCodes)) {
-                // Ищем ID кодов ОКВЭД по их строковому значению (предполагаем, что колонка называется 'code')
-                // Если ваша колонка называется иначе (например, 'name' или 'value'), замените 'code' ниже:
-                $okvedIds = DB::table('okveds')
-                    ->whereIn('code', $allOkvedCodes)
-                    ->pluck('id')
-                    ->toArray();
-
-                foreach ($okvedIds as $okvedId) {
-                    $syncOkveds[$okvedId] = ['version_id' => $currentVersionId];
-                }
-            }
 
             // Нам нужен метод связи okveds() в модели Form. 
             // Он должен быть объявлен как: return $this->belongsToMany(Okved::class, 'form_okved');

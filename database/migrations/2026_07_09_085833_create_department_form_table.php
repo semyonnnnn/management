@@ -14,9 +14,6 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('form_id')->constrained()->onDelete('cascade');
             $table->foreignId('department_id')->constrained()->onDelete('cascade');
-            $table->foreignId('version_id')
-                ->constrained()
-                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

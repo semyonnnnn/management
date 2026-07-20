@@ -17,9 +17,6 @@ return new class extends Migration {
             // Stored as a string to preserve dots and leading zeros (e.g., "01.11", "62.01")
             $table->string('okved')->unique();
 
-            $table->foreignId('version_id')
-                ->constrained()
-                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

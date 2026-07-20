@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Form;
-use App\Models\Version;
 use App\Models\Department;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -13,18 +12,9 @@ class FormDistributionService
     public function index(string $search, string $territory): array
     {
         $departments = Department::all();
-        $currentVersion = Version::query()->where('isCurrent', true)->first();
-
-        if (!$currentVersion) {
-            return [
-                'forms' => new LengthAwarePaginator([], 0, 12),
-                'departments' => $departments,
-            ];
-        }
 
         $formsQuery = Form::query()
-            ->with(['departments', 'okveds'])
-            ->where('version_id', $currentVersion->id);
+            ->with(['departments', 'okveds']);
 
         if ($territory !== 'all') {
             $formsQuery->whereHas('departments', function ($query) use ($territory) {
@@ -49,7 +39,6 @@ class FormDistributionService
             'indicators' => (int) $form->indicators,
             'reports' => (int) $form->reports,
             'coeff' => $form->coeff,
-            'version_id' => $form->version_id,
             'resolvedTerritory' => $form->departments->first()?->territory ?? 'all',
             'departments' => $form->departments->map(fn($d) => ['id' => $d->id, 'name' => $d->name]),
             'okveds' => $form->okveds->map(fn($o) => ['id' => $o->id, 'code' => $o->code]),

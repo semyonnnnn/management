@@ -16,7 +16,6 @@ interface FormItem {
     k4: number;
     k5: number;
     k6: number;
-    version_id: number;
     is_consolidated: boolean;
     created_at: string; // From SQL
     updated_at: string; // From SQL
@@ -51,7 +50,6 @@ export default function Index({ forms, filters }: Props) {
     const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
     const [localForms, setLocalForms] = useState<LocalFormItem[]>([]);
     const [initialForms, setInitialForms] = useState<FormItem[]>(forms.data);
-    const extractedVersionId = forms.data[0]?.version_id || 0;
 
     const mapToLocalState = (items: FormItem[]): LocalFormItem[] => {
         return items.map(item => ({
@@ -139,7 +137,7 @@ export default function Index({ forms, filters }: Props) {
                     </div>
                 </div>
 
-                <AddFormModal isConsolidated={true} isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} versionId={extractedVersionId} />
+                <AddFormModal isConsolidated={true} isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
 
                 {hasChanges && (
                     <div className="fixed bottom-4 right-4 bg-white border border-slate-300 p-4 shadow-lg z-50">

@@ -44,14 +44,13 @@ interface PaginatedForms {
 interface ExtendedPageProps extends PageProps {
     departments: Department[];
     forms: PaginatedForms;
-    versionId: number; // Added to capture explicit version bounds
     filters: {
         territory?: string;
         search?: string;
     };
 }
 
-export default function Index({ departments, forms, versionId, filters }: ExtendedPageProps) {
+export default function Index({ departments, forms, filters }: ExtendedPageProps) {
     const [selectedTerritory, setSelectedTerritory] = useState<string>(filters.territory || 'all');
     const [searchQuery, setSearchQuery] = useState<string>(filters.search || '');
     const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false); // Modal state switch
@@ -256,7 +255,6 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                     isOpen={isAddModalOpen}
                     onClose={() => setIsAddModalOpen(false)}
                     departments={departments}
-                    versionId={versionId}
                 />
 
             </div>

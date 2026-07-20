@@ -9,11 +9,10 @@ interface EditFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     departments: Array<{ id: string; name: string; territory: string }>;
-    versionId: number;
     form: any;
 }
 
-export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }: EditFormModalProps) => {
+export const EditFormModal = ({ isOpen, onClose, departments, form }: EditFormModalProps) => {
     const { data, setData, put, processing, reset } = useForm({
         id: '',
         name: '',
@@ -21,7 +20,6 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
         reports: 1,
         coeff: '1.0',
         departments: [] as Array<{ department_id: string; okveds: string[] }>,
-        version_id: versionId
     });
 
     const [drafts, setDrafts] = useState<
@@ -34,7 +32,6 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
                 reports: number;
                 coeff: string;
                 departments: Array<{ department_id: string; okveds: string[] }>;
-                version_id: number;
             }
         >
     >({});
@@ -99,7 +96,6 @@ export const EditFormModal = ({ isOpen, onClose, departments, versionId, form }:
             reports: form.reports,
             coeff: form.coeff,
             departments: mappedDepartments,
-            version_id: versionId
         });
 
         setActiveDeptIndex(null);

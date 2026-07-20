@@ -216,12 +216,10 @@ export interface Department {
 interface AddFormModalProps {
     isOpen: boolean;
     onClose: () => void;
-    versionId: number;
 }
 interface ExtendedPageProps extends PageProps {
     departments: Department[];
     forms: PaginatedForms;
-    versionId: number;
     filters: {
         territory?: string;
         search?: string;

@@ -24,7 +24,6 @@ return new class extends Migration {
             $table->integer('staff')->default(0);
             $table->integer('state')->default(0);
             $table->integer('workload');
-            $table->foreignId('version_id')->constrained();
             $table->timestamps();
         });
 
@@ -40,9 +39,6 @@ return new class extends Migration {
                 ->nullable()
                 ->constrained()
                 ->nullOnDelete(); // department can be null if missing
-            $table->foreignId('version_id')
-                ->constrained()
-                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

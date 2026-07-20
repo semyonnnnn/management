@@ -6,7 +6,7 @@ import { EditFormModal } from './EditFormDistributionModal';
 import { ExtendedPageProps } from '@/types';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function Index({ departments, forms, versionId, filters }: ExtendedPageProps) {
+export default function Index({ departments, forms, filters }: ExtendedPageProps) {
     const [selectedTerritory, setSelectedTerritory] = useState<string>(filters.territory || 'all');
     const [searchQuery, setSearchQuery] = useState<string>(filters.search || '');
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
@@ -162,7 +162,7 @@ export default function Index({ departments, forms, versionId, filters }: Extend
                     })}
                 </div>
 
-                <EditFormModal isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedForm(null); }} departments={departments} versionId={versionId} form={selectedForm} />
+                <EditFormModal isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedForm(null); }} departments={departments} form={selectedForm} />
             </div>
         </AuthenticatedLayout>
     );

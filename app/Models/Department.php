@@ -17,16 +17,7 @@ class Department extends Model
         'name',
         'territory',
         'state',
-        'version_id',
     ];
-
-    // protected function casts(): array
-    // {
-    //     return [
-    //         'state' => 'integer', // Ensures 1/0 from DB becomes true/false in PHP
-    //         'version_id' => 'integer',
-    //     ];
-    // }
 
     /**
      * Get the forms associated with the department.

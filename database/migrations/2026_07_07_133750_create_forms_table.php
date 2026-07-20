@@ -26,10 +26,6 @@ return new class extends Migration {
 
             $table->integer('reports');
 
-            $table->foreignId('version_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
             // Converted to snake_case (is_consolidated) to match Laravel database conventions
             $table->boolean('is_consolidated')->default(false);
             $table->timestamps();

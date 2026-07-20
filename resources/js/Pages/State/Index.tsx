@@ -8,6 +8,7 @@ import { AddDepartment } from './AddDepartment';
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { DepartmentRow } from './DepartmentRow';
 import { FlashMessage } from '@/components/custom/FlashMessage';
+import { DatePicker } from '@/components/custom/DatePicker';
 
 interface StatePageProps extends PageProps {
     departments: Department[] | null;
@@ -144,6 +145,8 @@ export default function Index({ departments }: StatePageProps) {
                             <div className="text-3xl font-bold text-gray-900 uppercase tracking-tight">
                                 ШТАТНОЕ <span className="text-indigo-600">[{filteredState.length}]</span>
                             </div>
+                            <h2 className='border-l px-4'>Актуально на:</h2>
+                            <DatePicker className='w-fit' />
                             <div className="relative flex-1 max-w-md mr-28">
                                 <input
                                     type="text"
@@ -167,11 +170,11 @@ export default function Index({ departments }: StatePageProps) {
                         </div>
                     </div>
 
-                    <div className="bg-white/90 backdrop-blur-sm border border-indigo-200/50 w-full overflow-hidden">
+                    <div className="bg-white/90 uppercase backdrop-blur-sm border border-indigo-200/50 w-full overflow-hidden">
                         <div className="flex bg-indigo-50/80 border-b border-indigo-200/80 items-center">
                             <div className="w-24 px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 border-r border-indigo-200">КОД</div>
                             <div className="flex-1 px-1.5 py-1 text-sm font-mono font-bold text-indigo-700">ОТДЕЛ</div>
-                            <div className="w-24 px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 text-right">ШТАТНОЕ</div>
+                            <div className="w-24 px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 text-right border-r">ШТАТНОЕ</div>
                             <div className="w-40 px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 text-right">ТЕРРИТОРИЯ</div>
                             <div className="w-24"></div>
                         </div>

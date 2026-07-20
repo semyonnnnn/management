@@ -64,6 +64,7 @@ export const DepartmentRow = ({
         krg: "bg-purple-100 text-purple-700 border border-purple-200",
     };
 
+    console.log(dept);
     return (
         <div className={`flex flex-col border-b border-indigo-900/10 ${index % 2 === 0 ? 'bg-slate-50/60' : 'bg-white'}`}>
             <div className="flex items-start h-fit py-2">
@@ -93,7 +94,7 @@ export const DepartmentRow = ({
                 </div>
 
                 {/* STATE CELL */}
-                <div className="w-24 px-1.5 flex flex-col justify-start">
+                <div className="w-24 px-2 flex flex-col relative justify-start">
                     <input
                         type="text"
                         value={dept.state}
@@ -101,6 +102,7 @@ export const DepartmentRow = ({
                         className={`w-full h-7 border-b px-1.5 text-right font-mono text-sm font-bold bg-transparent text-indigo-900 outline-none transition-colors ${getBorderClass('state')}`}
                     />
                     {renderError('state')}
+                    <div className="absolute right-0 top-0 w-px h-7 bg-indigo-200" />
                 </div>
 
                 {/* TERRITORY CELL */}

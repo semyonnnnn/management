@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use App\Services\UploadFilesService;
-use App\Models\Version;
 
 class DepartmentsController extends Controller
 {
@@ -18,26 +17,14 @@ class DepartmentsController extends Controller
 
     public function index()
     {
-        $currentVersion = Version::query()->where('isCurrent', true)->first();
-
-        if (!$currentVersion) {
-            return Inertia::render('Departments/Index', [
-                'departments' => [],
-                'forms' => [],
-                'versionId' => 0,
-            ]);
-        }
-
         // 2. Fetch Data
         $departments = DB::table('departments')
-            ->where('version_id', $currentVersion->id)
             ->select('id', 'name', 'territory', 'staff', 'workload', 'state')
             ->orderBy('name', 'asc')
             ->get();
 
         // FIXED: Removed 'department_id', 'coeff', and 'final' as they do not exist in your table.
         $forms = DB::table('forms')
-            ->where('version_id', $currentVersion->id)
             ->select('id', 'name', 'indicators', 'reports')
             ->orderBy('name', 'asc')
             ->get();
@@ -46,7 +33,6 @@ class DepartmentsController extends Controller
             return Inertia::render('Departments/Index', [
                 'departments' => [],
                 'forms' => [],
-                'versionId' => $currentVersion->id,
             ]);
         }
 
@@ -71,7 +57,6 @@ class DepartmentsController extends Controller
         return Inertia::render('Departments/Index', [
             'departments' => $departmentsWithForms,
             'forms' => $forms,
-            'versionId' => $currentVersion->id
         ]);
     }
 }

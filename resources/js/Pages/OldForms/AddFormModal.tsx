@@ -12,17 +12,15 @@ interface AddFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     departments: Department[];
-    versionId: number;
 }
 
-export const AddFormModal = ({ isOpen, onClose, departments, versionId }: AddFormModalProps) => {
+export const AddFormModal = ({ isOpen, onClose, departments }: AddFormModalProps) => {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         indicators: 0,
         reports: 1,
         coeff: '1.0',
         old_department_id: '',
-        versions_id: versionId
     });
 
     const handleSubmit = (e: React.FormEvent) => {

@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 use App\Services\FormService;
 use App\Http\Requests\FormRequest;
 use App\Models\Form;
-use App\Models\Version;
 
 class FormsController extends Controller
 {
@@ -31,7 +30,6 @@ class FormsController extends Controller
     public function create(FormRequest $r)
     {
         $data = $r->validated();
-        $currentVersionId = Version::query()->where('isCurrent', true)->firstOrFail()->id;
 
         $form = Form::create([
             'name' => $data['name'],
@@ -45,7 +43,6 @@ class FormsController extends Controller
             'k5' => $data['k5'] ?? 1.0,
             'k6' => $data['k6'] ?? 1.0,
             'is_consolidated' => $data['is_consolidated'] ?? false,
-            'version_id' => $currentVersionId,
         ]);
 
         $departmentIds = collect($data['departments'] ?? [])
@@ -83,7 +80,6 @@ class FormsController extends Controller
                     'k5' => $formData['k5'],
                     'k6' => $formData['k6'],
                     'is_consolidated' => $formData['is_consolidated'] ?? false,
-                    'version_id' => $formData['version_id'] ?? $form->version_id,
                 ]);
 
                 // Clean up and sync department relationships for this specific form

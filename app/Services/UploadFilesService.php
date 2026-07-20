@@ -68,17 +68,6 @@ class UploadFilesService
         DB::transaction(function () use ($data, $versionName) {
 
             // 1. Deactivate old current version
-            DB::table('versions')
-                ->where('isCurrent', true)
-                ->update(['isCurrent' => false, 'updated_at' => now()]);
-
-            // 2. Create new Version record
-            $versionId = DB::table('versions')->insertGetId([
-                'name' => $versionName,
-                'isCurrent' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
 
             // 3. Insert Departments and store ID map by name
             $depIdMap = [];
@@ -89,7 +78,6 @@ class UploadFilesService
                     'staff' => $dep['staff'],
                     'state' => $dep['staff'], // ← state gets the same value as staff
                     'workload' => $dep['workload'],
-                    'version_id' => $versionId,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -108,7 +96,6 @@ class UploadFilesService
                     'coeff' => $form['coeff'],
                     'final' => $form['final'],
                     'old_department_id' => $depId,
-                    'version_id' => $versionId,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -163,7 +150,6 @@ class UploadFilesService
             'departments' => 'required|array',
             'departments.*.id' => 'required|integer|exists:departments,id',
             'departments.*.staff' => 'required|integer|min:0',
-            'version_id' => 'required|integer|exists:versions,id'
         ]);
 
         DB::transaction(function () use ($validated) {
@@ -176,12 +162,10 @@ class UploadFilesService
                     'id' => $deptUpdate['id'],
                     'old_staff' => $originalDept->staff,
                     'old_state' => $originalDept->state,
-                    'version_id' => $validated['version_id']
                 ]);
 
                 DB::table('old_departments')
                     ->where('id', $deptUpdate['id'])
-                    ->where('version_id', $validated['version_id'])
                     ->update([
                         'staff' => $deptUpdate['staff'],
                         'state' => $originalDept->state, // Use the exact original value

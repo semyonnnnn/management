@@ -24,7 +24,6 @@ class FormRequest extends FR
             'k5' => 'nullable|numeric',
             'k6' => 'nullable|numeric',
             'is_consolidated' => 'nullable|boolean',
-            'version_id' => 'required|integer',
         ];
     }
 
@@ -50,9 +49,6 @@ class FormRequest extends FR
             'k6.numeric' => 'Коэффициент K6 должен быть числом.',
 
             'is_consolidated.boolean' => 'Поле "Консолидированная" должно иметь логическое значение.',
-
-            'version_id.required' => 'Отсутствует привязка к версии.',
-            'version_id.integer' => 'ID версии должен быть числом.',
         ];
     }
 }

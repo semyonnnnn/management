@@ -3,24 +3,15 @@
 namespace App\Services;
 
 use App\Models\Form;
-use App\Models\Version;
-use App\Models\Department;
-use Illuminate\Pagination\LengthAwarePaginator;
+// use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class FormService
 {
     public function index(string $search, string $territory): array
     {
-        $currentVersion = Version::query()->where('isCurrent', true)->first();
 
-        if (!$currentVersion) {
-            return [
-                'forms' => new LengthAwarePaginator([], 0, 12),
-            ];
-        }
-
-        $formsQuery = Form::query()->where('version_id', $currentVersion->id);
+        $formsQuery = Form::query();
 
         if ($territory !== 'all') {
             $formsQuery->whereHas('departments', function ($query) use ($territory) {
@@ -51,7 +42,6 @@ class FormService
             'k5' => (float) $form->k5,
             'k6' => (float) $form->k6,
             'reports' => (int) $form->reports,
-            'version_id' => $form->version_id,
             'is_consolidated' => (bool) $form->is_consolidated,
             'created_at' => $form->created_at,
             'updated_at' => $form->updated_at,

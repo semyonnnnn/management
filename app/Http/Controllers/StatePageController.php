@@ -6,7 +6,6 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 /////////////////////////////////
 use App\Models\Department;
-use App\Models\Version;
 use App\Http\Requests\StateCreateRequest;
 use App\Http\Requests\StateUpdateRequest;
 
@@ -14,27 +13,19 @@ class StatePageController extends Controller
 {
     public function index()
     {
-        $currentVersionId = Version::query()->where('isCurrent', true)->first()?->id;
-
-        $departments = Department::query()->where('version_id', $currentVersionId)
+        $departments = Department::query()
             ->orderBy('id', 'asc')
             ->get(['id', 'territory', 'name', 'state', 'code']);
 
-        // MAGIC: Fetch the versions so the dropdown actually has data to map over!
-        $versions = Version::query()->orderBy('name', 'asc')->get(['id', 'name']);
-
         return Inertia::render('State/Index', [
             'departments' => $departments->isNotEmpty() ? $departments : null,
-            'versions' => $versions
         ]);
     }
 
     public function create(StateCreateRequest $r)
     {
-        $currentVersionId = Version::query()->where('isCurrent', true)->first()?->id;
-
         Department::create(array_merge($r->validated(), [
-            'version_id' => $currentVersionId
+            'state_updated_at' => now(),
         ]));
 
         return to_route('state.index')
@@ -57,7 +48,12 @@ class StatePageController extends Controller
         // Step 4: Loop, Match, and Save
         foreach ($data as $item) {
             if ($dept = $departments->get($item['id'])) {
-                $dept->update($item);
+                $updatedData = $item;
+
+                if ($item['state'] != $dept['state']) {
+                    $updatedData['state_updated_at'] = now();
+                }
+                $dept->update($updatedData);
             }
         }
 

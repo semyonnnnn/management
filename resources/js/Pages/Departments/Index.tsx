@@ -8,21 +8,20 @@ import { TotalLoadCard } from "./Partials/TotalLoadCard";
 import { DeptTable } from "./Partials/DeptTable";
 import Modal from "@/components/custom/Modal";
 
-export default function Index({ auth, departments, forms, versionId }: PageProps & { departments: any[], forms: any[], versionId: number }) {
+export default function Index({ auth, departments, forms }: PageProps & { departments: any[], forms: any[] }) {
     return (
         <AuthenticatedLayout
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Управление нагрузкой</h2>}
         >
             <Head title="Отделы" />
-            <LoadAndModifyModule backendDepartments={departments} forms={forms} currentVersionId={versionId} />
+            <LoadAndModifyModule backendDepartments={departments} forms={forms} />
         </AuthenticatedLayout>
     );
 }
 
-const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[], currentVersionId: number }> = ({
+const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }> = ({
     backendDepartments,
-    forms,
-    currentVersionId
+    forms
 }) => {
     const [localStaff, setLocalStaff] = useState<Record<string, number>>({});
 
@@ -112,7 +111,6 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[], c
 
             await axios.put('/uploadFiles', {
                 departments: updates,
-                version_id: currentVersionId
             });
 
             // Show success message (you can add a toast notification here)

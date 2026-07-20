@@ -21,10 +21,6 @@ return new class extends Migration {
             $table->integer('state')->default(0);
 
             $table->integer('workload')->default(0);
-
-            $table->foreignId('version_id')
-                ->constrained()
-                ->cascadeOnDelete();
             $table->timestamps();
         });
     }
