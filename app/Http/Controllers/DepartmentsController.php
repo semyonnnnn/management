@@ -30,7 +30,7 @@ class DepartmentsController extends Controller
             ->get();
 
         if ($departments->isEmpty()) {
-            return Inertia::render('Departments/Index', [
+            return Inertia::render('Dashboard/Index', [
                 'departments' => [],
                 'forms' => [],
             ]);
@@ -54,7 +54,7 @@ class DepartmentsController extends Controller
             ];
         })->values();
 
-        return Inertia::render('Departments/Index', [
+        return Inertia::render('Dashboard/Index', [
             'departments' => $departmentsWithForms,
             'forms' => $forms,
         ]);

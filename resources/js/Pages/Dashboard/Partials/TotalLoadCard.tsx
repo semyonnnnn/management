@@ -1,5 +1,5 @@
 import React from "react";
-import { TotalLoadCardProps } from "@/types";
+import { TotalLoadCardProps, LoadItem } from "@/types";
 
 const lower_value = 80;
 const upper_value = 100;
@@ -22,14 +22,19 @@ function getStatusIcon(percent: number) {
     return "⚠";
 }
 
+const DEFAULT_LOAD_ITEMS: LoadItem[] = [
+    { id: '1', percent: 0, label: '', value: 0, load_per_person: 0 },
+    { id: '2', percent: 0, label: '', value: 0, load_per_person: 0 },
+    { id: '3', percent: 0, label: '', value: 0, load_per_person: 0 },
+];
 
-export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads }) => {
+export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads = DEFAULT_LOAD_ITEMS }) => {
     loads.forEach(
         (load, index) => {
             if (index !== 0) {
                 const currentValue = loads[index].load_per_person;
                 const totalValue = loads[0].load_per_person;
-                const rawPercent = 100 * (currentValue) / (totalValue);
+                const rawPercent = totalValue > 0 ? (100 * currentValue) / totalValue : 0;
                 const roundedPercent = Math.round(rawPercent * 10) / 10;
 
                 loads[index].percent = roundedPercent;
@@ -37,28 +42,16 @@ export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads }) => {
         }
     );
 
-    loads[0].percent = 100;
+    loads[0].percent = loads[0].load_per_person > 0 ? 100 : 0;
 
     return (
-        <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border border-indigo-100 shadow-sm">
-            {/* <div className="border-b border-indigo-200/50 px-6 py-5 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-sm">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                    </div>
-                    <h6 className="text-xl font-mono font-bold text-gray-900 tracking-tighter uppercase">общая нагрузка по сбору форм фсн</h6>
-                </div>
-            </div> */}
-
+        <div className="bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50 border border-indigo-100 shadow-sm">
             <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     {loads.map((load) => (
                         <div key={load.id} className="group relative bg-white/90 backdrop-blur-sm border border-indigo-200/50 hover:border-indigo-300 transition-all duration-300">
-                            {/* Visual Center Marker (the 100% benchmark line) */}
                             <div className="absolute inset-y-0 left-1/2 w-px bg-indigo-200/40 z-0" />
-                            <div className="absolute top-0 left-0 w-0 h-0 border-t-[35px] border-r-[35px] border-t-indigo-100/80 border-r-transparent"></div>
+                            <div className="absolute top-0 left-0 w-0 h-0 border-t-35 border-r-35 border-t-indigo-100/80 border-r-transparent"></div>
 
                             <div className="p-5 relative z-10">
                                 <div className="flex items-center justify-between mb-5">
@@ -84,15 +77,13 @@ export const TotalLoadCard: React.FC<TotalLoadCardProps> = ({ loads }) => {
                                         <span className="text-[12px] font-mono text-indigo-800 tracking-wider uppercase">средняя нагрузка на человека</span>
                                     </div>
 
-                                    {/* Progress Bar Container */}
                                     <div className="relative w-full bg-indigo-100/80 h-2 border border-indigo-200/30 overflow-hidden">
-                                        {/* Visual Markers: 50%, 100% (Center), 150% */}
                                         <div className="absolute left-1/4 top-0 w-px h-full bg-yellow-300 z-10" />
                                         <div className="absolute left-1/2 top-0 w-px h-full bg-yellow-500 z-10" />
                                         <div className="absolute left-3/4 top-0 w-px h-full bg-yellow-500 z-10" />
 
                                         <div
-                                            className={`h-full bg-gradient-to-r ${getGradientColor(load.percent)}`}
+                                            className={`h-full bg-linear-to-r ${getGradientColor(load.percent)}`}
                                             style={{
                                                 width: `${Math.min(load.percent, 100)}%`,
                                                 transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
