@@ -14,7 +14,7 @@ class FormDistributionService
         $departments = Department::all();
 
         $formsQuery = Form::query()
-            ->with(['departments', 'okveds']);
+            ->with(['departments']);
 
         if ($territory !== 'all') {
             $formsQuery->whereHas('departments', function ($query) use ($territory) {
@@ -41,7 +41,6 @@ class FormDistributionService
             'coeff' => $form->coeff,
             'resolvedTerritory' => $form->departments->first()?->territory ?? 'all',
             'departments' => $form->departments->map(fn($d) => ['id' => $d->id, 'name' => $d->name]),
-            'okveds' => $form->okveds->map(fn($o) => ['id' => $o->id, 'code' => $o->code]),
         ]);
 
         return ['forms' => $forms, 'departments' => $departments];

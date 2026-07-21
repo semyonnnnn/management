@@ -16,9 +16,6 @@ export const EditFormModal = ({ isOpen, onClose, departments, form }: EditFormMo
     const { data, setData, put, processing, reset } = useForm({
         id: '',
         name: '',
-        indicators: 0,
-        reports: 1,
-        coeff: '1.0',
         departments: [] as Array<{ department_id: string; okveds: string[] }>,
     });
 
@@ -27,10 +24,6 @@ export const EditFormModal = ({ isOpen, onClose, departments, form }: EditFormMo
             string,
             {
                 id: string;
-                name: string;
-                indicators: number;
-                reports: number;
-                coeff: string;
                 departments: Array<{ department_id: string; okveds: string[] }>;
             }
         >
@@ -92,9 +85,6 @@ export const EditFormModal = ({ isOpen, onClose, departments, form }: EditFormMo
         setData({
             id: form.id,
             name: form.name,
-            indicators: form.indicators,
-            reports: form.reports,
-            coeff: form.coeff,
             departments: mappedDepartments,
         });
 
@@ -123,7 +113,6 @@ export const EditFormModal = ({ isOpen, onClose, departments, form }: EditFormMo
     const handleAddDepartment = () => {
         if (!selectedDeptId) return;
 
-        // Prevent adding duplicates
         if (data.departments.some(d => d.department_id === selectedDeptId)) {
             setSelectedDeptId('');
             return;
@@ -131,13 +120,11 @@ export const EditFormModal = ({ isOpen, onClose, departments, form }: EditFormMo
 
         const updatedDepts = [...data.departments, { department_id: selectedDeptId, okveds: [] }];
 
-        // Update local state ONLY (no onSave call here)
         updateFormData('departments', updatedDepts);
         setAddedDepartmentIndex(updatedDepts.length - 1);
         setHasUnsavedDepartment(true);
         setSelectedDeptId('');
 
-        // Immediately highlight the new department so the OKVED panel opens
         setActiveDeptIndex(updatedDepts.length - 1);
     };
 
@@ -164,7 +151,6 @@ export const EditFormModal = ({ isOpen, onClose, departments, form }: EditFormMo
     const handleSubmit = (e?: React.FormEvent) => {
         if (e) e.preventDefault();
 
-        // This is the ONLY place that actually sends the request to Laravel
         put('/forms_distribution', {
             preserveScroll: true,
             onSuccess: () => {
@@ -172,7 +158,7 @@ export const EditFormModal = ({ isOpen, onClose, departments, form }: EditFormMo
                 setHasUnsavedDepartment(false);
                 reset();
                 setActiveDeptIndex(null);
-                onClose(); // Close modal only upon successful save
+                onClose();
             },
         });
     };
@@ -209,83 +195,16 @@ export const EditFormModal = ({ isOpen, onClose, departments, form }: EditFormMo
 
                 <div
                     onClick={handleOutsideClick}
-                    className="font-mono text-gray-900 select-none p-1 w-fit h-fit"
+                    className="font-mono text-gray-900 select-none p-1 w-fit h-fit relative pt-7"
                     style={{ fontFamily: "'JetBrains Mono', monospace" }}
                 >
                     <form
                         onSubmit={handleSubmit}
                         onClick={handleOutsideClick}
-                        className="flex flex-row items-start w-fit cursor-default"
+                        className="flex flex-row items-start mt-2 w-fit cursor-default"
                     >
-                        {/* Main Settings Panel */}
-                        <div className="w-95 border border-gray-300 p-5 bg-gray-50 flex flex-col shadow-sm shrink-0 mr-5">
-                            <div className="space-y-5">
-                                <h3 className="text-sm font-bold uppercase tracking-tight text-indigo-900 border-b border-indigo-200 pb-3">
-                                    [*] Редактировать #{data.id}
-                                </h3>
-                                <div>
-                                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Название</label>
-                                    <input
-                                        type="text"
-                                        value={data.name}
-                                        onChange={e => updateFormData('name', e.target.value)}
-                                        className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
-                                        required
-                                    />
-                                </div>
-                                <div className="grid grid-cols-3 gap-3">
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Пок.</label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            value={data.indicators}
-                                            onChange={e => setData('indicators', parseInt(e.target.value) || 0)}
-                                            className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Отч.</label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            value={data.reports}
-                                            onChange={e => setData('reports', parseInt(e.target.value) || 0)}
-                                            className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold uppercase text-gray-500 mb-1.5">Коэф.</label>
-                                        <input
-                                            type="text"
-                                            value={data.coeff}
-                                            onChange={e => updateFormData('coeff', e.target.value)}
-                                            className="w-full px-3 py-2 bg-white border border-gray-300 text-sm font-bold focus:outline-none focus:border-indigo-500"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="pt-5 border-t border-gray-200 grid grid-cols-2 gap-3 mt-6">
-                                <button
-                                    type="button"
-                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
-                                    className="px-3 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-bold uppercase cursor-pointer"
-                                >
-                                    Отмена
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="px-3 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold uppercase cursor-pointer disabled:opacity-50 shadow-sm"
-                                >
-                                    {processing ? '...' : 'Сохранить'}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Departments Panel */}
                         <DepartmentsPartial
+                            formName={data.name}
                             onConfirmRemove={handleRequestDelete}
                             departments={departments}
                             dataDepartments={data.departments}
@@ -298,22 +217,20 @@ export const EditFormModal = ({ isOpen, onClose, departments, form }: EditFormMo
                             isPanel3Open={isPanel3Open}
                             onReset={handleCancel}
                             showActions={hasUnsavedDepartment}
-                            onSave={() => handleSubmit()} // <-- Add this back right here
+                            onSave={() => handleSubmit()}
                         />
 
-                        {/* OKVEDs Panel */}
-                        {/* <OkvedPartial
+                        <OkvedPartial
                             isOpen={isPanel3Open}
                             activeDeptIndex={activeDeptIndex}
                             form={{ data, setData, processing, put }}
                             okveds={isPanel3Open && activeDeptIndex !== null ? data.departments[activeDeptIndex].okveds : []}
                             onClose={onClose}
-                        /> */}
+                        />
                     </form>
                 </div>
             </Modal>
 
-            {/* Confirmations */}
             <Confirmation
                 show={isOkvedConfirmOpen}
                 onClose={() => setIsOkvedConfirmOpen(false)}

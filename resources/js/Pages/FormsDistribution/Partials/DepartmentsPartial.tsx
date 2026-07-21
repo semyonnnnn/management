@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { CustomSelect } from "@/components/custom/CustomSelect";
 
 interface Department {
     id: string;
@@ -25,92 +25,8 @@ interface DepartmentsPartialProps {
     onSave: () => void;
     onReset: () => void;
     showActions: boolean;
+    formName: string;
 }
-
-const CustomSelect = ({
-    value,
-    onChange,
-    options,
-    defaultText
-}: {
-    value: string;
-    onChange: (val: string) => void;
-    options: { id: string; name: string }[];
-    defaultText: string
-}) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const selectedOption = options.find(opt => opt.id === value);
-
-    return (
-        <div className="relative w-full select-none" ref={dropdownRef}>
-            <div
-                onClick={() => setIsOpen(!isOpen)}
-                className={`w-full px-3 py-2 bg-white border text-sm font-bold transition-all duration-150 cursor-pointer flex justify-between items-center h-full relative z-20
-                    ${isOpen ? 'border-indigo-500 shadow-lg ring-1 ring-indigo-500 text-gray-900' : 'border-gray-300 hover:border-indigo-400 text-gray-800 shadow-sm'}
-                `}
-            >
-                <span className={!selectedOption ? "text-gray-500" : "truncate"}>
-                    {selectedOption ? selectedOption.name : defaultText}
-                </span>
-
-                <svg
-                    className={`w-4 h-4 ml-2 shrink-0 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </div>
-
-            {isOpen && (
-                <div className="absolute z-10 w-full mt-1">
-                    {/* Fixed Fading Gradient Blur Underlay */}
-                    {/* Removed top bleeding, anchors exactly at top-0 and radiates downwards */}
-                    <div
-                        className="absolute -left-8 -right-8 -bottom-12 top-0 z-0 pointer-events-none backdrop-blur-xl opacity-95 mask-[radial-gradient(ellipse_at_top,black_30%,transparent_70%)]"
-                    />
-
-                    {/* Actual Dropdown Container */}
-                    <div className="relative z-10 w-full bg-white/85 backdrop-blur-md border border-gray-200 shadow-2xl shadow-black max-h-60 overflow-y-auto custom-scrollbar">
-                        {options.length === 0 ? (
-                            <div className="px-3 py-3 text-sm text-gray-400 font-semibold italic bg-white/50">
-                                Нет доступных ведомств
-                            </div>
-                        ) : (
-                            options.map((opt) => (
-                                <div
-                                    key={opt.id}
-                                    onClick={() => {
-                                        onChange(opt.id);
-                                        setIsOpen(false);
-                                    }}
-                                    className={`px-3 py-2 text-base font-semibold cursor-pointer transition-colors border-b border-gray-100/50 last:border-0
-                                        ${value === opt.id ? 'bg-indigo-100/80 text-indigo-800' : 'text-gray-800 hover:bg-indigo-50/80 hover:text-indigo-900'}
-                                    `}
-                                >
-                                    {opt.name}
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
 
 export const DepartmentsPartial = ({
     departments,
@@ -125,7 +41,8 @@ export const DepartmentsPartial = ({
     onConfirmRemove,
     onSave,
     onReset,
-    showActions
+    showActions,
+    formName,
 }: DepartmentsPartialProps) => {
 
     const availableDepartments = (departments ?? []).filter(
@@ -138,10 +55,10 @@ export const DepartmentsPartial = ({
 
     return (
         <div
-            className={`w-95 border border-gray-300 p-5 bg-white flex flex-col shadow-sm shrink-0 transition-all duration-300 ease-in-out ${isPanel3Open ? 'mr-5' : 'mr-0'}`}
+            className={`w-fit max-w-200 border border-gray-300 p-5 bg-white flex flex-col shadow-sm shrink-0 transition-all duration-300 ease-in-out ${isPanel3Open ? 'mr-5' : 'mr-0'}`}
         >
             <h3 className="text-sm font-bold uppercase tracking-tight text-indigo-900 border-b border-indigo-200 pb-2 mb-4">
-                Отделы
+                {formName}
             </h3>
 
             <div className="grid grid-cols-[1fr_44px] gap-2 mb-5 w-full items-stretch relative z-20">
@@ -206,26 +123,26 @@ export const DepartmentsPartial = ({
                         </div>
                     );
                 })}
-                {showActions && (
-                    <div className="flex gap-2 mt-5 pt-5 border-t border-gray-200">
-                        <button
-                            type="button"
-                            onClick={onReset}
-                            className="flex-1 h-11 border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 font-bold transition-colors cursor-pointer"
-                        >
-                            Отменить
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={onSave}
-                            className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-colors cursor-pointer"
-                        >
-                            Сохранить
-                        </button>
-                    </div>
-                )}
             </div>
+            {showActions && (
+                <div className="flex gap-2 mt-5 pt-5 border-t border-gray-200">
+                    <button
+                        type="button"
+                        onClick={onReset}
+                        className="flex-1 h-11 border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 font-bold transition-colors cursor-pointer"
+                    >
+                        Отменить
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={onSave}
+                        className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-colors cursor-pointer"
+                    >
+                        Сохранить
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
