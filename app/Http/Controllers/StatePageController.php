@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 /////////////////////////////////
 use App\Models\Department;
+use App\Models\Schedule;
 use App\Http\Requests\StateCreateRequest;
 use App\Http\Requests\StateUpdateRequest;
 
@@ -19,6 +20,7 @@ class StatePageController extends Controller
 
         return Inertia::render('State/Index', [
             'departments' => $departments->isNotEmpty() ? $departments : null,
+            'date' => Schedule::first()->date ?? null,
         ]);
     }
 
@@ -27,6 +29,12 @@ class StatePageController extends Controller
         Department::create(array_merge($r->validated(), [
             'state_updated_at' => now(),
         ]));
+
+        if (!Schedule::exists()) {
+            Schedule::create(
+                ['date' => now()]
+            );
+        }
 
         return to_route('state.index')
             ->with('message', 'Отдел успешно добавлен');
@@ -37,16 +45,16 @@ class StatePageController extends Controller
     public function update(StateUpdateRequest $r)
     {
         // Step 1: Get raw validated data
-        $data = $r->validated()['departments'];
+        $validated = $r->validated();
 
         // Step 2: Extract IDs
-        $ids = array_column($data, 'id');
+        $ids = array_column($validated['departments'], 'id');
 
         // Step 3: Query & Key by ID
         $departments = Department::whereIn('id', $ids)->get()->keyBy('id');
 
         // Step 4: Loop, Match, and Save
-        foreach ($data as $item) {
+        foreach ($validated['departments'] as $item) {
             if ($dept = $departments->get($item['id'])) {
                 $updatedData = $item;
 
@@ -57,13 +65,23 @@ class StatePageController extends Controller
             }
         }
 
+        if ($validated['date']) {
+            Schedule::first()->update([
+                'date' => $validated['date']
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Данные успешно обновлены');
     }
 
     public function delete(int $id)
     {
-        $department = Department::findOrFail($id);
+        $department = Department::find($id);
         $department->delete();
+
+        if (!Department::exists()) {
+            Schedule::first()->delete();
+        }
 
         return redirect()->back();
     }

@@ -12,29 +12,32 @@ import { DatePicker } from '@/components/custom/DatePicker';
 
 interface StatePageProps extends PageProps {
     departments: Department[] | null;
+    date: string | null; // Changed to strict SQL string format
 }
 
-export default function Index({ departments }: StatePageProps) {
+export default function Index({ departments, date: initialDate }: StatePageProps) {
     const [localDepartments, setLocalDepartments] = useState<Department[]>([]);
+    const [localDate, setLocalDate] = useState<string | null>(initialDate || null);
     const [selectedTerritory, setSelectedTerritory] = useState<string>("all");
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [isAdding, setIsAdding] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<Department | null>(null);
 
-    // Track errors mapped directly to stable Department IDs: { [deptId]: { [fieldName]: "error msg" } }
     const [localErrors, setLocalErrors] = useState<Record<string, Record<string, string>>>({});
 
-    const { put, delete: destroy, setData, data, errors } = useForm<{ departments: Department[] }>({
-        departments: [] as Department[]
+    const { put, delete: destroy, setData, data, errors } = useForm<{
+        departments: Department[];
+        date: string | null; // Changed to strict SQL string format
+    }>({
+        departments: [],
+        date: null,
     });
 
-    // Map Inertia's volatile array index errors to stable Department IDs
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
             const mapped: Record<string, Record<string, string>> = {};
 
-            // Cast errors to a indexable record so TypeScript stops complaining
             const errorsRecord = errors as Record<string, string>;
 
             Object.keys(errorsRecord).forEach((key) => {
@@ -42,12 +45,11 @@ export default function Index({ departments }: StatePageProps) {
                 if (match) {
                     const index = parseInt(match[1], 10);
                     const field = match[2];
-                    const dept = data.departments[index]; // Locate the dept submitted at this index
+                    const dept = data.departments[index];
                     if (dept) {
                         if (!mapped[dept.id]) {
                             mapped[dept.id] = {};
                         }
-                        // TypeScript is now happy because errorsRecord is a standard Record<string, string>
                         mapped[dept.id][field] = errorsRecord[key];
                     }
                 }
@@ -75,6 +77,22 @@ export default function Index({ departments }: StatePageProps) {
         }
     }, [departments]);
 
+    useEffect(() => {
+        setLocalDate(initialDate || null);
+    }, [initialDate]);
+
+    const handleDateChange = (newDate: string | undefined) => {
+        const updatedDate = newDate || null;
+        setLocalDate(updatedDate);
+
+        // Direct string evaluation obfuscates the need for timestamp conversion
+        if (initialDate !== updatedDate) {
+            setData('date', updatedDate);
+        } else {
+            setData('date', null);
+        }
+    };
+
     const handleDepartmentChange = (updatedDept: Department) => {
         const nextLocal = localDepartments.map(d => d.id === updatedDept.id ? updatedDept : d);
         setLocalDepartments(nextLocal);
@@ -88,7 +106,6 @@ export default function Index({ departments }: StatePageProps) {
 
         setData('departments', diffOnly);
 
-        // Instantly clear the error for this row as soon as the user makes any edits
         if (localErrors[updatedDept.id]) {
             setLocalErrors(prev => {
                 const copy = { ...prev };
@@ -99,8 +116,8 @@ export default function Index({ departments }: StatePageProps) {
     };
 
     const hasChanges = useMemo(() => {
-        return data.departments.length > 0;
-    }, [data.departments]);
+        return data.departments.length > 0 || data.date !== null;
+    }, [data.departments, data.date]);
 
     const filteredState = useMemo(() => {
         return localDepartments.filter((dept) => {
@@ -114,6 +131,7 @@ export default function Index({ departments }: StatePageProps) {
         put(route('state.update'), {
             onSuccess: () => {
                 setData('departments', []);
+                setData('date', null);
                 setLocalErrors({});
             }
         });
@@ -121,7 +139,9 @@ export default function Index({ departments }: StatePageProps) {
 
     const handleReset = () => {
         setLocalDepartments(departments || []);
+        setLocalDate(initialDate || null);
         setData('departments', []);
+        setData('date', null);
         setLocalErrors({});
     };
 
@@ -142,12 +162,13 @@ export default function Index({ departments }: StatePageProps) {
                 <div className="space-y-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                     <div className="bg-white border border-indigo-200/50 p-1.5 flex flex-col md:flex-row gap-2 justify-between items-stretch shadow-sm">
                         <div className="flex flex-1 items-center justify-between">
-                            <div className="text-3xl font-bold text-gray-900 uppercase tracking-tight">
-                                ШТАТНОЕ <span className="text-indigo-600">[{filteredState.length}]</span>
+                            <div className='flex gap-4'>
+                                <div className="text-3xl font-bold text-gray-900 uppercase tracking-tight">
+                                    ШТАТНОЕ <span className="text-indigo-600">[{filteredState.length}]</span>
+                                </div>
+                                <DatePicker date={localDate} setDate={handleDateChange} className='w-fit!' />
                             </div>
-                            <h2 className='border-l px-4'>Актуально на:</h2>
-                            <DatePicker className='w-fit' />
-                            <div className="relative flex-1 max-w-md mr-28">
+                            <div className="relative flex-1 max-w-md">
                                 <input
                                     type="text"
                                     value={searchQuery}
@@ -186,7 +207,6 @@ export default function Index({ departments }: StatePageProps) {
                                     index={index}
                                     onDeptChange={handleDepartmentChange}
                                     onDelete={(d) => { setItemToDelete(d); setIsDeleting(true); }}
-                                    // Pass ONLY the error mapping specific to this row!
                                     rowErrors={localErrors[dept.id] || {}}
                                 />
                             ))}

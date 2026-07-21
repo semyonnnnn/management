@@ -64,7 +64,6 @@ export const DepartmentRow = ({
         krg: "bg-purple-100 text-purple-700 border border-purple-200",
     };
 
-    console.log(dept);
     return (
         <div className={`flex flex-col border-b border-indigo-900/10 ${index % 2 === 0 ? 'bg-slate-50/60' : 'bg-white'}`}>
             <div className="flex items-start h-fit py-2">

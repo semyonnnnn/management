@@ -3,6 +3,7 @@
 import * as React from "react"
 import {
     format,
+    parse,
     startOfMonth,
     endOfMonth,
     startOfWeek,
@@ -20,26 +21,52 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 export interface DatePickerProps {
-    date?: Date
-    setDate?: (date: Date | undefined) => void
+    date: string | null // Now explicitly expects 'YYYY-MM-DD'
+    setDate?: (date: string | undefined) => void // Now emits 'YYYY-MM-DD'
     className?: string
 }
 
 export function DatePicker({ date: externalDate, setDate: externalSetDate, className }: DatePickerProps) {
-    // Fallback internal state to ensure immediate re-rendering if parent state is missing
-    const [internalDate, setInternalDate] = React.useState<Date | undefined>(undefined)
-    const [currentMonth, setCurrentMonth] = React.useState(new Date())
+    const [internalDate, setInternalDate] = React.useState<string | undefined>(externalDate || undefined)
+
+    // Helper to safely parse the SQL date string back into a JS Date object for rendering
+    const parseSqlDate = (dateStr?: string | null) => {
+        if (!dateStr) return null
+        return parse(dateStr, 'yyyy-MM-dd', new Date())
+    }
+
+    const activeDateString = externalDate !== undefined ? externalDate : internalDate
+    const activeDateObj = parseSqlDate(activeDateString)
+
+    const [currentMonth, setCurrentMonth] = React.useState<Date>(activeDateObj || new Date())
     const [open, setOpen] = React.useState(false)
 
-    // Prioritize external control, but fallback to internal tracking seamlessly
-    const activeDate = externalDate !== undefined ? externalDate : internalDate
+    React.useEffect(() => {
+        if (externalDate !== undefined) {
+            setInternalDate(externalDate === null ? undefined : externalDate)
+            if (externalDate) {
+                setCurrentMonth(parseSqlDate(externalDate) as Date)
+            }
+        }
+    }, [externalDate])
 
-    // Generate the 7x6 industrial grid matrix
     const monthStart = startOfMonth(currentMonth)
     const monthEnd = endOfMonth(monthStart)
-    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 }) // Monday start
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 })
     const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 })
     const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd })
+
+    const formatCleanRussianDate = (date: Date): string => {
+        if (isNaN(date.getTime())) return ''
+
+        const formatted = new Intl.DateTimeFormat('ru-RU', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+        }).format(date)
+
+        return formatted.replace(/\s?г\.$/, '')
+    }
 
     const formatMonthHeader = (dateInstance: Date) => {
         const rawLabel = format(dateInstance, "LLLL yyyy", { locale: ru })
@@ -53,16 +80,15 @@ export function DatePicker({ date: externalDate, setDate: externalSetDate, class
                     variant="outline"
                     className={cn(
                         "w-70 justify-start text-left font-mono rounded-none border-zinc-300 bg-white text-zinc-950 hover:bg-zinc-50",
-                        !activeDate && "text-zinc-400",
+                        !activeDateObj && "text-zinc-400",
                         className
                     )}
                 >
                     <CalendarIcon className="mr-2 h-4 w-4 text-zinc-400" />
-                    {activeDate ? format(activeDate, "dd.MM.yyyy") : <span>ВЫБОР_ДАТЫ</span>}
+                    {activeDateObj ? formatCleanRussianDate(activeDateObj) : <span>ВЫБОР_ДАТЫ</span>}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64 p-3 rounded-none border border-zinc-300 bg-white text-zinc-950 font-mono shadow-none">
-                {/* Header Navigation */}
                 <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-bold tracking-wider text-zinc-900">
                         {formatMonthHeader(currentMonth)}
@@ -85,17 +111,15 @@ export function DatePicker({ date: externalDate, setDate: externalSetDate, class
                     </div>
                 </div>
 
-                {/* Day Labels */}
                 <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-indigo-600/70 mb-2">
                     {["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"].map((d) => (
                         <div key={d}>{d}</div>
                     ))}
                 </div>
 
-                {/* Core Calendar Grid */}
                 <div className="grid grid-cols-7 gap-1">
                     {days.map((day, idx) => {
-                        const isSelected = activeDate && isSameDay(day, activeDate)
+                        const isSelected = activeDateObj && isSameDay(day, activeDateObj)
                         const isCurrentMonth = isSameMonth(day, currentMonth)
 
                         return (
@@ -104,10 +128,11 @@ export function DatePicker({ date: externalDate, setDate: externalSetDate, class
                                 type="button"
                                 onClick={() => {
                                     if (isCurrentMonth) {
+                                        // Formats the clicked date into SQL standard string
+                                        const sqlDateString = format(day, "yyyy-MM-dd")
+                                        setInternalDate(sqlDateString)
                                         if (externalSetDate) {
-                                            externalSetDate(day) // Update parent if handler exists
-                                        } else {
-                                            setInternalDate(day) // Otherwise run localized fallback
+                                            externalSetDate(sqlDateString)
                                         }
                                         setOpen(false)
                                     }
