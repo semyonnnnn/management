@@ -8,6 +8,7 @@ class Form extends Model
 {
     protected $fillable = [
         'name',
+        'okud',
         'total',
         'indicators',
         'reports',

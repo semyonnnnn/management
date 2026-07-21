@@ -5,7 +5,6 @@ import { PropsWithChildren, ReactNode, useState } from 'react';
 import { Link } from '@inertiajs/react';
 import { ToggleDarkMode } from '@/components/custom/ToggleDarkMode';
 import { AuthProvider } from '@/Contexts/AuthContext';
-import { AuthDropdown } from '@/Pages/Auth/AuthDropdown';
 
 export default function GuestLayout({ header, children }: PropsWithChildren<{ header?: ReactNode }>) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);

@@ -1,7 +1,5 @@
 import { PageProps } from '@/types';
 import { Head } from '@inertiajs/react';
-import { NavButtonsMenu } from '@/components/custom/NavButtonsMenu';
-import Guest from '@/Layouts/GuestLayout';
 import Authenticated from '@/Layouts/AuthenticatedLayout';
 
 export default function Welcome({ }: PageProps<{}>) {

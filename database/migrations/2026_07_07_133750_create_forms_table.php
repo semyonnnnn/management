@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->string('name', 255);
             $table->integer('total')->default(0);
             $table->integer('indicators')->default(0);
+            $table->integer('okud');
 
             // Decimal is used for k1-k6 assuming they are coefficients/multipliers like the original 'coeff'
             $table->decimal('k1', 8, 2)->default(1.0);

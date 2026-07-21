@@ -22,7 +22,6 @@ interface FormItem {
 }
 
 // The editable interface (UI representation)
-// Omitting created_at/updated_at because they are read-only
 interface LocalFormItem extends Omit<FormItem, 'total' | 'indicators' | 'reports' | 'k1' | 'k2' | 'k3' | 'k4' | 'k5' | 'k6'> {
     total: string;
     indicators: string;
@@ -65,7 +64,6 @@ export default function Index({ forms, filters }: Props) {
             k5: String(item.k5 ?? 0),
             k6: String(item.k6 ?? 0),
             is_consolidated: !!item.is_consolidated,
-            // okveds: item.okveds || []
         }));
     };
 
@@ -109,26 +107,40 @@ export default function Index({ forms, filters }: Props) {
                 </div>
 
                 <div className="border border-slate-300">
-                    <div className="grid grid-cols-12 border-b border-slate-300 bg-slate-50 text-[10px] font-bold text-slate-700 uppercase tracking-wider">
-                        <div className="col-span-4 p-2 border-r border-slate-300">Наименование формы</div>
+                    {/* Header Grid: 13 Columns Layout for fine precision alignment */}
+                    <div className="grid grid-cols-13 border-b border-slate-300 bg-slate-50 text-[10px] font-bold text-slate-700 uppercase tracking-wider">
+                        <div className="col-span-3 p-2 border-r border-slate-300">Наименование формы</div>
                         <div className="col-span-1 p-2 border-r border-slate-300 text-center">Показ.</div>
                         <div className="col-span-1 p-2 border-r border-slate-300 text-center">Отчеты</div>
                         <div className="col-span-1 p-2 border-r border-slate-300 text-center">Итого</div>
-                        <div className="col-span-4 p-2 border-r border-slate-300 text-center">Коэффициенты (K1 - K6)</div>
+
+                        {/* 6 Discrete Coefficient Header Cells */}
+                        {['K1', 'K2', 'K3', 'K4', 'K5', 'K6'].map(k => (
+                            <div key={k} className="col-span-1 p-2 border-r border-slate-300 text-center">
+                                {k}
+                            </div>
+                        ))}
+
                         <div className="col-span-1 p-2 text-center">Режим</div>
                     </div>
+
                     <div className="divide-y divide-slate-200">
                         {localForms.map((form) => (
-                            <div key={form.id} className="grid grid-cols-12 items-center text-sm text-slate-900">
-                                <div className="col-span-4 p-2 border-r border-slate-200">
+                            <div key={form.id} className="grid grid-cols-13 items-center text-sm text-slate-900">
+                                <div className="col-span-3 p-2 border-r border-slate-200">
                                     <input type="text" value={form.name} onChange={(e) => handleInputChange(form.id, 'name', e.target.value)} className="w-full focus:outline-none" />
                                 </div>
                                 <div className="col-span-1 p-2 border-r border-slate-200 text-center">{form.indicators}</div>
                                 <div className="col-span-1 p-2 border-r border-slate-200 text-center">{form.reports}</div>
                                 <div className="col-span-1 p-2 border-r border-slate-200 text-center">{form.total}</div>
-                                <div className="col-span-4 p-2 border-r border-slate-200 grid grid-cols-6 text-center text-indigo-700 font-bold text-xs">
-                                    {['k1', 'k2', 'k3', 'k4', 'k5', 'k6'].map(k => <div key={k}>{form[k as keyof LocalFormItem]}</div>)}
-                                </div>
+
+                                {/* 6 Discrete Coefficient Data Cells */}
+                                {['k1', 'k2', 'k3', 'k4', 'k5', 'k6'].map(k => (
+                                    <div key={k} className="col-span-1 p-2 border-r border-slate-200 text-center text-indigo-700 font-bold text-xs">
+                                        {form[k as keyof LocalFormItem]}
+                                    </div>
+                                ))}
+
                                 <div className="col-span-1 p-2 text-center">
                                     <input type="checkbox" checked={form.is_consolidated} onChange={(e) => handleInputChange(form.id, 'is_consolidated', e.target.checked)} />
                                 </div>
@@ -146,7 +158,6 @@ export default function Index({ forms, filters }: Props) {
                             <button onClick={() => setLocalForms(mapToLocalState(initialForms))} className="px-3 py-1 border border-slate-300 text-xs uppercase">Отмена</button>
                             <button
                                 onClick={() => {
-                                    // Map to a clean object structure that matches what your backend expects
                                     const payload = getChangedForms().map(form => ({
                                         id: form.id,
                                         name: form.name,

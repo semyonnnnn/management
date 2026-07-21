@@ -7,7 +7,7 @@ use Inertia\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\FormService;
-use App\Http\Requests\FormRequest;
+use App\Http\Requests\FormCreateRequest;
 use App\Models\Form;
 
 class FormsController extends Controller
@@ -27,22 +27,23 @@ class FormsController extends Controller
         ]));
     }
 
-    public function create(FormRequest $r)
+    public function create(FormCreateRequest $r)
     {
         $data = $r->validated();
 
         $form = Form::create([
-            'name' => $data['name'],
-            'total' => $data['total'] ?? 0,
-            'indicators' => $data['indicators'] ?? 0,
-            'reports' => $data['reports'],
-            'k1' => $data['k1'] ?? 1.0,
-            'k2' => $data['k2'] ?? 1.0,
-            'k3' => $data['k3'] ?? 1.0,
-            'k4' => $data['k4'] ?? 1.0,
-            'k5' => $data['k5'] ?? 1.0,
-            'k6' => $data['k6'] ?? 1.0,
-            'is_consolidated' => $data['is_consolidated'] ?? false,
+            'name' => (string) $data['name'],
+            'okud' => (int) $data['okud'],
+            'total' => (int) $data['total'],
+            'indicators' => (int) $data['indicators'],
+            'reports' => (int) $data['reports'],
+            'k1' => (float) $data['k1'],
+            'k2' => (float) $data['k2'],
+            'k3' => (float) $data['k3'],
+            'k4' => (float) $data['k4'],
+            'k5' => (float) $data['k5'],
+            'k6' => (float) $data['k6'],
+            'is_consolidated' => (bool) ($data['is_consolidated'] ?? false),
         ]);
 
         $departmentIds = collect($data['departments'] ?? [])
