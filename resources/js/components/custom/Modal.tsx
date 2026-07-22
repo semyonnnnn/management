@@ -4,7 +4,7 @@ import {
     Transition,
     TransitionChild,
 } from '@headlessui/react';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useEffect } from 'react';
 
 export default function Modal({
     children,
@@ -18,6 +18,26 @@ export default function Modal({
     closeable?: boolean;
     onClose: CallableFunction;
 }>) {
+    useEffect(() => {
+        const appElement = document.getElementById('app');
+
+        if (show) {
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+            if (appElement) appElement.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            if (appElement) appElement.style.overflow = '';
+        }
+
+        return () => {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            if (appElement) appElement.style.overflow = '';
+        };
+    }, [show]);
+
     const close = () => {
         if (closeable) {
             onClose();
@@ -44,7 +64,8 @@ export default function Modal({
             <Dialog
                 as="div"
                 id="modal"
-                className="fixed backdrop-blur-sm inset-0 z-50 flex justify-center items-center overflow-y-auto p-4 transition-all sm:p-6"
+                // Removed overflow-y-auto to stop the backdrop from acting as a scroll container
+                className="fixed backdrop-blur-sm inset-0 z-50 flex justify-center items-center p-4 transition-all sm:p-6"
                 onClose={close}
             >
                 <TransitionChild

@@ -9,9 +9,8 @@ class Form extends Model
     protected $fillable = [
         'name',
         'okud',
-        'total',
+        'period',
         'indicators',
-        'reports',
         'k1',
         'k2',
         'k3',

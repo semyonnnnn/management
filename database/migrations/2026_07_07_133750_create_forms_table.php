@@ -12,20 +12,17 @@ return new class extends Migration {
     {
         Schema::create('forms', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 255);
-            $table->integer('total')->default(0);
-            $table->integer('indicators')->default(0);
             $table->integer('okud');
+            $table->string('name');
+            $table->enum('period', ['годовая', 'полугодовая', 'квартальная', 'месячная']);
+            $table->integer('indicators');
 
-            // Decimal is used for k1-k6 assuming they are coefficients/multipliers like the original 'coeff'
             $table->decimal('k1', 8, 2)->default(1.0);
             $table->decimal('k2', 8, 2)->default(1.0);
             $table->decimal('k3', 8, 2)->default(1.0);
             $table->decimal('k4', 8, 2)->default(1.0);
             $table->decimal('k5', 8, 2)->default(1.0);
             $table->decimal('k6', 8, 2)->default(1.0);
-
-            $table->integer('reports');
 
             // Converted to snake_case (is_consolidated) to match Laravel database conventions
             $table->boolean('is_consolidated')->default(false);

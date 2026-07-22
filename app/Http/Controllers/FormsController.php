@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\FormService;
 use App\Http\Requests\FormCreateRequest;
 use App\Models\Form;
+use App\Enum\PeriodEnum;
 
 class FormsController extends Controller
 {
@@ -23,7 +24,8 @@ class FormsController extends Controller
             'filters' => [
                 'search' => $search,
                 'territory' => $territory
-            ]
+            ],
+            'periods' => PeriodEnum::values()
         ]));
     }
 
@@ -32,11 +34,10 @@ class FormsController extends Controller
         $data = $r->validated();
 
         $form = Form::create([
-            'name' => (string) $data['name'],
             'okud' => (int) $data['okud'],
-            'total' => (int) $data['total'],
+            'name' => (string) $data['name'],
+            'period' => (string) $data['period'],
             'indicators' => (int) $data['indicators'],
-            'reports' => (int) $data['reports'],
             'k1' => (float) $data['k1'],
             'k2' => (float) $data['k2'],
             'k3' => (float) $data['k3'],
