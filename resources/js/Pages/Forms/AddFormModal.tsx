@@ -2,9 +2,11 @@ import React, { useEffect } from 'react';
 import Modal from "@/components/custom/Modal";
 import { useForm } from '@inertiajs/react';
 import { AddFormModalProps } from '@/types';
+import { CustomSelect } from '@/components/custom/CustomSelect';
 
 interface ExtendedAddProps extends AddFormModalProps {
     isConsolidated: boolean;
+    periods: string[];
 }
 
 // Translation mapping for field names
@@ -22,7 +24,7 @@ const FIELD_TRANSLATIONS: Record<string, string> = {
     'is_consolidated': 'Консолидированный'
 };
 
-export const AddFormModal = ({ isOpen, onClose, isConsolidated }: ExtendedAddProps) => {
+export const AddFormModal = ({ isOpen, onClose, isConsolidated, periods }: ExtendedAddProps) => {
     const { data, setData, post, processing, errors, reset, clearErrors, transform } = useForm({
         name: '',
         okud: '',
@@ -162,11 +164,13 @@ export const AddFormModal = ({ isOpen, onClose, isConsolidated }: ExtendedAddPro
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className={`block text-sm font-bold uppercase mb-2 ${errors.period ? 'text-red-700' : 'text-emerald-900/80'}`}>Период</label>
-                                        <input
-                                            type="text"
+                                        <CustomSelect
+                                            variant='green'
                                             value={data.period}
-                                            onChange={e => handleTextChange('period', e.target.value)}
-                                            className={`w-full px-3 py-2.5 bg-white border text-base font-bold focus:outline-none transition-colors text-center ${errors.period
+                                            onChange={(val) => setData('period', val)}
+                                            options={periods.map((p) => ({ id: p, name: p }))}
+                                            defaultText="— Выберите период —"
+                                            className={`w-full px-3.5 py-2.5 bg-white border text-base font-bold focus:outline-none transition-colors ${errors.period
                                                 ? 'border-red-500 text-red-950 focus:border-red-600 bg-red-50/30'
                                                 : 'border-emerald-300 text-emerald-950 focus:border-emerald-400 focus:ring focus:ring-emerald-400 focus:bg-emerald-100'
                                                 }`}

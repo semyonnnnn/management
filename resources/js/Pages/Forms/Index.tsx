@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
+//////////////////////////////////////////
 import { AddFormModal } from './AddFormModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { CustomSelect } from '@/components/custom/CustomSelect';
 
 interface FormItem {
     id: number;
@@ -191,7 +193,7 @@ export default function Index({ forms, filters, periods }: Props) {
                         </h1>
                         <button
                             onClick={() => setIsAddModalOpen(true)}
-                            className="px-3 py-1 bg-indigo-600 text-white text-xs font-bold uppercase hover:bg-indigo-700 cursor-pointer"
+                            className="px-3 py-1 bg-indigo-600 text-white text-xs afont-bold uppercase hover:bg-indigo-700 cursor-pointer"
                         >
                             + Создать форму
                         </button>
@@ -286,18 +288,13 @@ export default function Index({ forms, filters, periods }: Props) {
 
                                     {/* Period Column */}
                                     <div className={`col-span-1 ${inputCellClasses} ${borderRightSlate300} ${periodBg} group-hover/row:bg-emerald-200/40 focus-within:bg-emerald-200/90`}>
-                                        <select
+                                        <CustomSelect
+                                            variant='green'
                                             value={form.period}
-                                            onChange={(e) => handleInputChange(form.id, 'period', e.target.value)}
-                                            className="w-full py-0.5 text-center focus:outline-none border-b border-emerald-300 focus:border-emerald-700 text-xs text-emerald-950 font-medium transition-colors bg-transparent cursor-pointer"
-                                        >
-                                            <option value="">—</option>
-                                            {periods.map((p) => (
-                                                <option key={p} value={p}>
-                                                    {p}
-                                                </option>
-                                            ))}
-                                        </select>
+                                            onChange={(val) => handleInputChange(form.id, 'period', val)}
+                                            options={periods.map((p) => ({ id: p, name: p }))}
+                                            defaultText="—"
+                                        />
                                     </div>
 
                                     {/* Indicators Column */}
@@ -326,7 +323,7 @@ export default function Index({ forms, filters, periods }: Props) {
                     </div>
                 </div>
 
-                <AddFormModal isConsolidated={true} isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
+                <AddFormModal periods={periods} isConsolidated={true} isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
 
                 {hasChanges && (
                     <div className="fixed bottom-4 right-4 bg-white border border-slate-300 p-4 shadow-xl z-50">
