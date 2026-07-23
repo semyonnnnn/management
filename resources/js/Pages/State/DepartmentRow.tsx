@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Department } from '@/types';
 
 interface DepartmentRowProps {
@@ -6,15 +6,15 @@ interface DepartmentRowProps {
     index: number;
     onDeptChange: (updatedDept: Department) => void;
     onDelete: (dept: Department) => void;
-    rowErrors?: Record<string, string>; // Receives clean row-specific errors (e.g. { name: "Error text" })
+    rowErrors?: Record<string, string>;
 }
 
-export const DepartmentRow = ({
+export const DepartmentRow = memo(({
     dept,
     index,
     onDeptChange,
     onDelete,
-    rowErrors = {}
+    rowErrors = {} // Fallback applied here to preserve reference equality
 }: DepartmentRowProps) => {
 
     const updateField = (field: keyof Department, value: any) => {
@@ -132,4 +132,13 @@ export const DepartmentRow = ({
             </div>
         </div>
     );
-};
+}, (prevProps, nextProps) => {
+    // Exact equality check to ensure row isolates from parent modal states
+    return (
+        prevProps.dept === nextProps.dept &&
+        prevProps.index === nextProps.index &&
+        prevProps.rowErrors === nextProps.rowErrors
+    );
+});
+
+DepartmentRow.displayName = 'DepartmentRow';

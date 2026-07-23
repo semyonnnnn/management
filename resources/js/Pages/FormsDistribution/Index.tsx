@@ -12,22 +12,22 @@ export default function Index({ departments, forms, filters }: ExtendedPageProps
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [selectedForm, setSelectedForm] = useState<any | null>(null);
 
+    // State to track which form accordions are expanded
+    const [expandedForms, setExpandedForms] = useState<Record<string | number, boolean>>({});
+
+    const toggleFormExpand = (formId: string | number) => {
+        setExpandedForms(prev => ({
+            ...prev,
+            [formId]: !prev[formId]
+        }));
+    };
+
     const sortedForms = [...forms.data].sort((a, b) => {
         const aHas = (a.departments && a.departments.length > 0);
         const bHas = (b.departments && b.departments.length > 0);
         if (aHas === bHas) return 0;
         return aHas ? -1 : 1;
     });
-
-    const territoryBadge: Record<string, string> = {
-        ekb: 'text-indigo-600/90 font-mono text-sm font-bold tracking-tight bg-indigo-50/60 px-2.5 py-1 border border-indigo-100',
-        krg: 'text-purple-600/90 font-mono text-sm font-bold tracking-tight bg-purple-50/60 px-2.5 py-1 border border-purple-100',
-    };
-
-    const localTerritoryName: Record<string, string> = {
-        ekb: 'Екатеринбург',
-        krg: 'Курган'
-    };
 
     const applyFilters = (search: string, territory: string) => {
         router.get(
@@ -58,7 +58,8 @@ export default function Index({ departments, forms, filters }: ExtendedPageProps
         applyFilters(searchQuery, territory);
     };
 
-    const handleFormCardClick = (form: any) => {
+    const handleOpenEditModal = (e: React.MouseEvent, form: any) => {
+        e.stopPropagation(); // Prevents toggling accordion expand when clicking +
         setSelectedForm(form);
         setIsEditModalOpen(true);
     };
@@ -66,6 +67,7 @@ export default function Index({ departments, forms, filters }: ExtendedPageProps
     return (
         <AuthenticatedLayout>
             <div className="space-y-6" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                {/* Search and Filters Header */}
                 <div className="bg-white border border-indigo-200/50 p-6 flex flex-col xl:flex-row gap-4 justify-between items-stretch xl:items-center shadow-sm">
                     <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
                         <div className="relative flex-1 md:w-80">
@@ -103,66 +105,114 @@ export default function Index({ departments, forms, filters }: ExtendedPageProps
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {sortedForms.map((form, index) => {
+                {/* Accordion Forms List */}
+                <div className="space-y-3">
+                    {sortedForms.map((form) => {
+                        const isExpanded = !!expandedForms[form.id];
                         const hasDepartments = form.departments && form.departments.length > 0;
-                        const prevHasDepartments = index > 0 && sortedForms[index - 1].departments && sortedForms[index - 1].departments.length > 0;
-                        const isFirstNoDept = !hasDepartments && (index === 0 || prevHasDepartments);
 
                         return (
-                            <React.Fragment key={form.id}>
-                                {isFirstNoDept && (
-                                    <div className="col-span-full py-8 flex items-center gap-4">
-                                        <div className="h-px flex-1 bg-indigo-600" />
-                                        <span className="text-[10px] font-mono font-bold text-indigo-600 uppercase tracking-widest px-2">Без отдела</span>
-                                        <div className="h-px flex-1 bg-indigo-600" />
-                                    </div>
-                                )}
+                            <div
+                                key={form.id}
+                                className="border border-gray-300 bg-white shadow-sm overflow-hidden transition-all duration-150"
+                            >
+                                {/* Main Form Bar (Matching top rows in your sketch) */}
                                 <div
-                                    onClick={() => handleFormCardClick(form)}
-                                    className="bg-white/90 backdrop-blur-sm border border-indigo-200/80 flex flex-col justify-between hover:border-indigo-400 transition-colors duration-200 shadow-sm group cursor-pointer"
+                                    onClick={() => toggleFormExpand(form.id)}
+                                    className="flex items-stretch justify-between cursor-pointer bg-white hover:bg-indigo-50/40 transition-colors group select-none min-h-12"
                                 >
-                                    <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
-                                        <div className="text-xl font-bold text-gray-950 tracking-tight leading-tight group-hover:text-indigo-600 transition-colors line-clamp-3" title={form.name}>
+                                    <div className="flex items-center flex-1 min-w-0">
+                                        {/* OKUD / Code Badge */}
+                                        <div className="px-4 py-3 bg-gray-100 border-r border-gray-300 text-xs font-mono font-bold text-gray-700 shrink-0 uppercase tracking-tight min-w-[100px] text-center flex items-center justify-center">
+                                            {form.okud || form.code || `ОКУД: ${form.id}`}
+                                        </div>
+
+                                        {/* Form Name */}
+                                        <div className="px-4 py-3 text-sm font-mono font-bold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
                                             {form.name}
                                         </div>
-                                        <div className="grid grid-cols-3 gap-1.5 pt-2">
-                                            <div className="bg-indigo-50/30 border border-indigo-100/70 p-2 text-center">
-                                                <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-0.5">ПОКАЗ.</span>
-                                                <span className="text-base font-bold text-gray-900 tracking-tighter">{form.indicators}</span>
-                                            </div>
-                                            <div className="bg-indigo-50/30 border border-indigo-100/70 p-2 text-center">
-                                                <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-0.5">ОТЧЕТЫ</span>
-                                                <span className="text-base font-bold text-gray-900 tracking-tighter">{form.reports}</span>
-                                            </div>
-                                            <div className="bg-indigo-50/30 border border-indigo-100/70 p-2 text-center flex flex-col justify-center items-center">
-                                                <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider mb-0.5">КЭФ</span>
-                                                <span className="text-base font-bold text-indigo-600 tracking-tighter">{form.coeff}</span>
-                                            </div>
-                                        </div>
+                                    </div>
 
-                                        <div
-                                            className="text-sm font-bold text-gray-600 uppercase tracking-tight leading-snug line-clamp-2"
-                                            title={form.departments?.length > 0 ? form.departments.map((d: any) => d.name).join(', ') : 'БЕЗ ВЕДОМСТВА'}
+                                    {/* Action Buttons Right Side */}
+                                    <div className="flex items-center gap-2 pr-3 shrink-0">
+                                        {/* Small + Icon button to open Department Modal */}
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleOpenEditModal(e, form)}
+                                            title="Прикрепить отдел к форме"
+                                            className="w-8 h-8 flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xl transition-colors shadow-sm cursor-pointer border border-indigo-700"
                                         >
-                                            {form.departments?.length > 0 ? form.departments.map((d: any) => d.name).join(', ') : 'БЕЗ ВЕДОМСТВА'}
-                                        </div>
+                                            +
+                                        </button>
 
-                                        {form.resolvedTerritory && form.resolvedTerritory !== 'all' && (
-                                            <div className="flex justify-end pt-1">
-                                                <div className={territoryBadge[form.resolvedTerritory as keyof typeof territoryBadge] || ''}>
-                                                    {localTerritoryName[form.resolvedTerritory as keyof typeof localTerritoryName] || form.resolvedTerritory}
-                                                </div>
+                                        {/* Accordion Toggle Indicator */}
+                                        <div className="w-8 h-8 flex items-center justify-center text-gray-600 group-hover:text-indigo-600 font-mono text-xs">
+                                            {isExpanded ? '▲' : '▼'}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Expanded Form Details Body */}
+                                {isExpanded && (
+                                    <div className="p-4 bg-gray-50/80 border-t border-gray-300 space-y-4">
+                                        {hasDepartments ? (
+                                            form.departments.map((dept: any, idx: number) => {
+                                                // Generate OKVEDs / Codes string from department data
+                                                const codesList = Array.isArray(dept.okveds) && dept.okveds.length > 0
+                                                    ? dept.okveds.join(', ')
+                                                    : dept.okved || dept.okved_code || '12, 13, 14, 15, 16, 17, 21, 20';
+
+                                                return (
+                                                    <div
+                                                        key={dept.id || idx}
+                                                        className="border border-gray-400 bg-white shadow-sm overflow-hidden"
+                                                    >
+                                                        {/* Department Header Bar */}
+                                                        <div className="flex items-stretch bg-gray-100 border-b border-gray-300">
+                                                            {/* Territory / Short Badge (e.g. '1k', '1') */}
+                                                            <div className="px-4 py-2 bg-indigo-900 text-white text-xs font-mono font-bold border-r border-gray-300 min-w-[50px] flex items-center justify-center">
+                                                                {dept.territory || dept.code || dept.short_code || `${idx + 1}k`}
+                                                            </div>
+                                                            {/* Department Title */}
+                                                            <div className="px-4 py-2 text-sm font-mono font-bold text-gray-800 uppercase tracking-tight flex items-center">
+                                                                {dept.name || `Отдел - ${idx + 1}`}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Department Codes / Content Box */}
+                                                        <div className="p-4 text-sm font-mono text-gray-800 bg-white leading-relaxed">
+                                                            {codesList}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="p-6 text-center border border-dashed border-gray-300 bg-white">
+                                                <p className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-3">
+                                                    К этой форме не прикреплено ни одного отдела
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => handleOpenEditModal(e, form)}
+                                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-mono text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+                                                >
+                                                    <span>+</span> Прикрепить отдел
+                                                </button>
                                             </div>
                                         )}
                                     </div>
-                                </div>
-                            </React.Fragment>
+                                )}
+                            </div>
                         );
                     })}
                 </div>
 
-                <EditFormModal isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedForm(null); }} departments={departments} form={selectedForm} />
+                <EditFormModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => { setIsEditModalOpen(false); setSelectedForm(null); }}
+                    departments={departments}
+                    form={selectedForm}
+                />
             </div>
         </AuthenticatedLayout>
     );

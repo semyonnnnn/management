@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import '@fontsource/jetbrains-mono/700.css';
 import '@fontsource/jetbrains-mono/400.css';
@@ -9,11 +9,10 @@ import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { DepartmentRow } from './DepartmentRow';
 import { FlashMessage } from '@/components/custom/FlashMessage';
 import { DatePicker } from '@/components/custom/DatePicker';
-import { date } from 'zod';
 
 interface StatePageProps extends PageProps {
     departments: Department[] | null;
-    date: string | null; // Changed to strict SQL string format
+    date: string | null;
 }
 
 export default function Index({ departments, date: initialDate }: StatePageProps) {
@@ -29,7 +28,7 @@ export default function Index({ departments, date: initialDate }: StatePageProps
 
     const { put, delete: destroy, setData, data, errors, processing } = useForm<{
         departments: Department[];
-        date: string | null; // Changed to strict SQL string format
+        date: string | null;
     }>({
         departments: [],
         date: null,
@@ -38,7 +37,6 @@ export default function Index({ departments, date: initialDate }: StatePageProps
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
             const mapped: Record<string, Record<string, string>> = {};
-
             const errorsRecord = errors as Record<string, string>;
 
             Object.keys(errorsRecord).forEach((key) => {
@@ -59,7 +57,7 @@ export default function Index({ departments, date: initialDate }: StatePageProps
         } else {
             setLocalErrors({});
         }
-    }, [errors]);
+    }, [errors, data.departments]);
 
     useEffect(() => {
         if (departments) {
@@ -76,7 +74,7 @@ export default function Index({ departments, date: initialDate }: StatePageProps
         } else {
             setLocalDepartments([]);
         }
-    }, [departments]);
+    }, [departments, data.departments]);
 
     useEffect(() => {
         setLocalDate(initialDate || null);
@@ -86,7 +84,6 @@ export default function Index({ departments, date: initialDate }: StatePageProps
         const updatedDate = newDate || null;
         setLocalDate(updatedDate);
 
-        // Direct string evaluation obfuscates the need for timestamp conversion
         if (initialDate !== updatedDate) {
             setData('date', updatedDate);
         } else {
@@ -94,37 +91,43 @@ export default function Index({ departments, date: initialDate }: StatePageProps
         }
     };
 
-    const handleDepartmentChange = (updatedDept: Department) => {
-        const nextLocal = localDepartments.map(d => d.id === updatedDept.id ? updatedDept : d);
-        setLocalDepartments(nextLocal);
+    // Memoized to retain referential stability and prevent re-rendering unaffected children
+    const handleDepartmentChange = useCallback((updatedDept: Department) => {
+        setLocalDepartments(prevLocal => {
+            const nextLocal = prevLocal.map(d => d.id === updatedDept.id ? updatedDept : d);
+            const originalList = departments || [];
 
-        const originalList = departments || [];
+            const diffOnly = nextLocal.filter(localDept => {
+                const originalDept = originalList.find(d => d.id === localDept.id);
+                if (!originalDept) return true;
+                return JSON.stringify(localDept) !== JSON.stringify(originalDept);
+            });
 
-        const diffOnly = nextLocal.filter(localDept => {
-            const originalDept = originalList.find(d => d.id === localDept.id);
-            //if user somehow deletes local
-            if (!originalDept) return true;
-
-            return JSON.stringify(localDept) !== JSON.stringify(originalDept);
+            setData('departments', diffOnly);
+            return nextLocal;
         });
 
-        setData('departments', diffOnly);
-
-        if (localErrors[updatedDept.id]) {
-            setLocalErrors(prev => {
+        setLocalErrors(prev => {
+            if (prev[updatedDept.id]) {
                 const copy = { ...prev };
                 delete copy[updatedDept.id];
                 return copy;
-            });
-        }
-    };
+            }
+            return prev;
+        });
+    }, [departments, setData]);
+
+    // Extracted into a stable callback rather than an inline anonymous function
+    const handleDeleteClick = useCallback((d: Department) => {
+        setItemToDelete(d);
+        setIsDeleting(true);
+    }, []);
 
     const hasChanges = useMemo(() => {
         return data.departments.length > 0 || data.date !== null;
     }, [data.departments, data.date]);
 
     const changes = data.departments?.length + (data.date ? 1 : 0);
-
 
     const filteredState = useMemo(() => {
         return localDepartments.filter((dept) => {
@@ -213,8 +216,9 @@ export default function Index({ departments, date: initialDate }: StatePageProps
                                     dept={dept}
                                     index={index}
                                     onDeptChange={handleDepartmentChange}
-                                    onDelete={(d) => { setItemToDelete(d); setIsDeleting(true); }}
-                                    rowErrors={localErrors[dept.id] || {}}
+                                    onDelete={handleDeleteClick}
+                                    // Notice: passing undefined instead of {} prevents object reference churning
+                                    rowErrors={localErrors[dept.id]}
                                 />
                             ))}
                         </div>

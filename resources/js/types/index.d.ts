@@ -242,3 +242,32 @@ export interface DepartmentRowProps {
     ) => void;
     onDelete: (dept: Department) => void;
 }
+
+export interface LocalFormItem extends Omit<
+    FormItem,
+    'indicators' | 'k1' | 'k2' | 'k3' | 'k4' | 'k5' | 'k6'
+> {
+    okud: string;
+    period: string;
+    indicators: string;
+    k1: string;
+    k2: string;
+    k3: string;
+    k4: string;
+    k5: string;
+    k6: string;
+}
+
+export interface FormRowProps {
+    form: LocalFormItem;
+    rowIndex: number;
+    periods: ('годовая' | 'полугодовая' | 'квартальная' | 'месячная')[];
+    handleInputChange: (
+        id: number,
+        field: keyof LocalFormItem,
+        rawValue: string,
+    ) => void;
+    inputCellClasses: string;
+    borderRightSlate300: string;
+    borderRightSlate200: string;
+}

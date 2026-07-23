@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import Modal from "@/components/custom/Modal";
 import { useForm } from '@inertiajs/react';
+/////////////////////////////////////////////
+import Modal from "@/components/custom/Modal";
 import { DepartmentsPartial } from './Partials/DepartmentsPartial';
 import { OkvedPartial } from './Partials/OkvedPartial';
 import { Confirmation } from './Partials/Confirmation';
+import { Department } from '@/types';
 
 interface EditFormModalProps {
     isOpen: boolean;
     onClose: () => void;
-    departments: Array<{ id: string; name: string; territory: string }>;
+    departments: Department[],
+    // departments: Array<{ id: string; name: string; territory: string }>;
     form: any;
 }
 

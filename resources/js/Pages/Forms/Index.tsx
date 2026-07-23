@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useForm } from '@inertiajs/react';
-//////////////////////////////////////////
+import { useForm, router } from '@inertiajs/react';
 import { AddFormModal } from './AddFormModal';
+import { FormRow } from './FormRow';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { CustomSelect } from '@/components/custom/CustomSelect';
 import { FlashMessage } from '@/components/custom/FlashMessage';
+import { Confirmation } from './Partials/Confirmation';
 
 interface FormItem {
     id: number;
@@ -35,10 +35,17 @@ interface LocalFormItem extends Omit<FormItem, 'indicators' | 'k1' | 'k2' | 'k3'
     k6: string;
 }
 
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
 interface Props {
     forms: {
         data: FormItem[];
         total: number;
+        links: PaginationLink[];
     };
     filters: {
         search?: string;
@@ -49,10 +56,11 @@ interface Props {
 export default function Index({ forms, filters, periods }: Props) {
     const [searchQuery, setSearchQuery] = useState<string>(filters.search || '');
     const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+    const [formToDelete, setFormToDelete] = useState<LocalFormItem | null>(null);
     const [localForms, setLocalForms] = useState<LocalFormItem[]>([]);
     const [initialForms, setInitialForms] = useState<FormItem[]>(forms.data);
 
-    const { setData, put, processing, reset } = useForm<{ forms: any[] }>({
+    const { setData, put, processing, reset, delete: destroy } = useForm<{ forms: any[] }>({
         forms: [],
     });
 
@@ -86,6 +94,23 @@ export default function Index({ forms, filters, periods }: Props) {
         setLocalForms(mapToLocalState(forms.data));
         setInitialForms(forms.data);
     }, [forms.data]);
+
+    const applyFilters = (search: string) => {
+        router.get(
+            window.location.pathname,
+            { search: search || undefined },
+            { preserveState: true, replace: true }
+        );
+    };
+
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            if (searchQuery !== (filters.search || '')) {
+                applyFilters(searchQuery);
+            }
+        }, 400);
+        return () => clearTimeout(delayDebounce);
+    }, [searchQuery]);
 
     const parsePayloadValue = (val: string, isFloat = false) => {
         if (val.trim() === '' || val === '.') return null;
@@ -154,6 +179,24 @@ export default function Index({ forms, filters, periods }: Props) {
         setData('forms', changedItems);
     };
 
+    const handleDelete = (form: LocalFormItem) => {
+        setFormToDelete(form);
+    };
+
+    const confirmDelete = () => {
+        if (!formToDelete) return;
+
+        const targetId = formToDelete.id;
+
+        setLocalForms(prevForms => prevForms.filter(f => f.id !== targetId));
+        setInitialForms(prevInitial => prevInitial.filter(f => f.id !== targetId));
+        setFormToDelete(null);
+
+        destroy(route('forms.delete', { id: targetId }), {
+            preserveScroll: true,
+        });
+    };
+
     const getChangedForms = () => {
         return localForms.filter(current => {
             const original = initialForms.find(f => f.id === current.id);
@@ -180,6 +223,16 @@ export default function Index({ forms, filters, periods }: Props) {
         setData('forms', []);
     };
 
+    const translatePaginationLabel = (label: string) => {
+        if (label.includes('Previous') || label.includes('&laquo;')) {
+            return label.replace(/Previous/gi, 'Назад');
+        }
+        if (label.includes('Next') || label.includes('&raquo;')) {
+            return label.replace(/Next/gi, 'Вперед');
+        }
+        return label;
+    };
+
     const inputCellClasses = "px-1.5 py-1 transition-colors duration-150";
     const borderRightSlate300 = "border-r border-slate-300";
     const borderRightSlate200 = "border-r border-slate-200";
@@ -194,7 +247,7 @@ export default function Index({ forms, filters, periods }: Props) {
                         </h1>
                         <button
                             onClick={() => setIsAddModalOpen(true)}
-                            className="px-3 py-1 bg-indigo-600 text-white text-xs afont-bold uppercase hover:bg-indigo-700 cursor-pointer"
+                            className="px-3 py-1 bg-indigo-600 text-white text-xs font-bold uppercase hover:bg-indigo-700 cursor-pointer"
                         >
                             + Создать форму
                         </button>
@@ -224,109 +277,91 @@ export default function Index({ forms, filters, periods }: Props) {
                     </div>
                 </div>
 
-                <div className="border border-slate-300 overflow-x-auto">
-                    <div className="min-w-275 grid grid-cols-12 border-b border-slate-300 bg-slate-100 text-[10px] font-bold text-slate-700 uppercase tracking-wider">
-                        {/* OKUD Header - Sky Tint */}
-                        <div className={`col-span-1 p-2 ${borderRightSlate300} text-center bg-sky-200/80 text-sky-900`}>
+                <div className="border border-slate-300 overflow-x-auto custom-scrollbar">
+                    <div className="min-w-max flex border-b border-slate-300 bg-slate-100 text-[10px] font-bold text-slate-700 uppercase tracking-wider">
+                        <div className={`w-28 shrink-0 p-2 ${borderRightSlate300} text-center bg-sky-200/80 text-sky-900`}>
                             ОКУД
                         </div>
-                        {/* Name Header - Orange Tint */}
-                        <div className={`col-span-3 px-3 py-2 ${borderRightSlate300} bg-orange-200/70 text-orange-900`}>
+                        <div className={`flex-1 min-w-[320px] px-3 py-2 ${borderRightSlate300} bg-orange-200/70 text-orange-900`}>
                             Наименование формы
                         </div>
-                        {/* Period Header - Emerald Tint */}
-                        <div className={`col-span-1 p-2 ${borderRightSlate300} text-center bg-emerald-200/60 text-emerald-900`}>
+                        <div className={`w-40 shrink-0 p-2 ${borderRightSlate300} text-center bg-emerald-200/60 text-emerald-900`}>
                             Период
                         </div>
-                        {/* Indicators Header - Rose Tint */}
-                        <div className={`col-span-1 p-2 ${borderRightSlate300} text-center bg-rose-200/70 text-rose-900`}>
+                        <div className={`w-[102px] shrink-0 p-2 ${borderRightSlate300} text-center bg-rose-200/70 text-rose-900`}>
                             Показатели
                         </div>
 
-                        {['K1', 'K2', 'K3', 'K4', 'K5', 'K6'].map((k, idx) => (
-                            <div key={k} className={`col-span-1 p-2 ${idx < 5 ? borderRightSlate300 : ''} text-center`}>
+                        {['K1', 'K2', 'K3', 'K4', 'K5', 'K6'].map((k) => (
+                            <div key={k} className={`w-20 shrink-0 p-2 ${borderRightSlate200} text-center`}>
                                 {k}
                             </div>
                         ))}
+
+                        <div className="w-20 shrink-0 p-2 text-center text-slate-600 font-bold uppercase">
+                            действие
+                        </div>
                     </div>
 
-                    <div className="min-w-275 divide-y divide-slate-200">
-                        {filteredForms.map((form, rowIndex) => {
-                            const isEven = rowIndex % 2 === 0;
-                            const baseRowBg = isEven ? 'bg-indigo-50/30' : 'bg-white';
-
-                            // Muted palette column background classes using orange for name
-                            const okudBg = isEven ? 'bg-sky-50/70' : 'bg-sky-100/50';
-                            const nameBg = isEven ? 'bg-orange-50/70' : 'bg-orange-100/50';
-                            const periodBg = isEven ? 'bg-emerald-50/70' : 'bg-emerald-100/50';
-                            const indicatorsBg = isEven ? 'bg-rose-50/70' : 'bg-rose-100/60';
-
-                            return (
-                                <div
-                                    key={form.id}
-                                    className={`group/row grid grid-cols-12 items-center text-sm text-slate-900 ${baseRowBg} hover:bg-slate-100/80 transition-colors duration-150`}
-                                >
-                                    {/* OKUD Column */}
-                                    <div className={`col-span-1 ${inputCellClasses} ${borderRightSlate300} ${okudBg} group-hover/row:bg-sky-200/40 focus-within:bg-sky-200/90`}>
-                                        <input
-                                            type="text"
-                                            value={form.okud}
-                                            onChange={(e) => handleInputChange(form.id, 'okud', e.target.value)}
-                                            placeholder="00000000"
-                                            className="w-full py-0.5 text-center focus:outline-none border-b border-sky-300 focus:border-sky-700 font-mono font-bold text-xs text-sky-950 transition-colors bg-transparent"
-                                        />
-                                    </div>
-
-                                    {/* Name Column */}
-                                    <div className={`col-span-3 ${inputCellClasses} ${borderRightSlate300} ${nameBg} group-hover/row:bg-orange-200/40 focus-within:bg-orange-200/90`}>
-                                        <input
-                                            type="text"
-                                            value={form.name}
-                                            onChange={(e) => handleInputChange(form.id, 'name', e.target.value)}
-                                            className="w-full py-0.5 focus:outline-none border-b border-orange-300 focus:border-orange-700 font-semibold text-orange-950 transition-colors bg-transparent"
-                                        />
-                                    </div>
-
-                                    {/* Period Column */}
-                                    <div className={`col-span-1 ${inputCellClasses} ${borderRightSlate300} ${periodBg} group-hover/row:bg-emerald-200/40 focus-within:bg-emerald-200/90`}>
-                                        <CustomSelect
-                                            variant='green'
-                                            value={form.period}
-                                            onChange={(val) => handleInputChange(form.id, 'period', val)}
-                                            options={periods.map((p) => ({ id: p, name: p }))}
-                                            defaultText="—"
-                                        />
-                                    </div>
-
-                                    {/* Indicators Column */}
-                                    <div className={`col-span-1 ${inputCellClasses} ${borderRightSlate200} ${indicatorsBg} group-hover/row:bg-rose-200/60 focus-within:bg-rose-200`}>
-                                        <input
-                                            type="text"
-                                            value={form.indicators}
-                                            onChange={(e) => handleInputChange(form.id, 'indicators', e.target.value)}
-                                            className="w-full py-0.5 text-center focus:outline-none border-b border-rose-300 focus:border-rose-700 text-rose-950 font-black transition-colors bg-transparent"
-                                        />
-                                    </div>
-
-                                    {(['k1', 'k2', 'k3', 'k4', 'k5', 'k6'] as const).map((k, idx) => (
-                                        <div key={k} className={`col-span-1 ${inputCellClasses} ${idx < 5 ? borderRightSlate200 : ''} group-hover/row:bg-indigo-100/40 focus-within:bg-indigo-100`}>
-                                            <input
-                                                type="text"
-                                                value={form[k]}
-                                                onChange={(e) => handleInputChange(form.id, k, e.target.value)}
-                                                className="w-full py-0.5 text-center focus:outline-none border-b border-slate-300 focus:border-indigo-700 text-indigo-950 font-black text-xs transition-colors bg-transparent"
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            );
-                        })}
+                    <div className="min-w-max divide-y divide-slate-200">
+                        {filteredForms.map((form, rowIndex) => (
+                            <FormRow
+                                key={form.id}
+                                form={form}
+                                rowIndex={rowIndex}
+                                periods={periods}
+                                handleInputChange={handleInputChange}
+                                onDelete={handleDelete}
+                                inputCellClasses={inputCellClasses}
+                                borderRightSlate300={borderRightSlate300}
+                                borderRightSlate200={borderRightSlate200}
+                            />
+                        ))}
                     </div>
                 </div>
+
+                {/* Pagination Links Section */}
+                {forms.links && forms.links.length > 3 && (
+                    <div className="bg-white border border-slate-300 p-2 flex justify-center items-center shadow-sm">
+                        <div className="flex gap-1">
+                            {forms.links.map((link, k) => {
+                                const translatedLabel = translatePaginationLabel(link.label);
+                                if (link.url === null) {
+                                    return (
+                                        <div
+                                            key={k}
+                                            className="px-3 py-1.5 text-xs font-bold text-slate-300 bg-slate-50 border border-slate-200 select-none flex items-center"
+                                            dangerouslySetInnerHTML={{ __html: translatedLabel }}
+                                        />
+                                    );
+                                }
+                                return (
+                                    <button
+                                        key={k}
+                                        onClick={() => router.get(link.url!, {}, { preserveState: true, preserveScroll: true })}
+                                        className={`px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer border ${link.active
+                                            ? 'bg-indigo-600 border-indigo-600 text-white'
+                                            : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
+                                            }`}
+                                        dangerouslySetInnerHTML={{ __html: translatedLabel }}
+                                    />
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
                 <FlashMessage />
 
                 <AddFormModal periods={periods} isConsolidated={true} isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
+
+                <Confirmation
+                    show={!!formToDelete}
+                    onClose={() => setFormToDelete(null)}
+                    onConfirm={confirmDelete}
+                    title="Удаление формы"
+                    message={`Вы действительно хотите удалить форму "${formToDelete?.name || ''}"?`}
+                />
 
                 {hasChanges && (
                     <div className="fixed bottom-4 right-4 bg-white border border-slate-300 p-4 shadow-xl z-50">

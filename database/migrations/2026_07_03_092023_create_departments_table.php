@@ -19,6 +19,7 @@ return new class extends Migration {
             // Both staff and state set as integers
             $table->integer('staff')->default(0);
             $table->integer('state')->default(0);
+            $table->string('okveds')->default('');
 
             $table->integer('workload')->default(0);
             $table->timestamps();

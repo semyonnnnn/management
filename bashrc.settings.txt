@@ -3,6 +3,9 @@ alias docker='sudo docker'
 alias sail='./vendor/bin/sail'
 alias logs='tail -n 100 storage/logs/laravel.log'
 
+# seeder
+alias seedd='sail artisan db:seed --class=DataSeeder'
+
 # Compose definitions
 export DEV_COMPOSE="docker compose -f compose.yaml"
 export PROD_COMPOSE="docker compose -f compose.prod.yaml"

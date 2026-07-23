@@ -1,26 +1,16 @@
 import { CustomSelect } from "@/components/custom/CustomSelect";
-
-interface Department {
-    id: string;
-    name: string;
-    territory: string;
-}
+import { Department } from "@/types";
 
 interface DepartmentData {
     department_id: string;
-    okveds: string[];
 }
 
 interface DepartmentsPartialProps {
     departments: Department[];
     dataDepartments: DepartmentData[];
     selectedDeptId: string;
-    activeDeptIndex: number | null;
     onSelectDept: (id: string) => void;
     onAddDepartment: () => void;
-    onRemoveDepartment: (index: number) => void;
-    onSelectActiveDept: (index: number | null) => void;
-    isPanel3Open: boolean;
     onConfirmRemove: (index: number) => void;
     onSave: () => void;
     onReset: () => void;
@@ -32,12 +22,8 @@ export const DepartmentsPartial = ({
     departments,
     dataDepartments,
     selectedDeptId,
-    activeDeptIndex,
     onSelectDept,
     onAddDepartment,
-    onRemoveDepartment,
-    onSelectActiveDept,
-    isPanel3Open,
     onConfirmRemove,
     onSave,
     onReset,
@@ -46,7 +32,7 @@ export const DepartmentsPartial = ({
 }: DepartmentsPartialProps) => {
 
     const availableDepartments = (departments ?? []).filter(
-        dept => !(dataDepartments ?? []).some(d => d?.department_id === dept.id)
+        dept => !(dataDepartments ?? []).some(d => d?.department_id === String(dept.id))
     );
 
     const defaultSelectText = dataDepartments.length === 0
@@ -54,9 +40,7 @@ export const DepartmentsPartial = ({
         : "Выбрать ведомство...";
 
     return (
-        <div
-            className={`w-fit max-w-200 border border-gray-300 p-5 bg-white flex flex-col shadow-sm shrink-0 transition-all duration-300 ease-in-out ${isPanel3Open ? 'mr-5' : 'mr-0'}`}
-        >
+        <div className="w-fit max-w-200 border border-gray-300 p-5 bg-white flex flex-col shadow-sm shrink-0">
             <h3 className="text-sm font-bold uppercase tracking-tight text-indigo-900 border-b border-indigo-200 pb-2 mb-4">
                 {formName}
             </h3>
@@ -81,33 +65,19 @@ export const DepartmentsPartial = ({
             <div className="space-y-1.5 overflow-y-auto max-h-87.5 custom-scrollbar w-full relative z-10">
                 {dataDepartments.map((d, index) => {
                     const match = departments.find(
-                        dept => dept.id === d.department_id
+                        dept => String(dept.id) === d.department_id
                     );
-                    const isSelected = activeDeptIndex === index;
 
                     return (
                         <div
                             key={d.department_id}
-                            onClick={() => {
-                                onSelectActiveDept(
-                                    activeDeptIndex === index ? null : index
-                                );
-                            }}
-                            className={`group relative flex justify-between items-center text-sm font-bold cursor-pointer transition-all h-13 w-full border
-                                ${index % 2 === 0
-                                    ? 'bg-gray-50 hover:bg-gray-100'
-                                    : 'bg-indigo-50/40 hover:bg-indigo-100/60'
-                                }
-                                ${isSelected
-                                    ? 'border-indigo-500 text-indigo-800'
-                                    : 'border-transparent text-gray-700 hover:border-gray-300'
+                            className={`group relative flex justify-between items-center text-sm font-bold h-13 w-full border border-transparent hover:border-gray-300 transition-all ${index % 2 === 0
+                                    ? 'bg-gray-50'
+                                    : 'bg-indigo-50/40'
                                 }`}
                         >
-                            <span className="truncate pl-3 pr-14 flex-1">
-                                {index + 1}.{' '}
-                                {match
-                                    ? match.name
-                                    : `ID: ${d.department_id}`}
+                            <span className="truncate pl-3 pr-14 flex-1 text-gray-700">
+                                {index + 1}. {match ? match.name : `ID: ${d.department_id}`}
                             </span>
 
                             <button
@@ -116,7 +86,7 @@ export const DepartmentsPartial = ({
                                     e.stopPropagation();
                                     onConfirmRemove(index);
                                 }}
-                                className="absolute right-0 top-0 bottom-0 w-11 m-1 flex items-center justify-center text-4xl font-light leading-none border border-red-500 bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all shrink-0 select-none"
+                                className="absolute right-0 top-0 bottom-0 w-11 m-1 flex items-center justify-center text-4xl font-light leading-none border border-red-500 bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all shrink-0 select-none cursor-pointer"
                             >
                                 ×
                             </button>
@@ -124,6 +94,7 @@ export const DepartmentsPartial = ({
                     );
                 })}
             </div>
+
             {showActions && (
                 <div className="flex gap-2 mt-5 pt-5 border-t border-gray-200">
                     <button

@@ -99,4 +99,14 @@ class FormsController extends Controller
 
         return redirect()->back()->with('success', 'Данные успешно обновлены!');
     }
+
+    public function delete(int $id)
+    {
+        $form = Form::find($id);
+        $formName = $form->name;
+        $form->delete();
+
+
+        return redirect()->back()->with('success', "Форма $formName успешно удалена!");
+    }
 }

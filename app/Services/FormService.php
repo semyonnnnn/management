@@ -28,7 +28,7 @@ class FormService
             });
         }
 
-        $forms = $formsQuery->paginate(12)->withQueryString();
+        $forms = $formsQuery->paginate(20)->withQueryString();
 
         $forms->through(fn($form) => [
             'id' => $form->id,
