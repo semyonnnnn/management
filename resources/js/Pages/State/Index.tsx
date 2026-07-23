@@ -9,6 +9,7 @@ import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { DepartmentRow } from './DepartmentRow';
 import { FlashMessage } from '@/components/custom/FlashMessage';
 import { DatePicker } from '@/components/custom/DatePicker';
+import { date } from 'zod';
 
 interface StatePageProps extends PageProps {
     departments: Department[] | null;
@@ -26,7 +27,7 @@ export default function Index({ departments, date: initialDate }: StatePageProps
 
     const [localErrors, setLocalErrors] = useState<Record<string, Record<string, string>>>({});
 
-    const { put, delete: destroy, setData, data, errors } = useForm<{
+    const { put, delete: destroy, setData, data, errors, processing } = useForm<{
         departments: Department[];
         date: string | null; // Changed to strict SQL string format
     }>({
@@ -98,9 +99,12 @@ export default function Index({ departments, date: initialDate }: StatePageProps
         setLocalDepartments(nextLocal);
 
         const originalList = departments || [];
+
         const diffOnly = nextLocal.filter(localDept => {
             const originalDept = originalList.find(d => d.id === localDept.id);
+            //if user somehow deletes local
             if (!originalDept) return true;
+
             return JSON.stringify(localDept) !== JSON.stringify(originalDept);
         });
 
@@ -119,6 +123,9 @@ export default function Index({ departments, date: initialDate }: StatePageProps
         return data.departments.length > 0 || data.date !== null;
     }, [data.departments, data.date]);
 
+    const changes = data.departments?.length + (data.date ? 1 : 0);
+
+
     const filteredState = useMemo(() => {
         return localDepartments.filter((dept) => {
             const matchTerritory = selectedTerritory === "all" || dept.territory === selectedTerritory;
@@ -127,7 +134,7 @@ export default function Index({ departments, date: initialDate }: StatePageProps
         });
     }, [localDepartments, selectedTerritory, searchQuery]);
 
-    const handleApply = () => {
+    const handleSubmit = () => {
         put(route('state.update'), {
             onSuccess: () => {
                 setData('departments', []);
@@ -137,7 +144,7 @@ export default function Index({ departments, date: initialDate }: StatePageProps
         });
     };
 
-    const handleReset = () => {
+    const handleCancel = () => {
         setLocalDepartments(departments || []);
         setLocalDate(initialDate || null);
         setData('departments', []);
@@ -226,9 +233,23 @@ export default function Index({ departments, date: initialDate }: StatePageProps
                 </button>
 
                 {hasChanges && (
-                    <div className="fixed bottom-24 right-8 z-50 bg-white border border-indigo-600 shadow-2xl p-4 flex gap-2">
-                        <button onClick={handleReset} className="bg-gray-200 px-4 py-2 font-bold cursor-pointer">отменить</button>
-                        <button onClick={handleApply} className="bg-indigo-600 text-white px-4 py-2 font-bold cursor-pointer">применить</button>
+                    <div className="fixed bottom-4 right-4 bg-white border border-slate-300 p-4 shadow-xl z-50">
+                        <div className="text-lg font-bold uppercase mb-2">Изменения [{changes}]</div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={handleCancel}
+                                className="bg-gray-200 px-4 py-2 font-bold cursor-pointer text-2xl"
+                            >
+                                отменить
+                            </button>
+                            <button
+                                onClick={handleSubmit}
+                                disabled={processing}
+                                className="bg-indigo-600 text-white px-4 py-2 font-bold cursor-pointer text-2xl"
+                            >
+                                {processing ? 'Сохранение...' : 'применить'}
+                            </button>
+                        </div>
                     </div>
                 )}
             </AuthenticatedLayout>

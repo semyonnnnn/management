@@ -6,10 +6,12 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Services\FormService;
+/////////////////////////////////////////
 use App\Http\Requests\FormCreateRequest;
+use App\Http\Requests\FormUpdateRequest;
 use App\Models\Form;
 use App\Enum\PeriodEnum;
+use App\Services\FormService;
 
 class FormsController extends Controller
 {
@@ -57,7 +59,8 @@ class FormsController extends Controller
         return redirect()->back();
     }
 
-    public function update(FormRequest $r)
+    //FormUpdateRequest
+    public function update(FormUpdateRequest $r)
     {
         // 1. Get the validated nested data structure
         $validated = $r->validated();
@@ -71,17 +74,17 @@ class FormsController extends Controller
                 $form = Form::findOrFail($formData['id']);
 
                 $form->update([
-                    'name' => $formData['name'],
-                    'total' => $formData['total'] ?? 0,
-                    'indicators' => $formData['indicators'] ?? 0,
-                    'reports' => $formData['reports'],
-                    'k1' => $formData['k1'],
-                    'k2' => $formData['k2'],
-                    'k3' => $formData['k3'],
-                    'k4' => $formData['k4'],
-                    'k5' => $formData['k5'],
-                    'k6' => $formData['k6'],
-                    'is_consolidated' => $formData['is_consolidated'] ?? false,
+                    'okud' => (int) $formData['okud'],
+                    'name' => (string) $formData['name'],
+                    'period' => (string) $formData['period'],
+                    'indicators' => (int) $formData['indicators'],
+                    'k1' => (float) $formData['k1'],
+                    'k2' => (float) $formData['k2'],
+                    'k3' => (float) $formData['k3'],
+                    'k4' => (float) $formData['k4'],
+                    'k5' => (float) $formData['k5'],
+                    'k6' => (float) $formData['k6'],
+                    'is_consolidated' => (bool) ($data['is_consolidated'] ?? false),
                 ]);
 
                 // Clean up and sync department relationships for this specific form
@@ -94,6 +97,6 @@ class FormsController extends Controller
             }
         });
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Данные успешно обновлены!');
     }
 }

@@ -120,7 +120,7 @@ export function FlashMessage() {
                         }`}>
                         <span>СИСТЕМНОЕ УВЕДОМЛЕНИЕ</span>
                         <span className="font-extrabold">
-                            [{isError ? 'FAIL' : 'SUCCESS'}]
+                            [{isError ? 'увы' : 'успех'}]
                         </span>
                     </div>
 

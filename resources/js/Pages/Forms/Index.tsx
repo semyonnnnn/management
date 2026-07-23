@@ -4,6 +4,7 @@ import { useForm } from '@inertiajs/react';
 import { AddFormModal } from './AddFormModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { CustomSelect } from '@/components/custom/CustomSelect';
+import { FlashMessage } from '@/components/custom/FlashMessage';
 
 interface FormItem {
     id: number;
@@ -323,24 +324,26 @@ export default function Index({ forms, filters, periods }: Props) {
                     </div>
                 </div>
 
+                <FlashMessage />
+
                 <AddFormModal periods={periods} isConsolidated={true} isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
 
                 {hasChanges && (
                     <div className="fixed bottom-4 right-4 bg-white border border-slate-300 p-4 shadow-xl z-50">
-                        <div className="text-xs font-bold uppercase mb-2">Изменения ({getChangedForms().length})</div>
+                        <div className="text-lg font-bold uppercase mb-2">Изменения [{getChangedForms().length}]</div>
                         <div className="flex gap-2">
                             <button
                                 onClick={handleCancel}
-                                className="px-3 py-1 border border-slate-300 text-xs uppercase hover:bg-slate-50 cursor-pointer"
+                                className="bg-gray-200 px-4 py-2 font-bold cursor-pointer text-2xl"
                             >
-                                Отмена
+                                отменить
                             </button>
                             <button
                                 onClick={handleSubmit}
                                 disabled={processing}
-                                className="px-3 py-1 bg-indigo-600 text-white text-xs uppercase hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
+                                className="bg-indigo-600 text-white px-4 py-2 font-bold cursor-pointer text-2xl"
                             >
-                                {processing ? 'Сохранение...' : 'Принять'}
+                                {processing ? 'Сохранение...' : 'применить'}
                             </button>
                         </div>
                     </div>

@@ -173,7 +173,7 @@ export interface STVersionsCardProps {
 }
 
 export interface Department {
-    id: string;
+    id: number;
     name: string;
     territory: string;
     staff: number;
