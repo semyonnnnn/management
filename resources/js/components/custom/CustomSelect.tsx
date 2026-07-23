@@ -11,7 +11,7 @@ type SelectVariant = "green" | "indigo";
 interface CustomSelectProps {
     value: string;
     onChange: (val: string) => void;
-    options: { id: string; name: string }[];
+    options: { id: number; name: string }[];
     defaultText: string;
     className?: string;
     variant?: SelectVariant;
@@ -63,7 +63,8 @@ export const CustomSelect = ({
     className = "",
     variant = "indigo",
 }: CustomSelectProps) => {
-    const selectedOption = options.find((opt) => opt.id === value);
+    // Cast the numerical id to a string for the strict equality check
+    const selectedOption = options.find((opt) => String(opt.id) === value);
     const styles = variantStyles[variant];
 
     return (
@@ -97,9 +98,10 @@ export const CustomSelect = ({
                     options.map((opt) => (
                         <DropdownMenuItem
                             key={opt.id}
-                            onClick={() => onChange(opt.id)}
+                            // Pass the id back as a string to satisfy the onChange signature
+                            onClick={() => onChange(String(opt.id))}
                             title={opt.name}
-                            className={`${styles.item} ${value === opt.id
+                            className={`${styles.item} ${value === String(opt.id)
                                 ? styles.selectedItem
                                 : styles.unselectedItem
                                 }`}

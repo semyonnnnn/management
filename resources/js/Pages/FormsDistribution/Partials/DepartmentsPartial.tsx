@@ -1,8 +1,9 @@
-import { CustomSelect } from "@/components/custom/CustomSelect";
+import { useState, useRef, useEffect } from "react";
 import { Department } from "@/types";
 
 interface DepartmentData {
     department_id: string;
+    okveds?: string[];
 }
 
 interface DepartmentsPartialProps {
@@ -16,6 +17,10 @@ interface DepartmentsPartialProps {
     onReset: () => void;
     showActions: boolean;
     formName: string;
+    activeDeptIndex: number | null;
+    onRemoveDepartment: (index: number) => void;
+    onSelectActiveDept: (index: number | null) => void;
+    isPanel3Open: boolean;
 }
 
 export const DepartmentsPartial = ({
@@ -29,15 +34,52 @@ export const DepartmentsPartial = ({
     onReset,
     showActions,
     formName,
+    activeDeptIndex,
+    onRemoveDepartment,
+    onSelectActiveDept,
+    isPanel3Open,
 }: DepartmentsPartialProps) => {
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Ameliorate lingering dropdowns by closing them when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const availableDepartments = (departments ?? []).filter(
         dept => !(dataDepartments ?? []).some(d => d?.department_id === String(dept.id))
     );
 
-    const defaultSelectText = dataDepartments.length === 0
-        ? "Без ведомства"
-        : "Выбрать ведомство...";
+    const filteredDepartments = availableDepartments.filter(dept =>
+        dept.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleSelectDepartment = (id: string) => {
+        onSelectDept(id);
+
+        // A nominal delay ensures React batches the state update 
+        // in the parent before executing the add operation.
+        setTimeout(() => {
+            onAddDepartment();
+        }, 0);
+
+        setSearchTerm("");
+        setIsDropdownOpen(false);
+    };
+
+    const placeholderText = dataDepartments.length === 0
+        ? "Поиск (Без ведомства)..."
+        : "Поиск ведомства...";
 
     return (
         <div className="w-fit max-w-200 border border-gray-300 p-5 bg-white flex flex-col shadow-sm shrink-0">
@@ -45,23 +87,39 @@ export const DepartmentsPartial = ({
                 {formName}
             </h3>
 
-            <div className="grid grid-cols-[1fr_44px] gap-2 mb-5 w-full items-stretch relative z-20">
-                <CustomSelect
-                    value={selectedDeptId}
-                    onChange={onSelectDept}
-                    options={availableDepartments}
-                    defaultText={defaultSelectText}
+            {/* Search Input & Dropdown Container */}
+            <div className="relative mb-5 w-full z-20" ref={dropdownRef}>
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onFocus={() => setIsDropdownOpen(true)}
+                    placeholder={placeholderText}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 hover:border-indigo-400 text-gray-800 text-sm font-bold shadow-sm transition-all duration-150 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder:text-gray-500 placeholder:font-normal"
                 />
 
-                <button
-                    type="button"
-                    onClick={onAddDepartment}
-                    className="w-11 h-full flex items-center text-3xl justify-center bg-indigo-600 hover:bg-indigo-700 text-white uppercase cursor-pointer shadow-sm transition-colors"
-                >
-                    +
-                </button>
+                {isDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-1 w-full max-h-60 overflow-y-auto bg-white/95 backdrop-blur-md border border-gray-200 shadow-2xl shadow-black/10 z-50 custom-scrollbar">
+                        {filteredDepartments.length === 0 ? (
+                            <div className="px-3 py-3 text-sm text-gray-400 font-semibold italic bg-white/50">
+                                Нет совпадений
+                            </div>
+                        ) : (
+                            filteredDepartments.map((dept) => (
+                                <div
+                                    key={dept.id}
+                                    onClick={() => handleSelectDepartment(String(dept.id))}
+                                    className="px-3 py-2 text-sm font-semibold text-gray-800 cursor-pointer transition-colors border-b border-gray-100/50 last:border-0 whitespace-normal break-words hover:bg-indigo-50/80 hover:text-indigo-900"
+                                >
+                                    {dept.name}
+                                </div>
+                            ))
+                        )}
+                    </div>
+                )}
             </div>
 
+            {/* Selected Departments List */}
             <div className="space-y-1.5 overflow-y-auto max-h-87.5 custom-scrollbar w-full relative z-10">
                 {dataDepartments.map((d, index) => {
                     const match = departments.find(
@@ -72,8 +130,8 @@ export const DepartmentsPartial = ({
                         <div
                             key={d.department_id}
                             className={`group relative flex justify-between items-center text-sm font-bold h-13 w-full border border-transparent hover:border-gray-300 transition-all ${index % 2 === 0
-                                    ? 'bg-gray-50'
-                                    : 'bg-indigo-50/40'
+                                ? 'bg-gray-50'
+                                : 'bg-indigo-50/40'
                                 }`}
                         >
                             <span className="truncate pl-3 pr-14 flex-1 text-gray-700">
@@ -95,6 +153,7 @@ export const DepartmentsPartial = ({
                 })}
             </div>
 
+            {/* Action Buttons */}
             {showActions && (
                 <div className="flex gap-2 mt-5 pt-5 border-t border-gray-200">
                     <button

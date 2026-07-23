@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/react';
-/////////////////////////////////////////////
 import Modal from "@/components/custom/Modal";
 import { DepartmentsPartial } from './Partials/DepartmentsPartial';
-import { OkvedPartial } from './Partials/OkvedPartial';
+// import { OkvedPartial } from './Partials/OkvedPartial';
 import { Confirmation } from './Partials/Confirmation';
 import { Department } from '@/types';
 
@@ -11,7 +10,6 @@ interface EditFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     departments: Department[],
-    // departments: Array<{ id: string; name: string; territory: string }>;
     form: any;
 }
 
@@ -223,13 +221,13 @@ export const EditFormModal = ({ isOpen, onClose, departments, form }: EditFormMo
                             onSave={() => handleSubmit()}
                         />
 
-                        <OkvedPartial
+                        {/* <OkvedPartial
                             isOpen={isPanel3Open}
                             activeDeptIndex={activeDeptIndex}
                             form={{ data, setData, processing, put }}
                             okveds={isPanel3Open && activeDeptIndex !== null ? data.departments[activeDeptIndex].okveds : []}
                             onClose={onClose}
-                        />
+                        /> */}
                     </form>
                 </div>
             </Modal>
