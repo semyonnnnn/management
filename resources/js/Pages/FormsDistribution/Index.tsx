@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import '@fontsource/jetbrains-mono/700.css';
 import '@fontsource/jetbrains-mono/400.css';
-import { EditFormModal } from './EditFormDistributionModal';
+import { EditFormDistributionModal } from './EditFormDistributionModal';
 import { ExtendedPageProps } from '@/types';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
@@ -123,7 +123,7 @@ export default function Index({ departments, forms, filters }: ExtendedPageProps
                                 >
                                     <div className="flex items-center flex-1 min-w-0">
                                         {/* OKUD / Code Badge */}
-                                        <div className="px-4 py-3 bg-gray-100 border-r border-gray-300 text-xs font-mono font-bold text-gray-700 shrink-0 uppercase tracking-tight min-w-[100px] text-center flex items-center justify-center">
+                                        <div className="px-4 py-3 bg-gray-100 border-r border-gray-300 text-xs font-mono font-bold text-gray-700 shrink-0 uppercase tracking-tight min-w-25 text-center flex items-center justify-center">
                                             {form.okud || form.code || `ОКУД: ${form.id}`}
                                         </div>
 
@@ -135,15 +135,6 @@ export default function Index({ departments, forms, filters }: ExtendedPageProps
 
                                     {/* Action Buttons Right Side */}
                                     <div className="flex items-center gap-2 pr-3 shrink-0">
-                                        {/* Small + Icon button to open Department Modal */}
-                                        <button
-                                            type="button"
-                                            onClick={(e) => handleOpenEditModal(e, form)}
-                                            title="Прикрепить отдел к форме"
-                                            className="w-8 h-8 flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xl transition-colors shadow-sm cursor-pointer border border-indigo-700"
-                                        >
-                                            +
-                                        </button>
 
                                         {/* Accordion Toggle Indicator */}
                                         <div className="w-8 h-8 flex items-center justify-center text-gray-600 group-hover:text-indigo-600 font-mono text-xs">
@@ -170,7 +161,7 @@ export default function Index({ departments, forms, filters }: ExtendedPageProps
                                                         {/* Department Header Bar */}
                                                         <div className="flex items-stretch bg-gray-100 border-b border-gray-300">
                                                             {/* Territory / Short Badge (e.g. '1k', '1') */}
-                                                            <div className="px-4 py-2 bg-indigo-900 text-white text-xs font-mono font-bold border-r border-gray-300 min-w-[50px] flex items-center justify-center">
+                                                            <div className="px-4 py-2 bg-indigo-900 text-white text-xs font-mono font-bold border-r border-gray-300 min-w-12.5 flex items-center justify-center">
                                                                 {dept.territory || dept.code || dept.short_code || `${idx + 1}k`}
                                                             </div>
                                                             {/* Department Title */}
@@ -207,7 +198,7 @@ export default function Index({ departments, forms, filters }: ExtendedPageProps
                     })}
                 </div>
 
-                <EditFormModal
+                <EditFormDistributionModal
                     isOpen={isEditModalOpen}
                     onClose={() => { setIsEditModalOpen(false); setSelectedForm(null); }}
                     departments={departments}

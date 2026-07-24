@@ -16,9 +16,7 @@ class DepartmentFactory extends Factory
             'territory' => $this->faker->randomElement(['ekb', 'krg']),
             'staff' => $this->faker->numberBetween(5, 50),
             'state' => $this->faker->numberBetween(0, 5),
-            'okveds' => collect(['12', '13', '14', '15', '16', '17', '20', '21'])
-                ->random($this->faker->numberBetween(1, 4))
-                ->implode(', '),
+            'okveds' => '',
             'workload' => $this->faker->numberBetween(10, 100),
         ];
     }

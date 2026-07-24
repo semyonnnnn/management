@@ -43,6 +43,8 @@ class FormsDistributionController extends Controller
         return redirect()->back();
     }
 
+
+    //FormDistributionRequest
     public function update(FormDistributionRequest $r)
     {
         $data = $r->validated();
@@ -57,23 +59,19 @@ class FormsDistributionController extends Controller
                 'coeff' => $data['coeff'] ?? '1.0',
             ]);
 
-            // Collect IDs and flatten OKVEDs directly
-            $departmentIds = collect($data['departments'])->pluck('department_id')->toArray();
-            $allOkvedCodes = collect($data['departments'])->pluck('okveds')->flatten()->unique()->toArray();
+            // 2. Обрабатываем каждое ведомство и обновляем поле okveds в таблице departments напрямую
+            foreach ($data['departments'] ?? [] as $departmentItem) {
+                $departmentId = $departmentItem['department_id'];
+                $okveds = $departmentItem['okveds'] ?? '';
 
-            // Sync departments without extra pivot data
+                \App\Models\Department::where('id', $departmentId)->update([
+                    'okveds' => $okveds,
+                ]);
+            }
+
+            // 3. Синхронизируем только чистые ID ведомств для связи с формой
+            $departmentIds = collect($data['departments'] ?? [])->pluck('department_id')->toArray();
             $form->departments()->sync($departmentIds);
-
-            // Sync OKVEDs (assuming a similar relationship exists)
-            $form->okveds()->sync($allOkvedCodes);
-
-            // 3. Собираем и синхронизируем ОКВЭДы (form_okved)
-            $syncOkveds = [];
-            $allOkvedCodes = array_unique($allOkvedCodes);
-
-            // Нам нужен метод связи okveds() в модели Form. 
-            // Он должен быть объявлен как: return $this->belongsToMany(Okved::class, 'form_okved');
-            $form->okveds()->sync($syncOkveds);
         });
 
         return redirect()->back();

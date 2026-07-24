@@ -14,16 +14,16 @@ class FormDistributionRequest extends FR
     public function rules(): array
     {
         $rules = [
+            'id' => ['required', 'integer', 'exists:forms,id'],
             'name' => ['required', 'string', 'max:255'],
 
-            // Валидация для вложенной структуры отделов (без okveds)
             'departments' => ['nullable', 'array'],
-            'departments.*.department_id' => ['nullable', 'exists:departments,id'],
+            'departments.*.department_id' => ['required', 'integer', 'exists:departments,id'],
+            'departments.*.okveds' => ['nullable', 'string'],
         ];
 
-        // Если это запрос на обновление, проверяем существование ID самой записи
         if ($this->isMethod('put') || $this->isMethod('patch') || $this->has('id')) {
-            $rules['id'] = ['required', 'exists:forms,id'];
+            $rules['id'] = ['required', 'integer', 'exists:forms,id'];
         }
 
         return $rules;
@@ -33,14 +33,20 @@ class FormDistributionRequest extends FR
     {
         return [
             'id.required' => 'ID формы обязателен для обновления.',
-            'id.exists' => 'Редактируемая форма не найдена.',
+            'id.integer' => 'ID формы должен быть целым числом.',
+            'id.exists' => 'Редактируемая форма не найдена в базе данных.',
 
-            'name.required' => 'Поле "Название" обязательно для заполнения.',
-            'name.string' => 'Название должно быть текстовым.',
-            'name.max' => 'Название не может превышать 255 символов.',
+            'name.required' => 'Поле "Название формы" обязательно для заполнения.',
+            'name.string' => 'Название формы должно быть строкой.',
+            'name.max' => 'Название формы не может превышать 255 символов.',
 
-            'departments.array' => 'Структура отделов должна быть массивом.',
+            'departments.array' => 'Структура отделов должна представлять собой массив.',
+
+            'departments.*.department_id.required' => 'ID ведомства обязателен.',
+            'departments.*.department_id.integer' => 'ID ведомства должен быть целым числом.',
             'departments.*.department_id.exists' => 'Выбранное ведомство не существует в базе данных.',
+
+            'departments.*.okveds.string' => 'ОКВЭДы должны быть строкой.',
         ];
     }
 }
