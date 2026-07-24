@@ -77,12 +77,13 @@ class StatePageController extends Controller
     public function delete(int $id)
     {
         $department = Department::find($id);
+        $depName = $department->name;
         $department->delete();
 
         if (!Department::exists()) {
             Schedule::first()->delete();
         }
 
-        return redirect()->back();
+        return redirect()->back()->with('success', "Отдел '$depName' успешно удалён!");
     }
 }

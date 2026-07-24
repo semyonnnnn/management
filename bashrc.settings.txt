@@ -6,6 +6,18 @@ alias logs='tail -n 100 storage/logs/laravel.log'
 # seeder
 alias seedd='sail artisan db:seed --class=DataSeeder'
 
+# search if no trust in vs code
+
+search() {
+    if [ -z "$1" ]; then
+        echo "Please provide a component name."
+        return 1
+    fi
+    
+    # Excludes the standard build folders, plus 'ssr' to keep SSR compiled files out of your results
+    grep -rnw . --exclude-dir={node_modules,.git,dist,build,ssr} -e "$1"
+}
+
 # Compose definitions
 export DEV_COMPOSE="docker compose -f compose.yaml"
 export PROD_COMPOSE="docker compose -f compose.prod.yaml"

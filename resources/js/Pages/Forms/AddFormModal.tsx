@@ -168,7 +168,7 @@ export const AddFormModal = ({ isOpen, onClose, isConsolidated, periods }: Exten
                                             variant='green'
                                             value={data.period}
                                             onChange={(val) => setData('period', val)}
-                                            options={periods.map((p) => ({ id: p, name: p }))}
+                                            options={periods.map((p) => ({ name: p }))}
                                             defaultText="— Выберите период —"
                                             className={`w-full px-3.5 py-2.5 bg-white border text-base font-bold focus:outline-none transition-colors ${errors.period
                                                 ? 'border-red-500 text-red-950 focus:border-red-600 bg-red-50/30'

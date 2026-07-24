@@ -139,25 +139,9 @@ export default function Index({ forms, filters, periods }: Props) {
         );
     };
 
-    const handleInputChange = (id: number, field: keyof LocalFormItem, rawValue: string) => {
-        let value = rawValue;
-
-        if (field === 'okud') {
-            if (value !== '' && (!/^\d*$/.test(value) || value.length > 8)) return;
-        } else if (field === 'indicators') {
-            if (value !== '' && !/^(0|[1-9]\d*)$/.test(value)) return;
-        } else if (['k1', 'k2', 'k3', 'k4', 'k5', 'k6'].includes(field)) {
-            if (value === '.') value = '0.';
-            if (value !== '' && !/^(0(\.\d*)?|[1-9]\d*(\.\d*)?)$/.test(value)) return;
-        }
-
-        const updatedLocal = localForms.map(form =>
-            form.id === id ? { ...form, [field]: value } : form
-        );
-
-        setLocalForms(updatedLocal);
-
-        const changedItems = updatedLocal
+    // Helper function to calculate all changed items consistently
+    const getChangedForms = (currentLocalForms: LocalFormItem[]) => {
+        return currentLocalForms
             .filter(current => {
                 const original = initialForms.find(f => f.id === current.id);
                 if (!original) return false;
@@ -175,8 +159,31 @@ export default function Index({ forms, filters, periods }: Props) {
                 k5: parsePayloadValue(form.k5, true),
                 k6: parsePayloadValue(form.k6, true),
             }));
+    };
 
-        setData('forms', changedItems);
+    const handleInputChange = (id: number, field: keyof LocalFormItem, rawValue: string) => {
+        let value = rawValue;
+
+        if (field === 'okud') {
+            if (value !== '' && (!/^\d*$/.test(value) || value.length > 8)) return;
+        } else if (field === 'indicators') {
+            if (value !== '' && !/^(0|[1-9]\d*)$/.test(value)) return;
+        } else if (['k1', 'k2', 'k3', 'k4', 'k5', 'k6'].includes(field)) {
+            if (value === '.') value = '0.';
+            if (value !== '' && !/^(0(\.\d*)?|[1-9]\d*(\.\d*)?)$/.test(value)) return;
+        }
+
+        setLocalForms(prevLocalForms => {
+            const updatedLocal = prevLocalForms.map(form =>
+                form.id === id ? { ...form, [field]: value } : form
+            );
+
+            // Calculate and sync changes using the freshly updated local array state
+            const changedItems = getChangedForms(updatedLocal);
+            setData('forms', changedItems);
+
+            return updatedLocal;
+        });
     };
 
     const handleDelete = (form: LocalFormItem) => {
@@ -188,7 +195,12 @@ export default function Index({ forms, filters, periods }: Props) {
 
         const targetId = formToDelete.id;
 
-        setLocalForms(prevForms => prevForms.filter(f => f.id !== targetId));
+        setLocalForms(prevForms => {
+            const nextForms = prevForms.filter(f => f.id !== targetId);
+            setData('forms', getChangedForms(nextForms));
+            return nextForms;
+        });
+
         setInitialForms(prevInitial => prevInitial.filter(f => f.id !== targetId));
         setFormToDelete(null);
 
@@ -197,14 +209,8 @@ export default function Index({ forms, filters, periods }: Props) {
         });
     };
 
-    const getChangedForms = () => {
-        return localForms.filter(current => {
-            const original = initialForms.find(f => f.id === current.id);
-            return original && isFormChanged(current, original);
-        });
-    };
-
-    const hasChanges = getChangedForms().length > 0;
+    const changedFormsList = getChangedForms(localForms);
+    const hasChanges = changedFormsList.length > 0;
 
     const filteredForms = localForms.filter(form =>
         form.name.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
@@ -365,7 +371,7 @@ export default function Index({ forms, filters, periods }: Props) {
 
                 {hasChanges && (
                     <div className="fixed bottom-4 right-4 bg-white border border-slate-300 p-4 shadow-xl z-50">
-                        <div className="text-lg font-bold uppercase mb-2">Изменения [{getChangedForms().length}]</div>
+                        <div className="text-lg font-bold uppercase mb-2">Изменения [{changedFormsList.length}]</div>
                         <div className="flex gap-2">
                             <button
                                 onClick={handleCancel}

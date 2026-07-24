@@ -11,8 +11,8 @@ class DepartmentFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => 'Отдел ' . $this->faker->unique()->word(),
-            'code' => $this->faker->unique()->numerify('DEP-###'),
+            'name' => 'Отдел ' . $this->faker->unique()->numerify('###'),
+            'code' => $this->faker->unique()->numerify('##'),
             'territory' => $this->faker->randomElement(['ekb', 'krg']),
             'staff' => $this->faker->numberBetween(5, 50),
             'state' => $this->faker->numberBetween(0, 5),

@@ -11,7 +11,7 @@ interface DepartmentsPartialProps {
     dataDepartments: DepartmentData[];
     selectedDeptId: string;
     onSelectDept: (id: string) => void;
-    onAddDepartment: () => void;
+    onAddDepartment: (id: string) => void;
     onConfirmRemove: (index: number) => void;
     onSave: () => void;
     onReset: () => void;
@@ -69,9 +69,9 @@ export const DepartmentsPartial = ({
 
         // A nominal delay ensures React batches the state update 
         // in the parent before executing the add operation.
-        setTimeout(() => {
-            onAddDepartment();
-        }, 0);
+        // setTimeout(() => {
+        onAddDepartment(id);
+        // }, 0);
 
         setSearchTerm("");
         setIsDropdownOpen(false);
