@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import '@fontsource/jetbrains-mono/700.css';
 import '@fontsource/jetbrains-mono/400.css';
+/////////////////////////////////////////////
 import { EditFormDistributionModal } from './EditFormDistributionModal';
 import { ExtendedPageProps } from '@/types';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { FormDepartmentsList } from './Partials/FormDepartmentList';
 
 export default function Index({ departments, forms, filters }: ExtendedPageProps) {
     const [selectedTerritory, setSelectedTerritory] = useState<string>(filters.territory || 'all');
@@ -143,55 +145,8 @@ export default function Index({ departments, forms, filters }: ExtendedPageProps
                                     </div>
                                 </div>
 
-                                {/* Expanded Form Details Body */}
                                 {isExpanded && (
-                                    <div className="p-4 bg-gray-50/80 border-t border-gray-300 space-y-4">
-                                        {hasDepartments ? (
-                                            form.departments.map((dept: any, idx: number) => {
-                                                // Generate OKVEDs / Codes string from department data
-                                                const codesList = Array.isArray(dept.okveds) && dept.okveds.length > 0
-                                                    ? dept.okveds.join(', ')
-                                                    : dept.okved || dept.okved_code || '12, 13, 14, 15, 16, 17, 21, 20';
-
-                                                return (
-                                                    <div
-                                                        key={dept.id || idx}
-                                                        className="border border-gray-400 bg-white shadow-sm overflow-hidden"
-                                                    >
-                                                        {/* Department Header Bar */}
-                                                        <div className="flex items-stretch bg-gray-100 border-b border-gray-300">
-                                                            {/* Territory / Short Badge (e.g. '1k', '1') */}
-                                                            <div className="px-4 py-2 bg-indigo-900 text-white text-xs font-mono font-bold border-r border-gray-300 min-w-12.5 flex items-center justify-center">
-                                                                {dept.territory || dept.code || dept.short_code || `${idx + 1}k`}
-                                                            </div>
-                                                            {/* Department Title */}
-                                                            <div className="px-4 py-2 text-sm font-mono font-bold text-gray-800 uppercase tracking-tight flex items-center">
-                                                                {dept.name || `Отдел - ${idx + 1}`}
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Department Codes / Content Box */}
-                                                        <div className="p-4 text-sm font-mono text-gray-800 bg-white leading-relaxed">
-                                                            {codesList}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })
-                                        ) : (
-                                            <div className="p-6 text-center border border-dashed border-gray-300 bg-white">
-                                                <p className="text-xs font-mono text-gray-500 uppercase tracking-wider mb-3">
-                                                    К этой форме не прикреплено ни одного отдела
-                                                </p>
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => handleOpenEditModal(e, form)}
-                                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-mono text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
-                                                >
-                                                    <span>+</span> Прикрепить отдел
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <FormDepartmentsList form={form} onOpenEditModal={handleOpenEditModal} />
                                 )}
                             </div>
                         );

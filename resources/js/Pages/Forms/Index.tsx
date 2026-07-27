@@ -294,7 +294,7 @@ export default function Index({ forms, filters, periods }: Props) {
                         <div className={`w-40 shrink-0 p-2 ${borderRightSlate300} text-center bg-emerald-200/60 text-emerald-900`}>
                             Период
                         </div>
-                        <div className={`w-[102px] shrink-0 p-2 ${borderRightSlate300} text-center bg-rose-200/70 text-rose-900`}>
+                        <div className={`w-25.5 shrink-0 p-2 ${borderRightSlate300} text-center bg-rose-200/70 text-rose-900`}>
                             Показатели
                         </div>
 

@@ -3,7 +3,7 @@ import { useForm } from '@inertiajs/react';
 import Modal from "@/components/custom/Modal";
 import { Confirmation } from './Partials/Confirmation';
 import { Department } from "@/types";
-import { DepSearch } from "./DepSearch";
+import { DepSearch } from "./Partials/DepSearch";
 
 interface DepartmentData {
     department_id: string;

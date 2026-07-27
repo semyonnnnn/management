@@ -16,7 +16,7 @@ export function DepSearch({
     handleSelectDepartment
 }: DepSearchProps) {
     return (
-        <div className="space-y-3 mb-5 min-w-[200px]">
+        <div className="space-y-3 mb-5 min-w-50">
             <div className="w-full">
                 <input
                     type="text"
@@ -37,7 +37,7 @@ export function DepSearch({
                         <div
                             key={dept.id}
                             onClick={() => handleSelectDepartment(String(dept.id))}
-                            className="px-3 py-2 text-sm font-semibold text-gray-800 cursor-pointer transition-colors border-b border-gray-100 last:border-0 whitespace-normal break-words hover:bg-indigo-50/80 hover:text-indigo-900"
+                            className="px-3 py-2 text-sm font-semibold text-gray-800 cursor-pointer transition-colors border-b border-gray-100 last:border-0 whitespace-normal wrap-break-word hover:bg-indigo-50/80 hover:text-indigo-900"
                         >
                             {dept.name}
                         </div>
