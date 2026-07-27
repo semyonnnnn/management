@@ -3,6 +3,7 @@ import { useForm } from '@inertiajs/react';
 import Modal from "@/components/custom/Modal";
 import { Confirmation } from './Partials/Confirmation';
 import { Department } from "@/types";
+import { DepSearch } from "./DepSearch";
 
 interface DepartmentData {
     department_id: string;
@@ -16,7 +17,6 @@ interface EditFormDistributionModalProps {
     form: any;
 }
 
-// Translation mapping for field names
 const FIELD_TRANSLATIONS: Record<string, string> = {
     'name': 'Название',
     'departments': 'Отделы',
@@ -54,22 +54,8 @@ export const EditFormDistributionModal = ({
     const [addedDepartmentIndex, setAddedDepartmentIndex] = useState<number | null>(null);
     const [isOkvedConfirmOpen, setIsOkvedConfirmOpen] = useState(false);
 
-    // Search and dropdown state
     const [searchTerm, setSearchTerm] = useState("");
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsDropdownOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
+    const [addedSearchTerm, setAddedSearchTerm] = useState("");
 
     const handleRequestDelete = (index: number) => {
         setDeptToDelete(index);
@@ -179,9 +165,23 @@ export const EditFormDistributionModal = ({
     const handleCancel = () => {
         clearErrors();
         if (addedDepartmentIndex !== null) {
-            setDeptToDelete(addedDepartmentIndex);
-            setIsDeptConfirmOpen(true);
-            return;
+            // Reconstruct original backend departments to discard all local additions at once
+            const originalDepartments = Array.isArray(form?.departments)
+                ? form.departments.map((d: any) => ({
+                    department_id: String(d.department_id || d.id),
+                    okveds: typeof d.okveds === 'string' ? d.okveds : (Array.isArray(d.okveds) ? d.okveds.join(', ') : '')
+                }))
+                : Array.isArray(form?.department_ids)
+                    ? form.department_ids.map((id: any) => ({
+                        department_id: String(id),
+                        okveds: ''
+                    }))
+                    : (form?.department_id
+                        ? [{ department_id: String(form.department_id), okveds: '' }]
+                        : []);
+
+            updateFormData('departments', originalDepartments);
+            setAddedDepartmentIndex(null);
         }
         onClose();
     };
@@ -222,12 +222,27 @@ export const EditFormDistributionModal = ({
         setSelectedDeptId(id);
         handleAddDepartment(id);
         setSearchTerm("");
-        setIsDropdownOpen(false);
     };
 
     const placeholderText = data.departments.length === 0
         ? "Поиск (Без ведомства)..."
         : "Поиск ведомства...";
+
+    const indexedDepartments = data.departments.map((d, index) => {
+        const match = departments.find(
+            dept => String(dept.id) === d.department_id
+        );
+        return {
+            originalIndex: index,
+            d,
+            match,
+            name: match ? match.name : `ID: ${d.department_id}`
+        };
+    });
+
+    const filteredIndexedDepartments = indexedDepartments.filter(item =>
+        item.name.toLowerCase().includes(addedSearchTerm.toLowerCase())
+    );
 
     const hasErrors = Object.keys(errors).length > 0;
     const isSaveDisabled = data.departments.length === 0;
@@ -261,7 +276,7 @@ export const EditFormDistributionModal = ({
 
                 <div
                     onClick={handleOutsideClick}
-                    className="font-mono text-gray-900 select-none p-6 relative pt-7 text-base inline-block box-border"
+                    className="font-mono max-h-[90vh] w-[80vw] text-gray-900 select-none p-6 relative pt-7 text-base inline-block box-border"
                     style={{ fontFamily: "'JetBrains Mono', monospace" }}
                 >
                     <div className="p-5 border border-indigo-300 bg-[repeating-linear-gradient(45deg,#f5f3ff,#f5f3ff_10px,#e0e7ff_10px,#e0e7ff_20px)] flex flex-row items-stretch gap-4 transition-all duration-300">
@@ -270,114 +285,107 @@ export const EditFormDistributionModal = ({
                             onClick={handleOutsideClick}
                             className="flex flex-row items-stretch cursor-default w-full"
                         >
-                            <div className="w-full border border-gray-300 p-6 bg-white flex flex-col shadow-sm shrink-0" style={{ minWidth: '640px' }}>
+                            <div className="w-full border border-gray-300 p-6 bg-white flex flex-col shadow-sm shrink-0" style={{ minWidth: '20rem' }}>
                                 <h3 className="text-sm font-bold uppercase tracking-tight text-indigo-900 border-b border-indigo-200 pb-3 mb-5">
                                     {data.name}
                                 </h3>
 
-                                {/* Search Input & Dropdown Container */}
-                                <div className="relative mb-5 w-full z-20" ref={dropdownRef}>
-                                    <input
-                                        type="text"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        onFocus={() => setIsDropdownOpen(true)}
-                                        placeholder={placeholderText}
-                                        className="w-full px-3.5 py-2.5 bg-white border border-gray-300 hover:border-indigo-400 text-gray-800 text-sm font-bold shadow-sm transition-all duration-150 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder:text-gray-500 placeholder:font-normal"
-                                    />
+                                {/* [SEARCH SECTION & CONTENT LAYOUT CONTAINER] */}
+                                <div className="flex flex-col md:flex-row gap-4 flex-1 min-h-0">
+                                    <div className="w-full md:w-80 shrink-0 flex flex-col gap-2" style={{ minWidth: '200px' }}>
+                                        <DepSearch
+                                            searchTerm={searchTerm}
+                                            setSearchTerm={setSearchTerm}
+                                            placeholderText={placeholderText}
+                                            filteredDepartments={filteredDepartments}
+                                            handleSelectDepartment={handleSelectDepartment}
+                                        />
+                                    </div>
 
-                                    {isDropdownOpen && (
-                                        <div className="absolute top-full left-0 mt-1 w-full max-h-60 overflow-y-auto bg-white/95 backdrop-blur-md border border-gray-200 shadow-2xl shadow-black/10 z-50 custom-scrollbar">
-                                            {filteredDepartments.length === 0 ? (
-                                                <div className="px-3 py-3 text-sm text-gray-400 font-semibold italic bg-white/50">
-                                                    Нет совпадений
+                                    <div className="hidden md:block border-l border-gray-200 mx-1"></div>
+
+                                    <div className="flex-1 flex flex-col min-h-0">
+                                        {/* [ADDED DEPARTMENTS SEARCH FIELD] */}
+                                        <div className="mb-3">
+                                            <input
+                                                type="text"
+                                                value={addedSearchTerm}
+                                                onChange={(e) => setAddedSearchTerm(e.target.value)}
+                                                placeholder="Поиск по добавленным..."
+                                                className="w-full px-3.5 py-2.5 bg-white border border-gray-300 hover:border-indigo-400 text-gray-800 text-sm font-bold shadow-sm transition-all duration-150 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder:text-gray-500 placeholder:font-normal"
+                                            />
+                                        </div>
+
+                                        {/* [DISPLAY SECTION] */}
+                                        <div className="space-y-3 overflow-y-auto max-h-87.5 custom-scrollbar w-full relative z-10 pr-1 flex-1">
+                                            {filteredIndexedDepartments.length === 0 ? (
+                                                <div className="px-3 py-3 text-sm text-gray-400 font-semibold italic bg-white/50 border border-gray-200">
+                                                    Нет добавленных совпадений
                                                 </div>
                                             ) : (
-                                                filteredDepartments.map((dept) => (
+                                                filteredIndexedDepartments.map(({ originalIndex, d, match, name }) => (
                                                     <div
-                                                        key={dept.id}
-                                                        onClick={() => handleSelectDepartment(String(dept.id))}
-                                                        className="px-3 py-2 text-sm font-semibold text-gray-800 cursor-pointer transition-colors border-b border-gray-100/50 last:border-0 whitespace-normal break-words hover:bg-indigo-50/80 hover:text-indigo-900"
+                                                        key={d.department_id}
+                                                        className={`group relative flex flex-col gap-2.5 p-3.5 border border-transparent hover:border-gray-300 transition-all ${originalIndex % 2 === 0 ? 'bg-gray-50' : 'bg-indigo-50/40'
+                                                            }`}
                                                     >
-                                                        {dept.name}
+                                                        <div className="flex justify-between items-center text-sm font-bold pr-10">
+                                                            <span className="w-150">
+                                                                {originalIndex + 1}. {name}
+                                                            </span>
+
+                                                            <button
+                                                                type="button"
+                                                                onClick={e => {
+                                                                    e.stopPropagation();
+                                                                    handleRequestDelete(originalIndex);
+                                                                }}
+                                                                className="absolute right-3.5 top-3.5 w-7 h-7 flex items-center justify-center text-base font-bold border border-red-500 bg-red-500/20 text-red-600 hover:bg-red-500 hover:text-white transition-all shrink-0 select-none cursor-pointer"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </div>
+
+                                                        <div>
+                                                            <textarea
+                                                                value={d.okveds}
+                                                                onChange={(e) => handleOkvedChange(originalIndex, e.target.value)}
+                                                                placeholder="ОКВЭДы (например: 01.11, 02.20)"
+                                                                rows={3}
+                                                                className="w-full px-3 py-2.5 bg-white border border-gray-300 text-sm font-mono text-gray-800 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-y"
+                                                            />
+                                                        </div>
                                                     </div>
                                                 ))
                                             )}
                                         </div>
-                                    )}
-                                </div>
 
-                                {/* Selected Departments List */}
-                                <div className="space-y-3 overflow-y-auto max-h-[500px] custom-scrollbar w-full relative z-10 pr-1">
-                                    {data.departments.map((d, index) => {
-                                        const match = departments.find(
-                                            dept => String(dept.id) === d.department_id
-                                        );
+                                        <div className="flex gap-3 mt-6 pt-5 border-t border-gray-200 shrink-0">
+                                            <button
+                                                type="button"
+                                                onClick={handleCancel}
+                                                className="flex-1 h-12 border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 font-bold transition-colors cursor-pointer"
+                                            >
+                                                Отменить
+                                            </button>
 
-                                        return (
-                                            <div
-                                                key={d.department_id}
-                                                className={`group relative flex flex-col gap-2.5 p-3.5 border border-transparent hover:border-gray-300 transition-all ${index % 2 === 0 ? 'bg-gray-50' : 'bg-indigo-50/40'
+                                            <button
+                                                type="button"
+                                                disabled={isSaveDisabled}
+                                                onClick={() => handleSubmit()}
+                                                className={`flex-1 h-12 font-bold transition-colors ${isSaveDisabled
+                                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                    : 'bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer'
                                                     }`}
                                             >
-                                                <div className="flex justify-between items-center text-sm font-bold pr-10">
-                                                    <span className="truncate text-gray-700">
-                                                        {index + 1}. {match ? match.name : `ID: ${d.department_id}`}
-                                                    </span>
-
-                                                    <button
-                                                        type="button"
-                                                        onClick={e => {
-                                                            e.stopPropagation();
-                                                            handleRequestDelete(index);
-                                                        }}
-                                                        className="absolute right-3.5 top-3.5 w-7 h-7 flex items-center justify-center text-base font-bold border border-red-500 bg-red-500/20 text-red-600 hover:bg-red-500 hover:text-white transition-all shrink-0 select-none cursor-pointer"
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                </div>
-
-                                                {/* OKVEDs textarea: vertical resize only, larger text */}
-                                                <div>
-                                                    <textarea
-                                                        value={d.okveds}
-                                                        onChange={(e) => handleOkvedChange(index, e.target.value)}
-                                                        placeholder="ОКВЭДы (например: 01.11, 02.20)"
-                                                        rows={3}
-                                                        className="w-full px-3 py-2.5 bg-white border border-gray-300 text-sm font-mono text-gray-800 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-y"
-                                                    />
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="flex gap-3 mt-6 pt-5 border-t border-gray-200">
-                                    <button
-                                        type="button"
-                                        onClick={handleCancel}
-                                        className="flex-1 h-12 border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 font-bold transition-colors cursor-pointer"
-                                    >
-                                        Отменить
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        disabled={isSaveDisabled}
-                                        onClick={() => handleSubmit()}
-                                        className={`flex-1 h-12 font-bold transition-colors ${isSaveDisabled
-                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            : 'bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer'
-                                            }`}
-                                    >
-                                        Сохранить
-                                    </button>
+                                                Сохранить
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </form>
 
-                        {/* DYNAMIC ERRORS PANEL */}
                         {hasErrors && (
                             <div className="w-80 h-full max-h-[90vh] bg-white border border-red-400 shadow-sm relative overflow-hidden flex flex-col font-mono" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                                 <div className="h-1.5 w-full bg-[repeating-linear-gradient(45deg,#f87171,#f87171_10px,#ef4444_10px,#ef4444_20px)] absolute top-0 left-0" />
