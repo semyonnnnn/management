@@ -179,8 +179,10 @@ export interface Department {
     staff: number;
     workload: number;
     state?: number;
-    [key: string]: any;
+    okveds: string;
 }
+
+export type MinDep = Omit<Department, 'staff' | 'workload', 'state'>;
 
 export interface StatisticalForm {
     id: number;
@@ -205,12 +207,6 @@ export interface PaginatedForms {
     links: PaginationLink[];
     total: number;
     current_page: number;
-}
-
-export interface Department {
-    id: string;
-    name: string;
-    territory: string;
 }
 
 interface AddFormModalProps {

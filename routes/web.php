@@ -12,7 +12,7 @@ use App\Http\Controllers\FormsController;
 use App\Http\Controllers\StatePageController;
 
 Route::get('/', function () {
-    return redirect('/forms');
+    return redirect('/forms_distribution');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

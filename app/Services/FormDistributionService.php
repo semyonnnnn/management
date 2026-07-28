@@ -35,12 +35,9 @@ class FormDistributionService
 
         $forms->through(fn($form) => [
             'id' => $form->id,
+            'okud' => $form->okud,
             'name' => $form->name,
-            'indicators' => (int) $form->indicators,
-            'reports' => (int) $form->reports,
-            'coeff' => $form->coeff,
-            'resolvedTerritory' => $form->departments->first()?->territory ?? 'all',
-            'departments' => $form->departments->map(fn($d) => ['id' => $d->id, 'name' => $d->name]),
+            'departments' => $form->departments->map(fn($d) => ['id' => $d->id, 'name' => $d->name, 'code' => $d->code, 'territory' => $d->territory, 'okveds' => $d->okveds,]),
         ]);
 
         return ['forms' => $forms, 'departments' => $departments];
