@@ -26,7 +26,6 @@ export default function Index({ departments, forms, filters }: ExtendedPageProps
             [formId]: !prev[formId]
         }));
     };
-    console.log('forms.data', forms.data);
 
     // Trigger backend update via Inertia PUT request
     const handleSaveBackend = (formId: number, deptValues: MinDep[]) => {
@@ -131,16 +130,16 @@ export default function Index({ departments, forms, filters }: ExtendedPageProps
                         const isExpanded = !!expandedForms[form.id];
 
                         return (
-
                             <FormList
+                                key={form.id}
                                 isExpanded={isExpanded}
                                 toggleFormExpand={toggleFormExpand}
                                 form={form}
+                                allDepartments={departments}
                                 onOpenEditModal={handleOpenEditModal}
                                 onSaveBackend={handleSaveBackend}
                                 processing={processing}
                             />
-
                         );
                     })}
                 </div>

@@ -40,12 +40,12 @@ export const SimpleDepSelect = ({
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full px-3.5 py-2.5 bg-white border border-gray-300 hover:border-indigo-400 text-gray-800 text-sm font-bold shadow-sm cursor-pointer flex justify-between items-center transition-all"
             >
-                <span className="truncate">{selectedDept ? selectedDept.name : placeholder}</span>
-                <span className="text-xs text-indigo-600 font-bold ml-2">{isOpen ? "▲" : "▼"}</span>
+                <span className="wrap-break-word pr-2">{selectedDept ? selectedDept.name : placeholder}</span>
+                <span className="text-xs text-indigo-600 font-bold shrink-0">{isOpen ? "▲" : "▼"}</span>
             </div>
 
             {isOpen && (
-                <div className="absolute left-0 right-0 mt-1 bg-white border border-indigo-300 shadow-lg z-50 flex flex-col max-h-60">
+                <div className="absolute right-0 mt-1 max-w-200 max-h-100 bg-white border border-indigo-300 shadow-xl z-50 flex flex-col">
                     <div className="p-2 border-b border-gray-200 bg-gray-50">
                         <input
                             type="text"
@@ -57,7 +57,7 @@ export const SimpleDepSelect = ({
                         />
                     </div>
 
-                    <div className="overflow-y-auto flex-1 custom-scrollbar">
+                    <div className="overflow-y-auto flex-1 custom-scrollbar overflow-x-hidden">
                         {filteredDepts.length === 0 ? (
                             <div className="px-3 py-2 text-xs text-gray-400 italic">Ничего не найдено</div>
                         ) : (
@@ -69,7 +69,9 @@ export const SimpleDepSelect = ({
                                         setIsOpen(false);
                                         setSearchTerm("");
                                     }}
-                                    className={`px-3 py-2 text-xs cursor-pointer hover:bg-indigo-50 transition-colors ${String(dept.id) === selectedId ? "bg-indigo-100 font-bold text-indigo-900" : "text-gray-700"
+                                    className={`px-3.5 py-2.5 text-xs cursor-pointer hover:bg-indigo-50 transition-colors break-words whitespace-normal ${String(dept.id) === selectedId
+                                        ? "bg-indigo-100 font-bold text-indigo-900"
+                                        : "text-gray-700"
                                         }`}
                                 >
                                     {dept.name}
