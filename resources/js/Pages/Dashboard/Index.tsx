@@ -114,7 +114,7 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
             });
 
             // Show success message (you can add a toast notification here)
-            console.log('Changes saved successfully');
+            // console.log('Changes saved successfully');
 
             // Refresh the page or update backendDepartments
             router.reload();

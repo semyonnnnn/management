@@ -38,9 +38,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     Route::get('/forms_distribution', [FormsDistributionController::class, 'index'])->name('forms_distribution.index');
-    Route::post('/forms_distribution', [FormsDistributionController::class, 'create'])->name('forms_distribution.create');
-    Route::put('/forms_distribution', [FormsDistributionController::class, 'update'])->name('forms_distribution.update');
-    Route::delete('/forms_distribution', [FormsDistributionController::class, 'delete'])->name('forms_distribution.delete');
+    // Route::post('/forms_distribution', [FormsDistributionController::class, 'create'])->name('forms_distribution.create');
+    Route::put('/forms_distribution/{id}', [FormsDistributionController::class, 'update'])->name('forms_distribution.update');
+    Route::delete('/forms_distribution/{id}', [FormsDistributionController::class, 'delete'])->name('forms_distribution.delete');
 
     Route::get('/state', [StatePageController::class, 'index'])->name('state.index');
     Route::post('/state', [StatePageController::class, 'create'])->name('state.create');

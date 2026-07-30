@@ -32,6 +32,7 @@ class FormDistributionService
         }
 
         $forms = $formsQuery->paginate(12)->withQueryString();
+        $links = $forms->linkCollection()->toArray();
 
         $forms->through(fn($form) => [
             'id' => $form->id,
@@ -40,6 +41,6 @@ class FormDistributionService
             'departments' => $form->departments->map(fn($d) => ['id' => $d->id, 'name' => $d->name, 'code' => $d->code, 'territory' => $d->territory, 'okveds' => $d->okveds,]),
         ]);
 
-        return ['forms' => $forms, 'departments' => $departments];
+        return ['forms' => $forms, 'departments' => $departments, 'links' => $links];
     }
 }

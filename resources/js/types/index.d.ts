@@ -200,6 +200,7 @@ export interface PaginationLink {
     url: string | null;
     label: string;
     active: boolean;
+    page?: number | null;
 }
 
 export interface PaginatedForms {
@@ -216,6 +217,7 @@ interface AddFormModalProps {
 interface ExtendedPageProps extends PageProps {
     departments: Department[];
     forms: PaginatedForms;
+    links: PaginationLink[];
     filters: {
         territory?: string;
         search?: string;

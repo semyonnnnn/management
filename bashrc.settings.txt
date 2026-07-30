@@ -15,7 +15,7 @@ search() {
     fi
     
     # Excludes the standard build folders, plus 'ssr' to keep SSR compiled files out of your results
-    grep -rnw . --exclude-dir={node_modules,.git,dist,build,ssr} -e "$1"
+    grep -rnw . --exclude-dir={node_modules,.git,dist,build,ssr,vendor} -e "$1"
 }
 
 # Compose definitions
@@ -47,6 +47,12 @@ alias saildown='sudo $DEV_COMPOSE down --remove-orphans'
 alias sailnpm='docker exec -it $CONTAINER npm'
 
 # Workflow Aliases
+###NB
+#sail npm run dev sometimes gives me '5173 not starting' error
+#port 5173 might be already allocated by stray process, so:
+#sudo fuser -k 5173/tcp
+
+#`npm run dev` and `sail npm run dev` are interchangeable
 alias saildev='sailup && sailnpm run dev'
 alias resaildev='sail down && sail up -d && sail npm run dev'
 alias resail='clean_up && sailup'

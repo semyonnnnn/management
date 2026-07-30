@@ -98,7 +98,7 @@ export function FlashMessage() {
             `}</style>
 
             <div
-                className={`fixed bottom-8 z-100 max-w-md transition-all duration-300 ease-out ${isMounted
+                className={`fixed bottom-8 z-100 w-max max-w-[50vw] transition-all duration-300 ease-out ${isMounted
                     ? 'left-8 opacity-100'
                     : '-left-96 opacity-0' // Back off-screen on reset
                     } ${isError
@@ -110,7 +110,7 @@ export function FlashMessage() {
                 }}
             >
                 {/* Main Outer Container */}
-                <div className={`bg-white border-2 flex flex-col ${isError ? 'border-rose-600' : 'border-indigo-600'
+                <div className={`bg-white border-2 flex flex-col h-full ${isError ? 'border-rose-600' : 'border-indigo-600'
                     }`}>
 
                     {/* Technical Header Strip */}
@@ -119,14 +119,14 @@ export function FlashMessage() {
                         : 'bg-indigo-50/50 border-indigo-100 text-emerald-700'
                         }`}>
                         <span>СИСТЕМНОЕ УВЕДОМЛЕНИЕ</span>
-                        <span className="font-extrabold">
+                        <span className="font-extrabold ml-4">
                             [{isError ? 'увы' : 'успех'}]
                         </span>
                     </div>
 
-                    {/* Content Area */}
-                    <div className="p-4 flex items-center justify-between gap-8 bg-white">
-                        <span className="text-base font-black tracking-wide text-gray-950 uppercase leading-normal">
+                    {/* Content Area with items-end vertical alignment */}
+                    <div className="p-4 flex items-end justify-between gap-6 bg-white flex-1">
+                        <span className="text-base font-black tracking-wide text-gray-950 uppercase leading-normal flex-1 min-w-0 break-words">
                             {message}
                         </span>
 
@@ -136,7 +136,7 @@ export function FlashMessage() {
                                 setIsMounted(false);
                                 setTimeout(() => setVisible(false), 300);
                             }}
-                            className={`px-3 py-1 border-2 font-black text-xs uppercase tracking-wider transition-all active:translate-y-0.5 active:shadow-none cursor-pointer ${isError
+                            className={`shrink-0 px-3 py-1 border-2 font-black text-xs uppercase tracking-wider transition-all active:translate-y-0.5 active:shadow-none cursor-pointer ${isError
                                 ? 'border-rose-600 text-rose-600 hover:bg-rose-50'
                                 : 'border-indigo-600 text-indigo-600 hover:bg-emerald-50 hover:border-emerald-500 hover:text-emerald-700'
                                 }`}

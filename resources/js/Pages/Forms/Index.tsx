@@ -277,7 +277,7 @@ export default function Index({ forms, filters, periods }: Props) {
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Поиск по ОКУД или наименованию..."
+                            placeholder="Поиск по форме..."
                             className="w-64 pl-8 pr-3 py-3 border border-slate-300 text-xs focus:outline-none focus:border-indigo-600 transition-colors"
                         />
                     </div>

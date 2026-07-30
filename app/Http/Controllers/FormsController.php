@@ -66,12 +66,12 @@ class FormsController extends Controller
         $validated = $r->validated();
 
         // 2. Wrap everything in a single transaction to update all forms together safely
-        DB::transaction(function () use ($validated) {
+        $form = Form::findOrFail($validated['id']);
+        DB::transaction(function () use ($validated, $form) {
             // Loop through each individual form array in the request
             foreach ($validated['forms'] as $formData) {
 
                 // Find the specific form using the ID inside the current loop element
-                $form = Form::findOrFail($formData['id']);
 
                 $form->update([
                     'okud' => (int) $formData['okud'],
@@ -97,7 +97,8 @@ class FormsController extends Controller
             }
         });
 
-        return redirect()->back()->with('success', 'Данные успешно обновлены!');
+        $formName = $form->name;
+        return redirect()->back()->with('success', "Данные в '$formName' успешно обновлены!");
     }
 
     public function delete(int $id)
