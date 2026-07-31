@@ -6,18 +6,20 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 ///////////////////////
 use App\Services\UploadFilesService;
+use App\Http\Requests\OldUploadRequest;
 
 class UploadFilesController extends Controller
 {
-    public function index()
-    {
-        return Inertia::render('UploadFiles/Index');
-    }
+    // public function index()
+    // {
+    //     return Inertia::render('UploadFiles/Index');
+    // }
 
-    public function store(Request $r)
+    //OldUploadRequest
+    public function store(OldUploadRequest $r)
     {
         (new UploadFilesService)->store($r);
-        return redirect('/old_forms');
+        return back()->with('success', 'Матрица успешно загружена');
     }
 
     public function update(Request $request)

@@ -46,6 +46,7 @@ class StatePageController extends Controller
     {
         // Step 1: Get raw validated data
         $validated = $r->validated();
+        // dd($validated['date']);
 
         // Step 2: Extract IDs
         $ids = array_column($validated['departments'], 'id');
@@ -54,21 +55,21 @@ class StatePageController extends Controller
         $departments = Department::whereIn('id', $ids)->get()->keyBy('id');
 
         // Step 4: Loop, Match, and Save
-        foreach ($validated['departments'] as $item) {
-            if ($dept = $departments->get($item['id'])) {
-                $updatedData = $item;
+        if ($departments) {
+            foreach ($validated['departments'] as $item) {
+                if ($dept = $departments->get($item['id'])) {
+                    $updatedData = $item;
 
-                if ($item['state'] != $dept['state']) {
-                    $updatedData['state_updated_at'] = now();
+                    if ($item['state'] != $dept['state']) {
+                        $updatedData['state_updated_at'] = now();
+                    }
+                    $dept->update($updatedData);
                 }
-                $dept->update($updatedData);
             }
         }
 
         if ($validated['date']) {
-            Schedule::first()->update([
-                'date' => $validated['date']
-            ]);
+            Schedule::updateOrCreate([], ['date' => $validated['date']]);
         }
 
         return redirect()->back()->with('success', 'Данные успешно обновлены');

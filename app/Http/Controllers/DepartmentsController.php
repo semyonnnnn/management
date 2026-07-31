@@ -17,7 +17,6 @@ class DepartmentsController extends Controller
 
     public function index()
     {
-        // 2. Fetch Data
         $departments = DB::table('departments')
             ->select('id', 'name', 'territory', 'staff', 'workload', 'state')
             ->orderBy('name', 'asc')

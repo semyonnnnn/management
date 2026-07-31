@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { router } from "@inertiajs/react";
 import { DeptTableProps } from "@/types";
 import { ModalDetails } from "./ModalDetails";
 
@@ -14,6 +15,11 @@ const DeptTable: React.FC<ExtendedProps> = ({
     const [showModal, setShowModal] = useState(false);
     const [selectedDept, setSelectedDept] = useState<any>(null);
     const [selectedTerritory, setSelectedTerritory] = useState<string>("all");
+    const [uploading, setUploading] = useState(false);
+    const [syncingState, setSyncingState] = useState(false);
+
+    // File input ref for the direct click trigger
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const territoryColor = {
         ekb: "bg-indigo-100 text-indigo-700 border border-indigo-200",
@@ -25,14 +31,57 @@ const DeptTable: React.FC<ExtendedProps> = ({
         setShowModal(true);
     };
 
+    // Direct upload handler
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files?.[0];
+        if (!selectedFile) return;
 
-    const filteredDepartments = selectedTerritory === "all"
-        ? departments
-        : departments.filter((dept) => dept.territory === selectedTerritory);
+        setUploading(true);
 
-    // console.log(filteredDepartments[2]);
+        router.post(
+            route("uploadFiles.upload"),
+            { matrix: selectedFile },
+            {
+                forceFormData: true,
+                onSuccess: () => {
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                },
+                onError: (err) => {
+                    console.error("Upload error:", err);
+                },
+                onFinish: () => {
+                    setUploading(false);
+                },
+            }
+        );
+    };
 
-    // This calculates the actual workload percentage (e.g., 150 means 150% load)
+    // Sets staff = state for all departments and submits via PUT route
+    const handleSyncStaffToState = () => {
+        setSyncingState(true);
+
+        const updates = departments.map((dept) => ({
+            id: Number(dept.id),
+            staff: Number(dept.state || 0),
+        }));
+
+        router.put(
+            route("uploadFiles.update"),
+            { departments: updates },
+            {
+                onFinish: () => setSyncingState(false),
+                onError: (err) => {
+                    console.error("Sync error:", err);
+                },
+            }
+        );
+    };
+
+    const filteredDepartments =
+        selectedTerritory === "all"
+            ? departments
+            : departments.filter((dept) => dept.territory === selectedTerritory);
+
     const calcWorkloadRawPercent = (dep: any) => {
         if (dep.staff <= 0 || fixedOptimalLoad === 0) return 0;
         const depLoadPerPerson = dep.totalLoad / dep.staff;
@@ -40,52 +89,106 @@ const DeptTable: React.FC<ExtendedProps> = ({
     };
 
     const getLevelClass = (percent: any) => {
-        if (percent < 50) return "bg-orange-400 shadow-[0_0_8px_rgba(255,165,0,0.7)]"; // < 50% load
-        if (percent >= 50 && percent < 90) return "bg-yellow-400"; // 50-90% load
-        if (percent >= 90 && percent <= 110) return "bg-green-200"; // 90-110% load (Optimal)
-        if (percent > 110 && percent <= 150) return "bg-green-500"; // 110-150% load
-        if (percent > 150 && percent <= 180) return "bg-rose-500"; // 150-180% load
-        return "bg-red-700"; // > 180% load
+        if (percent < 50) return "bg-orange-400 shadow-[0_0_8px_rgba(255,165,0,0.7)]";
+        if (percent >= 50 && percent < 90) return "bg-yellow-400";
+        if (percent >= 90 && percent <= 110) return "bg-green-200";
+        if (percent > 110 && percent <= 150) return "bg-green-500";
+        if (percent > 150 && percent <= 180) return "bg-rose-500";
+        return "bg-red-700";
     };
 
     return (
         <div className="bg-white/80 backdrop-blur-sm border border-indigo-200/50">
-            <div className="border-b border-indigo-200/50 px-5 py-4 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 bg-linear-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
+            {/* Hidden native input for upload */}
+            <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="hidden"
+                accept=".xlsx,.xls,.csv"
+            />
+
+            {/* Header Control Toolbar */}
+            <div className="border-b border-indigo-200/50 px-5 py-4 flex flex-wrap justify-between items-center gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 bg-linear-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                        <div>
+                            средняя нагрузка на человека:{" "}
+                            <span className="text-lg font-mono font-bold text-gray-900 tracking-tighter uppercase">
+                                {Math.round(fixedOptimalLoad).toLocaleString()}
+                            </span>
+                        </div>
                     </div>
-                    <div>средняя нагрузка на человека: <span className="text-lg font-mono font-bold text-gray-900 tracking-tighter uppercase">{Math.round(fixedOptimalLoad).toLocaleString()} </span></div>
+
+                    {/* Button placed closer to average workload text */}
+                    <button
+                        type="button"
+                        onClick={handleSyncStaffToState}
+                        disabled={syncingState}
+                        className="px-3 py-2 text-xs font-mono font-bold tracking-wider bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-300 transition-colors duration-150 disabled:opacity-50 uppercase flex items-center gap-1.5 shadow-xs cursor-pointer"
+                        title="Установить фактическое количество сотрудников равным штатному расписанию"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                        {syncingState ? "СИНХРОНИЗАЦИЯ..." : "сбросить до штатного"}
+                    </button>
                 </div>
-                <div className="flex gap-2">
-                    {["all", "ekb", "krg"].map((t) => (
-                        <button
-                            key={t}
-                            onClick={() => setSelectedTerritory(t)}
-                            className={`px-3 py-1.5 text-[10px] font-mono font-bold tracking-wider transition-all duration-200 ${selectedTerritory === t ? "bg-linear-to-r from-indigo-600 to-purple-600 text-white border border-indigo-400/30" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"}`}
-                        >
-                            {t === 'all' ? 'ВСЕ' : t.toUpperCase() === 'EKB' ? 'ЕКАТЕРИНБУРГ' : 'КУРГАН'}
-                        </button>
-                    ))}
+
+                <div className="flex gap-3 items-center">
+                    {/* Explicit Table Upload Button */}
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        className="px-4 py-2 text-xs font-mono font-bold tracking-wider bg-indigo-600 hover:bg-indigo-700 text-white transition-colors duration-150 disabled:opacity-50 uppercase flex items-center gap-2 shadow-sm cursor-pointer"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        {uploading ? "ЗАГРУЗКА..." : "ЗАГРУЗИТЬ МАТРИЦУ"}
+                    </button>
+
+                    <div className="h-5 w-px bg-indigo-200 mx-1" />
+
+                    {/* Filter Buttons */}
+                    <div className="flex gap-1">
+                        {["all", "ekb", "krg"].map((t) => (
+                            <button
+                                key={t}
+                                onClick={() => setSelectedTerritory(t)}
+                                className={`px-3 py-2 text-[10px] font-mono font-bold tracking-wider transition-all duration-200 cursor-pointer ${selectedTerritory === t
+                                    ? "bg-linear-to-r from-indigo-600 to-purple-600 text-white border border-indigo-400/30"
+                                    : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
+                                    }`}
+                            >
+                                {t === "all" ? "ВСЕ" : t.toUpperCase() === "EKB" ? "ЕКАТЕРИНБУРГ" : "КУРГАН"}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
+            {/* Table Core */}
             <div className="overflow-x-auto">
                 <table className="min-w-full">
                     <thead className="bg-indigo-50/50 border-b border-indigo-200/50">
                         <tr className="align-top">
                             <th className="text-left p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ОТДЕЛ</th>
-                            {selectedTerritory === 'all' &&
+                            {selectedTerritory === "all" && (
                                 <th className="text-left p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ТЕРРИТОРИЯ</th>
-                            }
+                            )}
                             <th className="text-right p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">СОТРУДНИКОВ</th>
                             <th className="text-right p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ШТАТНОЕ</th>
                             <th className="text-right p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">СУММАРНАЯ НАГРУЗКА, показатели</th>
                             <th className="text-right p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">НАГРУЗКА на 1 СОТРУДНИКА, показатели</th>
                             <th className="text-right p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">УРОВЕНЬ нагрузки по управлению</th>
-                            <th className=" p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ДЕТАЛИ</th>
+                            <th className="p-3 text-[12px] font-mono font-bold text-indigo-600 tracking-wider uppercase">ДЕТАЛИ</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -93,20 +196,18 @@ const DeptTable: React.FC<ExtendedProps> = ({
                             const workloadPercent = calcWorkloadRawPercent(dept);
                             const levelClass = getLevelClass(workloadPercent);
                             const loadPerStaff = dept.staff > 0 ? Math.floor(dept.totalLoad / dept.staff) : 0;
-
-                            // Visual logic: 200% load = 100% width. So we divide by 2.
                             const barWidth = Math.min(workloadPercent / 2, 100);
 
                             return (
-                                <tr key={dept.id} className={`border-b border-indigo-900/40 transition-all ${index % 2 === 0 ? 'bg-indigo-200/40' : ''}`}>
+                                <tr key={dept.id} className={`border-b border-indigo-900/40 transition-all ${index % 2 === 0 ? "bg-indigo-200/40" : ""}`}>
                                     <td className="px-2 text-md">{dept.name}</td>
-                                    {selectedTerritory === 'all' &&
+                                    {selectedTerritory === "all" && (
                                         <td className="px-2">
                                             <div className={`px-2 py-1 text-[9px] font-mono font-bold tracking-wider w-fit ${territoryColor[dept.territory as keyof typeof territoryColor]}`}>
                                                 {dept.territory === "ekb" ? "ЕКАТЕРИНБУРГ" : "КУРГАН"}
                                             </div>
                                         </td>
-                                    }
+                                    )}
                                     <td className="text-center px-2">
                                         <input
                                             type="number"
@@ -144,24 +245,22 @@ const DeptTable: React.FC<ExtendedProps> = ({
                 </table>
             </div>
 
-            {
-                selectedDept && (
-                    <ModalDetails
-                        fixedOptimalLoad={fixedOptimalLoad}
-                        showModal={showModal}
-                        setShowModal={setShowModal}
-                        departmentName={selectedDept.name}
-                        staffCount={selectedDept.staff}
-                        totalLoad={selectedDept.totalLoad}
-                        loadPerStaff={selectedDept.staff > 0 ? Math.floor(selectedDept.totalLoad / selectedDept.staff) : 0}
-                        levelPercent={calcWorkloadRawPercent(selectedDept)}
-                        levelClass={getLevelClass(calcWorkloadRawPercent(selectedDept)) as any}
-                        territory={selectedDept.territory}
-                        forms={selectedDept.forms || []}
-                    />
-                )
-            }
-        </div >
+            {selectedDept && (
+                <ModalDetails
+                    fixedOptimalLoad={fixedOptimalLoad}
+                    showModal={showModal}
+                    setShowModal={setShowModal}
+                    departmentName={selectedDept.name}
+                    staffCount={selectedDept.staff}
+                    totalLoad={selectedDept.totalLoad}
+                    loadPerStaff={selectedDept.staff > 0 ? Math.floor(selectedDept.totalLoad / selectedDept.staff) : 0}
+                    levelPercent={calcWorkloadRawPercent(selectedDept)}
+                    levelClass={getLevelClass(calcWorkloadRawPercent(selectedDept)) as any}
+                    territory={selectedDept.territory}
+                    forms={selectedDept.forms || []}
+                />
+            )}
+        </div>
     );
 };
 

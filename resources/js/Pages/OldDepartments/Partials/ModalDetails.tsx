@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import Modal from "@/components/custom/Modal";
 import { ModalDetailsProps } from "@/types";
 import { ModalDetailsSummary } from "./ModalDetailsSummary";
@@ -29,8 +30,18 @@ const ModalDetails = ({
     levelPercent,
     fixedOptimalLoad
 }: ModalDetailsProps) => {
+    // Local search state
+    const [searchTerm, setSearchTerm] = useState("");
+
     const totalCalc = forms.reduce((sum, f) => sum + f.final, 0);
     const color = getColor(levelPercent);
+
+    // Filter forms based on search query dynamically
+    const filteredForms = useMemo(() => {
+        if (!searchTerm.trim()) return forms;
+        const query = searchTerm.toLowerCase();
+        return forms.filter((f) => f.name.toLowerCase().includes(query));
+    }, [forms, searchTerm]);
 
     const CircularProgress = ({
         percent,
@@ -109,7 +120,7 @@ const ModalDetails = ({
                             </div>
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="w-7 h-7 bg-white border border-gray-300 hover:border-indigo-400 hover:bg-indigo-50 transition-all flex items-center justify-center"
+                                className="w-7 h-7 bg-white border border-gray-300 hover:border-indigo-400 hover:bg-indigo-50 transition-all flex items-center justify-center cursor-pointer"
                             >
                                 <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -133,66 +144,90 @@ const ModalDetails = ({
 
                     {/* Table Parent Layout Container */}
                     <div className="flex-1 flex flex-col border border-indigo-200/50 rounded-md rounded-br-none overflow-hidden">
-                        <div className="flex items-center justify-between px-3 py-2 bg-indigo-50 border-b border-indigo-200/50">
-                            <div className="flex text-[15px] gap-4 text-sm font-mono text-gray-500 justify-between w-full">
-                                <div>
-                                    форм: <span className="font-bold text-indigo-600">{forms.length}</span>
+
+                        {/* Table Header Toolbar with Integrated Search */}
+                        <div className="flex items-center justify-between px-3 py-3 bg-indigo-50 border-b border-indigo-200/50">
+                            <div className="flex items-center justify-between w-full font-mono text-sm text-gray-500 gap-4">
+
+                                {/* Form count indicator */}
+                                <div className="shrink-0 text-[15px]">
+                                    форм: <span className="font-bold text-indigo-600">{filteredForms.length}</span>
                                 </div>
-                                <div className="flex justify-end font-mono text-sm font-bold text-indigo-700">
-                                    итог: <span className="font-bold text-indigo-600">{totalCalc.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
+
+                                {/* Custom Frameless Search Bar */}
+                                <div className="flex-1 max-w-sm mx-4 relative">
+                                    <input
+                                        type="text"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        placeholder="ПОИСК ФОРМЫ..."
+                                        className="w-full bg-indigo-50 border-0 border-b-2 border-indigo-300 focus:border-indigo-600 px-2 py-1 text-xs font-mono text-indigo-900 placeholder-indigo-400 outline-none focus:outline-none focus:ring-0 transition-colors"
+                                    />
+                                    {searchTerm && (
+                                        <button
+                                            onClick={() => setSearchTerm("")}
+                                            className="absolute right-1 top-1/2 -translate-y-1/2 text-xs text-indigo-400 hover:text-indigo-700 font-bold px-1"
+                                        >
+                                            ×
+                                        </button>
+                                    )}
                                 </div>
+
+                                {/* Total calculations summary */}
+                                <div className="shrink-0 flex justify-end font-mono text-sm font-bold text-indigo-700 text-[15px]">
+                                    итог: <span className="font-bold text-indigo-600 ml-1">{totalCalc.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
+                                </div>
+
                             </div>
                         </div>
 
-                        {/* FIXED: Changed inner view wrappers to allow smooth horizontal auto-scrolling 
-                          if total custom cell metrics exceed the modal boundary.
-                        */}
-                        <div className="flex-1 overflow-x-auto overflow-y-auto min-h-0
-                                    [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
-                                    [&::-webkit-scrollbar-track]:bg-indigo-50/30
-                                    [&::-webkit-scrollbar-thumb]:bg-indigo-500
-                                    hover:[&::-webkit-scrollbar-thumb]:bg-indigo-600">
+                        {/* Table Scrollable Container */}
+                        <div className="flex-1 overflow-x-hidden overflow-y-auto min-h-0
+                            [&::-webkit-scrollbar]:w-2
+                            [&::-webkit-scrollbar-track]:bg-indigo-50/30
+                            [&::-webkit-scrollbar-thumb]:bg-indigo-500
+                            hover:[&::-webkit-scrollbar-thumb]:bg-indigo-600">
 
-                            {/* Force internal block matrix to keep absolute width matching total structural width */}
-                            <div className="min-w-max divide-y divide-indigo-100 overflow-x-none text-nowrap">
+                            <div className="w-full divide-y divide-indigo-100 font-mono text-nowrap">
 
                                 {/* TABLE HEADER BLOCK */}
-                                <div className="sticky top-0 z-20 flex items-center bg-indigo-100 border-b border-indigo-200 font-mono font-bold text-indigo-700 text-[15px] uppercase tracking-wide shadow-sm pr-2">
-                                    <div className="w-48 min-w-48 px-3 py-2.5">ФОРМА</div>
+                                <div className="sticky top-0 z-20 flex items-center bg-indigo-100 border-b border-indigo-200 font-bold text-indigo-700 text-[15px] uppercase tracking-wide shadow-sm pr-2">
+                                    <div className="flex-1 min-w-0 px-3 py-2.5">ФОРМА</div>
                                     <div className="w-32 min-w-32 px-3 py-2.5 text-left">ПОКАЗАТЕЛЕЙ</div>
                                     <div className="w-28 min-w-28 px-3 py-2.5 text-left">ОТЧЁТЫ</div>
                                     <div className="w-36 min-w-36 px-3 py-2.5 text-left">КОЭФ. (K1..K6)</div>
                                     <div className="w-24 min-w-24 px-3 py-2.5 text-left">РАСЧЁТ</div>
-                                    <div className="w-24 min-w-24 px-3 py-2.5 text-left">ДЕЙСТВИЯ</div>
                                 </div>
 
                                 {/* TABLE ROWS LOOP */}
-                                {forms.map(f => (
-                                    <div key={f.id} className="flex items-center hover:bg-indigo-50/40 transition-colors text-sm font-mono text-gray-900 pr-2">
-                                        {/* FIXED: Replaced flex-1 truncate with explicit bounding parameters matching header matrix */}
-                                        <div className="w-48 min-w-[192px] px-3 py-2 text-gray-900 truncate" title={f.name}>
-                                            {f.name}
+                                {filteredForms.length > 0 ? (
+                                    filteredForms.map((f) => (
+                                        <div key={f.id} className="flex items-center hover:bg-indigo-50/40 transition-colors text-sm text-gray-900 pr-2">
+                                            <div className="flex-1 min-w-0 px-3 py-2 text-gray-900 truncate" title={f.name}>
+                                                {f.name}
+                                            </div>
+                                            <div className="w-32 min-w-32 px-3 py-2 text-gray-600 bg-indigo-50/20 self-stretch flex items-center">
+                                                {f.indicators}
+                                            </div>
+                                            <div className="w-28 min-w-28 px-3 py-2 text-gray-600 self-stretch flex items-center">
+                                                {f.reports}
+                                            </div>
+                                            <div className="w-36 min-w-36 px-3 py-2 text-gray-600 bg-indigo-50/20 self-stretch flex items-center">
+                                                {f.coeff}
+                                            </div>
+                                            <div className="w-24 min-w-24 px-3 py-2 font-bold text-gray-900 self-stretch flex items-center">
+                                                {f.final}
+                                            </div>
                                         </div>
-                                        <div className="w-32 min-w-[128px] px-3 py-2 text-gray-600 bg-indigo-50/20 self-stretch flex items-center">
-                                            {f.indicators}
-                                        </div>
-                                        <div className="w-28 min-w-[112px] px-3 py-2 text-gray-600 self-stretch flex items-center">
-                                            {f.reports}
-                                        </div>
-                                        <div className="w-36 min-w-[144px] px-3 py-2 text-gray-600 bg-indigo-50/20 self-stretch flex items-center">
-                                            {f.coeff}
-                                        </div>
-                                        <div className="w-24 min-w-[96px] px-3 py-2 font-bold text-gray-900 self-stretch flex items-center">
-                                            {f.final}
-                                        </div>
-                                        <div className="w-24 min-w-[96px] px-3 py-2 text-gray-500 self-stretch flex items-center">
-                                            test
-                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="p-4 text-center text-xs font-mono text-indigo-400 uppercase tracking-wider">
+                                        Ничего не найдено
                                     </div>
-                                ))}
+                                )}
                             </div>
-
                         </div>
+
                     </div>
                 </div>
             </div>

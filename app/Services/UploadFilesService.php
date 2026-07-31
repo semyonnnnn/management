@@ -8,21 +8,25 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+////////////////////////////////////////////
+use App\Http\Requests\OldUploadRequest;
 
 class UploadFilesService
 {
-    public function store(Request $request)
+    //OldUploadRequest
+    public function store(OldUploadRequest $request)
     {
-        $this->validateUpload($request);
+        // 1. Custom validation for Excel sheets
         $this->validateSheetNames($request);
 
+        // 2. Process via Python script
         $res = $this->python($request);
 
-        // dd($res);
+        // 3. Validate Python response structure
         $clean = $this->validatePythonResponse($res);
 
-
-        $this->storeDataRaw($clean, $request->input('version'));
+        // 4. Store using the default hardcoded version name (Will truncate/override existing data)
+        $this->storeDataRaw($clean, 'start');
 
         return response()->json(['success' => true]);
     }
@@ -65,18 +69,21 @@ class UploadFilesService
 
     protected function storeDataRaw(array $data, string $versionName): void
     {
-        DB::transaction(function () use ($data, $versionName) {
+        DB::transaction(function () use ($data) {
 
-            // 1. Deactivate old current version
+            // 1. Wipe existing table data to perform a full overwrite
+            // Delete dependent forms first to prevent Foreign Key Constraint errors
+            DB::table('old_forms')->delete();
+            DB::table('old_departments')->delete();
 
-            // 3. Insert Departments and store ID map by name
+            // 2. Insert fresh Departments and store ID map by name
             $depIdMap = [];
             foreach ($data['departments'] as $dep) {
                 $depId = DB::table('old_departments')->insertGetId([
                     'name' => $dep['name'],
                     'territory' => $dep['territory'],
                     'staff' => $dep['staff'],
-                    'state' => $dep['staff'], // ← state gets the same value as staff
+                    'state' => $dep['staff'], // ← state gets the same initial value as staff
                     'workload' => $dep['workload'],
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -84,7 +91,7 @@ class UploadFilesService
                 $depIdMap[$dep['name']] = $depId;
             }
 
-            // 4. Insert Forms and link to actual department ID
+            // 3. Insert fresh Forms and link to actual department ID
             foreach ($data['forms'] as $form) {
                 $depName = $form['department'] ?? null;
                 $depId = $depName && isset($depIdMap[$depName]) ? $depIdMap[$depName] : null;
@@ -120,35 +127,13 @@ class UploadFilesService
         return $response->json();
     }
 
-    public function validateUpload(Request $request): void
-    {
-        $validator = Validator::make(
-            $request->all() + $request->allFiles(),
-            [
-                'version' => ['required', 'string', 'unique:versions,name'],
-                'matrix' => ['required', 'file', 'mimes:xlsx'],
-            ],
-            [
-                'version.required' => 'Название версии обязательно',
-                'version.unique' => 'Эта версия уже существует',
-                'matrix.required' => 'Файл матрицы обязателен',
-                'matrix.mimes' => 'Матрица должна быть .xlsx',
-            ]
-        );
-
-        if ($validator->fails()) {
-            throw ValidationException::withMessages($validator->errors()->toArray());
-        }
-    }
-
-
     public function update(Request $request)
     {
         \Log::info('Manual edit request', $request->all());
 
         $validated = $request->validate([
             'departments' => 'required|array',
-            'departments.*.id' => 'required|integer|exists:departments,id',
+            'departments.*.id' => 'required|integer|exists:old_departments,id',
             'departments.*.staff' => 'required|integer|min:0',
         ]);
 
@@ -168,7 +153,7 @@ class UploadFilesService
                     ->where('id', $deptUpdate['id'])
                     ->update([
                         'staff' => $deptUpdate['staff'],
-                        'state' => $originalDept->state, // Use the exact original value
+                        'state' => $originalDept->state, // Use exact original value
                         'updated_at' => now()
                     ]);
 

@@ -60,8 +60,8 @@ export default function Index({ departments, forms, filters, links }: ExtendedPa
             <div className="space-y-6" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                 {/* Search and Filters Header */}
                 <div className="bg-white border border-indigo-200/50 p-6 flex flex-col xl:flex-row gap-4 justify-between items-stretch xl:items-center shadow-sm">
-                    <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
-                        <div className="relative flex-1 md:w-80">
+                    <div className="flex flex-row gap-4 items-center w-full">
+                        <div className="relative flex-1 w-full">
                             <input
                                 type="text"
                                 value={searchQuery}

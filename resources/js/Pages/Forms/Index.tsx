@@ -246,20 +246,20 @@ export default function Index({ forms, filters, periods }: Props) {
     return (
         <AuthenticatedLayout>
             <div className="space-y-4">
-                <div className="flex items-center justify-between py-4 border-b border-slate-200">
+                <div className="flex gap-40 items-center justify-between py-4 border-b border-slate-200">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-xl font-medium text-slate-900 tracking-tight">
+                        <h1 className="text-2xl text-nowrap font-bold text-slate-900 tracking-tight">
                             РЕДАКТОР ФОРМ <span className="text-indigo-600">[{forms.total}]</span>
                         </h1>
                         <button
                             onClick={() => setIsAddModalOpen(true)}
-                            className="px-3 py-1 bg-indigo-600 text-white text-xs font-bold uppercase hover:bg-indigo-700 cursor-pointer"
+                            className="px-3 py-2 text-nowrap bg-indigo-600 text-white text-md font-bold uppercase hover:bg-indigo-700 cursor-pointer"
                         >
                             + Создать форму
                         </button>
                     </div>
 
-                    <div className="relative flex items-center">
+                    <div className="relative w-full flex items-center">
                         <svg
                             className="absolute left-2.5 w-3.5 h-3.5 text-slate-400 pointer-events-none"
                             fill="none"
@@ -278,7 +278,7 @@ export default function Index({ forms, filters, periods }: Props) {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Поиск по форме..."
-                            className="w-64 pl-8 pr-3 py-3 border border-slate-300 text-xs focus:outline-none focus:border-indigo-600 transition-colors"
+                            className="w-full pl-8 pr-3 py-2 border border-slate-300 text-lg focus:outline-none focus:border-indigo-600 transition-colors"
                         />
                     </div>
                 </div>

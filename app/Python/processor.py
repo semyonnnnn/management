@@ -22,7 +22,6 @@ class DepartmentProcessor:
         self.departments = []
         self.forms = []
 
-   
     def process_data(self):
         dept_temp = {}
 
@@ -55,7 +54,13 @@ class DepartmentProcessor:
             valid_depts = set()
             for val in col_values.unique():
                 val_lower = val.lower()
-                if not val or "итог" in val_lower or "отдел" not in val_lower:
+                
+                # Skip empty rows or "итог" (total) rows
+                if not val or "итог" in val_lower:
+                    continue
+                
+                # ALLOW "отдел", "сектор", OR "управление"
+                if not any(keyword in val_lower for keyword in ["отдел", "сектор", "управление"]):
                     continue
                 
                 if has_inline_totals:
@@ -76,13 +81,13 @@ class DepartmentProcessor:
                 staff = int(clean_float(row[staff_col])) if len(row) > staff_col and row[staff_col] else 0
                 workload = int(clean_float(row[workload_col])) if len(row) > workload_col and row[workload_col] else 0
                 
-                # 2. Normalize Territory safely for React front-end filters ('ekb' / 'krg')
+                # 2. Assign Territory based on the Sheet Name
                 if "со" in sheet_lower or "екат" in sheet_lower or "ekb" in sheet_lower:
                     territory = "ekb"
-                elif "курган" in sheet_lower or "krg" in sheet_lower:
+                elif "ко" in sheet_lower or "курган" in sheet_lower or "krg" in sheet_lower:
                     territory = "krg"
                 else:
-                    # Fallback to ekb or pass it through if it's already an accepted key
+                    # Fallback
                     territory = "ekb" 
 
                 if dept_name not in dept_temp:

@@ -1,12 +1,11 @@
 import axios from "axios";
 import { Head, useForm, router } from "@inertiajs/react";
 import React, { useState, useEffect, useMemo } from "react";
-///////////////////////////////////////////////////////
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { DeptData, PageProps, LoadItem } from "@/types";
 import { TotalLoadCard } from "./Partials/TotalLoadCard";
 import { DeptTable } from "./Partials/DeptTable";
-import Modal from "@/components/custom/Modal";
+import { FlashMessage } from "@/components/custom/FlashMessage";
 
 export default function Index({ auth, departments, forms }: PageProps & { departments: any[], forms: any[] }) {
     return (
@@ -24,14 +23,12 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
     forms
 }) => {
     const [localStaff, setLocalStaff] = useState<Record<string, number>>({});
-
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    const { data, setData } = useForm({
-        staff_map: {} as Record<string, number>,
-        version: "",
-    });
+    const safeNum = (val: any): number => {
+        const num = Number(val);
+        return Number.isNaN(num) ? 0 : num;
+    };
 
     useEffect(() => {
         const initial = backendDepartments.reduce((acc, d) => {
@@ -39,30 +36,35 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
             return acc;
         }, {} as Record<string, number>);
         setLocalStaff(initial);
-        setData('staff_map', initial);
     }, [backendDepartments]);
 
-    // THE FIXED ANCHOR: Derived from initial DB state to keep the 100% mark static
+    // Derived from initial DB state to keep the 100% mark static
     const fixedOptimalLoad = useMemo(() => {
-        const totalWorkload = backendDepartments.reduce((acc, d) => acc + Number(d.workload), 0);
-        const totalStaff = backendDepartments.reduce((acc, d) => acc + Number(d.staff), 0);
+        const totalWorkload = backendDepartments.reduce((acc, d) => acc + Number(d.workload || 0), 0);
+        const totalStaff = backendDepartments.reduce((acc, d) => acc + Number(d.staff || 0), 0);
         return totalStaff > 0 ? totalWorkload / totalStaff : 0;
     }, [backendDepartments]);
 
-    // Calculate Card Data: Mapping "Optimal" to 50% visual width
     const loads: LoadItem[] = useMemo(() => {
         const getStats = (territoryKey?: string) => {
             const depts = territoryKey
                 ? backendDepartments.filter(d => d.territory === territoryKey)
                 : backendDepartments;
 
-            const workload = depts.reduce((acc, d) => acc + Number(d.workload), 0);
-            const staff = depts.reduce((acc, d) => acc + (localStaff[String(d.id)] ?? Number(d.staff)), 0);
+            const workload = depts.reduce((acc, d) => acc + safeNum(d.workload), 0);
+            const staff = depts.reduce((acc, d) => acc + safeNum(localStaff[String(d.id)] ?? d.staff), 0);
             const avg = staff > 0 ? workload / staff : 0;
 
-            // Map: (avg / benchmark) * 50. If avg == benchmark, percent is 50 (The Center).
-            const percent = fixedOptimalLoad > 0 ? Math.round((avg / fixedOptimalLoad) * 50) : 0;
-            return { workload, percent, avg };
+            let percent = 0;
+            if (fixedOptimalLoad > 0 && avg > 0) {
+                percent = Math.round((avg / fixedOptimalLoad) * 50);
+            }
+
+            return {
+                workload: safeNum(workload),
+                percent: safeNum(percent),
+                avg: safeNum(avg)
+            };
         };
 
         const global = getStats();
@@ -78,15 +80,19 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
 
     const processedDepartments: DeptData[] = useMemo(() => {
         return backendDepartments.map((dept) => {
-            const staff = localStaff[String(dept.id)] ?? Number(dept.staff);
-            const avgLoad = staff > 0 ? Number(dept.workload) / staff : 0;
-            const levelPercent = fixedOptimalLoad > 0 ? Math.round((avgLoad / fixedOptimalLoad) * 50) : 0;
+            const staff = localStaff[String(dept.id)] ?? Number(dept.staff || 0);
+            const workload = Number(dept.workload || 0);
+            const avgLoad = staff > 0 ? workload / staff : 0;
+
+            const levelPercent = (fixedOptimalLoad > 0 && avgLoad > 0)
+                ? Math.round((avgLoad / fixedOptimalLoad) * 50)
+                : 0;
 
             return {
                 ...dept,
                 id: String(dept.id),
                 staff,
-                totalLoad: Number(dept.workload),
+                totalLoad: workload,
                 avgLoad: Math.round(avgLoad),
                 levelPercent,
             };
@@ -96,14 +102,12 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
     const changeStaff = (id: string, value: number) => {
         const updated = { ...localStaff, [id]: Math.max(0, value) };
         setLocalStaff(updated);
-        setData('staff_map', updated);
     };
 
-    // console.log("localStaff", localStaff);
+    // Directly saves updates to current state/backend
     const handleSaveStaffChanges = async () => {
         setSaving(true);
         try {
-            // Prepare updates for ALL departments (or only changed ones)
             const updates = Object.entries(localStaff).map(([id, staff]) => ({
                 id: parseInt(id),
                 staff: staff
@@ -113,27 +117,14 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
                 departments: updates,
             });
 
-            // Show success message (you can add a toast notification here)
             console.log('Changes saved successfully');
-
-            // Refresh the page or update backendDepartments
             router.reload();
         } catch (error) {
             console.error('Save failed:', error);
             alert('Failed to save changes');
         } finally {
             setSaving(false);
-            setIsModalOpen(false);
         }
-    };
-
-    const handleCreateVersion = () => {
-        // This is for creating a NEW version from current edits
-        router.post(route('versions.create'), {
-            name: data.version,
-            staff_map: data.staff_map,
-        });
-        setIsModalOpen(false);
     };
 
     const hasChanges = backendDepartments.some(d => localStaff[String(d.id)] !== Number(d.staff));
@@ -148,9 +139,10 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
                 toggleEditMode={() => { }}
             />
 
+            {/* Floating control bar (saves directly without modal popup) */}
             {hasChanges && (
                 <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-40">
-                    <div className="bg-white/90 backdrop-blur-md border border-indigo-200 p-2 shadow-2xl flex gap-2">
+                    <div className="bg-white/90 backdrop-blur-md border border-indigo-200 p-2 shadow-2xl flex gap-2 items-center">
                         <button
                             onClick={() => {
                                 const initial = backendDepartments.reduce((acc, d) => {
@@ -158,15 +150,14 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
                                     return acc;
                                 }, {} as Record<string, number>);
                                 setLocalStaff(initial);
-                                setData('staff_map', initial);
                             }}
-                            className="px-8 py-4 bg-white hover:bg-indigo-50 border border-indigo-200 text-indigo-600 font-mono font-bold text-xl"
+                            className="px-8 py-4 bg-white hover:bg-indigo-50 border border-indigo-200 text-indigo-600 font-mono font-bold text-xl cursor-pointer"
                         >
                             СБРОСИТЬ
                         </button>
                         <button
-                            onClick={() => setIsModalOpen(true)}
-                            className="px-10 py-4 bg-linear-to-br from-indigo-600 to-purple-600 text-white font-mono font-bold text-xl uppercase hover:opacity-90"
+                            onClick={handleSaveStaffChanges}
+                            className="px-10 py-4 bg-linear-to-br from-indigo-600 to-purple-600 text-white font-mono font-bold text-xl uppercase hover:opacity-90 cursor-pointer disabled:opacity-50"
                             disabled={saving}
                         >
                             {saving ? 'СОХРАНЕНИЕ...' : 'ПРИМЕНИТЬ'}
@@ -175,53 +166,7 @@ const LoadAndModifyModule: React.FC<{ backendDepartments: any[], forms: any[] }>
                 </div>
             )}
 
-            <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)} maxWidth="sm">
-                <div className="bg-white border border-indigo-200/50 h-fit flex flex-col p-6">
-                    <h3 className="text-2xl font-mono font-bold text-gray-900 mb-6">сохранение_версии</h3>
-
-                    {/* Two save options */}
-                    <div className="space-y-3">
-                        <button
-                            onClick={handleSaveStaffChanges}
-                            className="w-full py-4 bg-indigo-600 text-white font-mono font-bold uppercase"
-                        >
-                            СОХРАНИТЬ ИЗМЕНЕНИЯ (ТЕКУЩАЯ ВЕРСИЯ)
-                        </button>
-
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-300"></div>
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-white px-2 text-gray-500">или</span>
-                            </div>
-                        </div>
-
-                        <input
-                            type="text"
-                            value={data.version}
-                            onChange={(e) => setData('version', e.target.value)}
-                            placeholder="Название новой версии (напр. v1.0.4)"
-                            className="w-full bg-indigo-50 border border-indigo-100 p-4 font-mono text-lg mb-2 outline-none"
-                        />
-                        <button
-                            onClick={handleCreateVersion}
-                            className="w-full py-4 border-2 border-indigo-600 text-indigo-600 font-mono font-bold uppercase hover:bg-indigo-50"
-                        >
-                            СОЗДАТЬ НОВУЮ ВЕРСИЮ
-                        </button>
-                    </div>
-
-                    <div className="flex gap-3 mt-4">
-                        <button
-                            onClick={() => setIsModalOpen(false)}
-                            className="flex-1 py-4 border border-indigo-200 font-mono font-bold text-indigo-600 uppercase"
-                        >
-                            ОТМЕНА
-                        </button>
-                    </div>
-                </div>
-            </Modal>
+            <FlashMessage />
         </div>
     );
 };
