@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 /////////////////////////////////
 use App\Models\Department;
 use App\Models\Schedule;
-use App\Http\Requests\StateCreateRequest;
-use App\Http\Requests\StateUpdateRequest;
-
+use App\Http\Requests\State\StateCreateRequest;
+use App\Http\Requests\State\StateUpdateRequest;
+use App\Http\Requests\State\StateBulkUploadRequest;
+use App\Services\DepartmentImportService;
+use App\Repositories\DepartmentRepository;
+use App\Exceptions\DepartmentImportException;
 class StatePageController extends Controller
 {
     public function index()
@@ -86,5 +90,21 @@ class StatePageController extends Controller
         }
 
         return redirect()->back()->with('success', "Отдел '$depName' успешно удалён!");
+    }
+
+    public function upload(
+        StateBulkUploadRequest $r,
+        DepartmentImportService $importer,
+        DepartmentRepository $departments
+    ) {
+        try {
+            $rows = $importer->importFromFile($r->file('file'));
+        } catch (DepartmentImportException $e) {
+            return back()->withErrors(['file' => $e->getMessage()]);
+        }
+
+        $count = $departments->upsertMany($rows);
+
+        return back()->with('success', "Импортировано {$count} отделов!");
     }
 }

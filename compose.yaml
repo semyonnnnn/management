@@ -46,14 +46,12 @@ services:
             retries: 3
             timeout: 5s
 
-    phpmyadmin:
-        image: phpmyadmin/phpmyadmin
+    cloudbeaver:
+        image: dbeaver/cloudbeaver:latest
         ports:
-            - 8080:80
-        environment:
-            PMA_HOST: mariadb
-            PMA_USER: sail
-            PMA_PASSWORD: password
+            - '8080:8978'
+        volumes:
+            - 'sail-cloudbeaver:/opt/cloudbeaver/workspace'
         depends_on:
             - mariadb
         networks:
@@ -77,4 +75,6 @@ networks:
 
 volumes:
     sail-mariadb:
+        driver: local
+    sail-cloudbeaver:
         driver: local

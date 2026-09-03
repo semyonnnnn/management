@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import '@fontsource/jetbrains-mono/700.css';
 import '@fontsource/jetbrains-mono/400.css';
+////////////////////////////////////////////////////////
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps, Department } from '@/types';
 import { AddDepartment } from './AddDepartment';
@@ -9,6 +10,8 @@ import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { DepartmentRow } from './DepartmentRow';
 import { FlashMessage } from '@/components/custom/FlashMessage';
 import { DatePicker } from '@/components/custom/DatePicker';
+import { StateUploadButton } from './Partials/StateUploadButton';
+import { StateEmptyActions } from './StateEmptyAction';
 
 interface StatePageProps extends PageProps {
     departments: Department[] | null;
@@ -165,6 +168,11 @@ export default function Index({ departments, date: initialDate }: StatePageProps
         });
     };
 
+    // const handleUpload = (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     post(route('state.create'));
+    // }
+
     return (
         <>
             <Head title="Штатное" />
@@ -177,6 +185,7 @@ export default function Index({ departments, date: initialDate }: StatePageProps
                                     ШТАТНОЕ <span className="text-indigo-600">[{filteredState.length}]</span>
                                 </div>
                                 <DatePicker date={localDate} setDate={handleDateChange} className='w-fit!' />
+                                <StateUploadButton route_path='state.upload' />
                             </div>
                             <div className="relative flex-1 max-w-md">
                                 <input
@@ -210,17 +219,23 @@ export default function Index({ departments, date: initialDate }: StatePageProps
                             <div className="w-24"></div>
                         </div>
                         <div className="flex flex-col">
-                            {filteredState.map((dept, index) => (
-                                <DepartmentRow
-                                    key={dept.id}
-                                    dept={dept}
-                                    index={index}
-                                    onDeptChange={handleDepartmentChange}
-                                    onDelete={handleDeleteClick}
-                                    // Notice: passing undefined instead of {} prevents object reference churning
-                                    rowErrors={localErrors[dept.id]}
-                                />
-                            ))}
+                            {filteredState.length > 0 ? (
+                                filteredState.map((dept, index) => (
+                                    <DepartmentRow
+                                        key={dept.id}
+                                        dept={dept}
+                                        index={index}
+                                        onDeptChange={handleDepartmentChange}
+                                        onDelete={handleDeleteClick}
+                                        rowErrors={localErrors[dept.id]}
+                                    />
+                                ))
+                            ) : (
+                                <div className="flex min-h-162.5 items-center justify-center">
+                                    {/* <StateUploadButton isPlaceholder={true} /> */}
+                                    <StateEmptyActions onAddDepartment={() => setIsAdding(!isAdding)} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

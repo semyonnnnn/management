@@ -4,10 +4,13 @@ from io import BytesIO
 import pandas as pd
 import logging
 
+from state_upload import router as state_upload_router
+
 from processor import DepartmentProcessor
 from utils import json_ready
 
 app = FastAPI()
+app.include_router(state_upload_router)
 
 @app.post("/process")
 async def process(matrix: UploadFile = File(...)):
