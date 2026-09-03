@@ -65,7 +65,7 @@ export const DepartmentRow = memo(({
     };
 
     return (
-        <div className={`flex flex-col border-b border-indigo-900/10 ${index % 2 === 0 ? 'bg-slate-50/60' : 'bg-white'}`}>
+        <div className={`flex flex-col border-b border-indigo-900/10 ${index % 2 === 0 ? 'bg-indigo-400/10' : 'bg-white'}`}>
             <div className="flex items-start h-fit py-2">
 
                 {/* CODE CELL */}
