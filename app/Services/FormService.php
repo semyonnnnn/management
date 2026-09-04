@@ -3,32 +3,17 @@
 namespace App\Services;
 
 use App\Models\Form;
-// use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
+use App\Enum\PeriodEnum;
 
 class FormService
 {
     public function index(string $search, string $territory): array
     {
-
-        $formsQuery = Form::query();
-
-        if ($territory !== 'all') {
-            $formsQuery->whereHas('departments', function ($query) use ($territory) {
-                $query->where(DB::raw('LOWER(TRIM(territory))'), $territory);
-            });
-        }
-
-        if ($search !== '') {
-            $formsQuery->where(function ($query) use ($search) {
-                $query->where('name', 'like', '%' . $search . '%')
-                    ->orWhereHas('departments', function ($subQuery) use ($search) {
-                        $subQuery->where('name', 'like', '%' . $search . '%');
-                    });
-            });
-        }
-
-        $forms = $formsQuery->paginate(20)->withQueryString();
+        $forms = Form::query()
+            ->filterTerritory($territory)
+            ->search($search)
+            ->paginate(20)
+            ->withQueryString();
 
         $forms->through(fn($form) => [
             'id' => $form->id,
@@ -49,6 +34,11 @@ class FormService
 
         return [
             'forms' => $forms,
+            'filters' => [
+                'search' => $search,
+                'territory' => $territory,
+            ],
+            'periods' => PeriodEnum::values()
         ];
     }
 }

@@ -40,7 +40,7 @@ const DeptTable: React.FC<ExtendedProps> = ({
 
         router.post(
             route("uploadFiles.upload"),
-            { matrix: selectedFile },
+            { file: selectedFile },
             {
                 forceFormData: true,
                 onSuccess: () => {

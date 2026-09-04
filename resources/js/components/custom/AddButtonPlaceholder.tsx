@@ -1,12 +1,12 @@
 import { Plus } from "lucide-react";
 
-interface AddDepartmentButtonProps {
+interface AddButtonPlaceholderProps {
     onClick: () => void;
 }
 
-export function AddDepartmentButton({
+export function AddButtonPlaceholder({
     onClick,
-}: AddDepartmentButtonProps) {
+}: AddButtonPlaceholderProps) {
     return (
         <button
             type="button"
@@ -35,7 +35,7 @@ export function AddDepartmentButton({
             />
 
             <span className="text-lg font-semibold">
-                Добавить отдел
+                Добавить
             </span>
 
             <span className="text-sm opacity-60">

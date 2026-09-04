@@ -6,7 +6,7 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 ///////////////////////
 use App\Services\UploadFilesService;
-use App\Http\Requests\OldUploadRequest;
+use App\Http\Requests\FileUploadRequest;
 
 class UploadFilesController extends Controller
 {
@@ -15,8 +15,8 @@ class UploadFilesController extends Controller
     //     return Inertia::render('UploadFiles/Index');
     // }
 
-    //OldUploadRequest
-    public function store(OldUploadRequest $r)
+    //FileUploadRequest
+    public function store(FileUploadRequest $r)
     {
         (new UploadFilesService)->store($r);
         return back()->with('success', 'Матрица успешно загружена');

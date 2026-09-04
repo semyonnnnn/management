@@ -10,8 +10,8 @@ import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { DepartmentRow } from './DepartmentRow';
 import { FlashMessage } from '@/components/custom/FlashMessage';
 import { DatePicker } from '@/components/custom/DatePicker';
-import { StateUploadButton } from './Partials/StateUploadButton';
-import { StateEmptyActions } from './StateEmptyAction';
+import { StateUploadButton } from '@/components/custom/StateUploadButton';
+import { EmptyActions } from '@/components/custom/EmptyAction';
 
 interface StatePageProps extends PageProps {
     departments: Department[] | null;
@@ -233,7 +233,7 @@ export default function Index({ departments, date: initialDate }: StatePageProps
                             ) : (
                                 <div className="flex min-h-162.5 items-center justify-center">
                                     {/* <StateUploadButton isPlaceholder={true} /> */}
-                                    <StateEmptyActions onAddDepartment={() => setIsAdding(!isAdding)} />
+                                    <EmptyActions route_path='state.upload' warning='ШТАТНОЕ РАСПИСАНИЕ ПУСТО' onAddButtonClick={() => setIsAdding(!isAdding)} />
                                 </div>
                             )}
                         </div>

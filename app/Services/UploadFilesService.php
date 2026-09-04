@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 ////////////////////////////////////////////
-use App\Http\Requests\OldUploadRequest;
+use App\Http\Requests\FileUploadRequest;
 
 class UploadFilesService
 {
-    //OldUploadRequest
-    public function store(OldUploadRequest $request)
+    //FileUploadRequest
+    public function store(FileUploadRequest $request)
     {
         // 1. Custom validation for Excel sheets
         $this->validateSheetNames($request);
@@ -113,9 +113,9 @@ class UploadFilesService
     public function python(Request $request)
     {
         $response = Http::attach(
-            'matrix',
-            file_get_contents($request->file('matrix')->getRealPath()),
-            $request->file('matrix')->getClientOriginalName()
+            'file',
+            file_get_contents($request->file('file')->getRealPath()),
+            $request->file('file')->getClientOriginalName()
         )->post('http://python:8000/process');
 
         if ($response->failed()) {
@@ -175,7 +175,7 @@ class UploadFilesService
     protected function validateSheetNames(Request $request): void
     {
         $configs = [
-            'matrix' => ['КО', 'СО'],
+            'file' => ['КО', 'СО'],
         ];
 
         $errors = [];

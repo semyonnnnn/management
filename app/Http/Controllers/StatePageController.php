@@ -10,7 +10,7 @@ use App\Models\Department;
 use App\Models\Schedule;
 use App\Http\Requests\State\StateCreateRequest;
 use App\Http\Requests\State\StateUpdateRequest;
-use App\Http\Requests\State\StateBulkUploadRequest;
+use App\Http\Requests\FileUploadRequest;
 use App\Services\DepartmentImportService;
 use App\Repositories\DepartmentRepository;
 use App\Exceptions\DepartmentImportException;
@@ -93,7 +93,7 @@ class StatePageController extends Controller
     }
 
     public function upload(
-        StateBulkUploadRequest $r,
+        FileUploadRequest $r,
         DepartmentImportService $importer,
         DepartmentRepository $departments
     ) {

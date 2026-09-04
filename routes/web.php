@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/forms', [FormsController::class, 'index'])->name('forms.index');
     Route::post('/forms', [FormsController::class, 'create'])->name('forms.create');
+    Route::post('/forms/upload', [FormsController::class, 'upload'])->name('forms.upload');
     Route::put('/forms', [FormsController::class, 'update'])->name('forms.update');
     Route::delete('/forms/{id}', [FormsController::class, 'delete'])->name('forms.delete');
 

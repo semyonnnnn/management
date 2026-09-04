@@ -7,28 +7,23 @@ use Inertia\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 /////////////////////////////////////////
-use App\Http\Requests\FormCreateRequest;
-use App\Http\Requests\FormUpdateRequest;
+use App\Http\Requests\Forms\FormCreateRequest;
+use App\Http\Requests\Forms\FormUpdateRequest;
+use App\Http\Requests\FileUploadRequest;
 use App\Models\Form;
-use App\Enum\PeriodEnum;
 use App\Services\FormService;
+use App\Services\FormImportService;
+use App\Exceptions\FormImportException;
+use App\Repositories\FormRepository;
 
 class FormsController extends Controller
 {
-    public function index(Request $request, FormService $formService): Response
+    public function index(Request $r, FormService $formService): Response
     {
-        $search = (string) $request->input('search', '');
-        $territory = $request->input('territory') ? strtolower(trim((string) $request->input('territory'))) : 'all';
+        $search = (string) $r->input('search', '');
+        $territory = $r->input('territory') ? strtolower(trim((string) $r->input('territory'))) : 'all';
 
-        $data = $formService->index($search, $territory);
-
-        return Inertia::render('Forms/Index', array_merge($data, [
-            'filters' => [
-                'search' => $search,
-                'territory' => $territory
-            ],
-            'periods' => PeriodEnum::values()
-        ]));
+        return Inertia::render('Forms/Index', $formService->index($search, $territory));
     }
 
     public function create(FormCreateRequest $r)
@@ -62,16 +57,11 @@ class FormsController extends Controller
     //FormUpdateRequest
     public function update(FormUpdateRequest $r)
     {
-        // 1. Get the validated nested data structure
-        $validated = $r->validated();
+        $requestForms = $r->validated()['forms'];
 
-        // 2. Wrap everything in a single transaction to update all forms together safely
-        $form = Form::findOrFail($validated['id']);
-        DB::transaction(function () use ($validated, $form) {
-            // Loop through each individual form array in the request
-            foreach ($validated['forms'] as $formData) {
-
-                // Find the specific form using the ID inside the current loop element
+        foreach ($requestForms as $key => $formData) {
+            $form = Form::findOrFail($formData['id']);
+            DB::transaction(function () use ($formData, $form) {
 
                 $form->update([
                     'okud' => (int) $formData['okud'],
@@ -87,18 +77,18 @@ class FormsController extends Controller
                     'is_consolidated' => (bool) ($data['is_consolidated'] ?? false),
                 ]);
 
-                // Clean up and sync department relationships for this specific form
                 $departmentIds = collect($formData['departments'] ?? [])
                     ->pluck('department_id')
                     ->filter()
                     ->toArray();
 
                 $form->departments()->sync($departmentIds);
-            }
-        });
+            });
+        }
 
-        $formName = $form->name;
-        return redirect()->back()->with('success', "Данные в '$formName' успешно обновлены!");
+        $count = count($requestForms);
+        $form_rus = $count == 1 ? 'форме' : 'формах';
+        return redirect()->back()->with('success', "Данные в $count $form_rus успешно обновлены!");
     }
 
     public function delete(int $id)
@@ -109,5 +99,22 @@ class FormsController extends Controller
 
 
         return redirect()->back()->with('success', "Форма $formName успешно удалена!");
+    }
+
+    public function upload(
+        FileUploadRequest $r,
+        FormImportService $importer,
+        FormRepository $departments
+    ) {
+        try {
+            $rows = $importer->importFromFile($r->file('file'));
+        } catch (FormImportException $e) {
+            return back()->withErrors(['file' => $e->getMessage()]);
+        }
+
+        $count = $departments->upsertMany($rows);
+
+
+        return back()->with('success', "Импортировано {$count} форм!");
     }
 }

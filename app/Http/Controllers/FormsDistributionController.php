@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 //////////////////////////////
 use App\Services\FormDistributionService;
-use App\Http\Requests\FormDistributionRequest;
+use App\Http\Requests\Forms\FormDistributionRequest;
 use App\Models\Form;
 use App\Models\Department;
 

@@ -5,6 +5,8 @@ import { FormRow } from './FormRow';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { FlashMessage } from '@/components/custom/FlashMessage';
 import { Confirmation } from './Partials/Confirmation';
+import { EmptyActions } from '@/components/custom/EmptyAction';
+import { StateUploadButton } from '@/components/custom/StateUploadButton';
 
 interface FormItem {
     id: number;
@@ -257,6 +259,7 @@ export default function Index({ forms, filters, periods }: Props) {
                         >
                             + Создать форму
                         </button>
+                        <StateUploadButton route_path='forms.upload' />
                     </div>
 
                     <div className="relative w-full flex items-center">
@@ -310,19 +313,25 @@ export default function Index({ forms, filters, periods }: Props) {
                     </div>
 
                     <div className="min-w-max divide-y divide-slate-200">
-                        {filteredForms.map((form, rowIndex) => (
-                            <FormRow
-                                key={form.id}
-                                form={form}
-                                rowIndex={rowIndex}
-                                periods={periods}
-                                handleInputChange={handleInputChange}
-                                onDelete={handleDelete}
-                                inputCellClasses={inputCellClasses}
-                                borderRightSlate300={borderRightSlate300}
-                                borderRightSlate200={borderRightSlate200}
-                            />
-                        ))}
+                        {filteredForms.length > 0 ? (
+                            filteredForms.map((form, rowIndex) => (
+                                <FormRow
+                                    key={form.id}
+                                    form={form}
+                                    rowIndex={rowIndex}
+                                    periods={periods}
+                                    handleInputChange={handleInputChange}
+                                    onDelete={handleDelete}
+                                    inputCellClasses={inputCellClasses}
+                                    borderRightSlate300={borderRightSlate300}
+                                    borderRightSlate200={borderRightSlate200}
+                                />
+                            ))
+                        ) :
+                            (<div className="flex min-h-162.5 items-center justify-center">
+                                {/* <StateUploadButton isPlaceholder={true} /> */}
+                                <EmptyActions route_path='forms.upload' warning="таблица форм пуста" onAddButtonClick={() => setIsAddModalOpen(true)} />
+                            </div>)}
                     </div>
                 </div>
 
