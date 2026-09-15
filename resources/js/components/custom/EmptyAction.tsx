@@ -5,12 +5,14 @@ interface EmptyActionsProps {
     onAddButtonClick: () => void;
     warning: string;
     route_path: string;
+    isManualOptional?: boolean;
 }
 
 export function EmptyActions({
     onAddButtonClick,
     warning,
     route_path,
+    isManualOptional = false
 }: EmptyActionsProps) {
     return (
         <div className="flex min-h-125 flex-col items-center justify-center">
@@ -21,11 +23,14 @@ export function EmptyActions({
             <div className="flex items-center justify-center gap-12">
                 <StateUploadButton route_path={route_path} isPlaceholder />
 
-                <div className="h-60 w-px bg-[#3949AB]/30" />
+                {!isManualOptional &&
+                    <>
+                        <div className="h-60 w-px bg-[#3949AB]/30" />
 
-                <AddButtonPlaceholder
-                    onClick={onAddButtonClick}
-                />
+                        <AddButtonPlaceholder
+                            onClick={onAddButtonClick}
+                        />
+                    </>}
             </div>
         </div>
     );

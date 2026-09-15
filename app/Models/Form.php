@@ -23,6 +23,7 @@ class Form extends Model
         'k5',
         'k6',
         'is_consolidated',
+        'reports_count',
     ];
 
     public function departments()

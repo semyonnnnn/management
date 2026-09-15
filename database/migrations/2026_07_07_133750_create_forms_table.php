@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('forms', function (Blueprint $table) {
             $table->id();
-            $table->integer('okud');
+            $table->char('okud', 10);
             $table->string('name');
             $table->enum('period', ['годовая', 'полугодовая', 'квартальная', 'месячная']);
             $table->integer('indicators');
@@ -24,9 +24,13 @@ return new class extends Migration {
             $table->decimal('k5', 8, 2)->default(1.0);
             $table->decimal('k6', 8, 2)->default(1.0);
 
+            $table->unsignedInteger('reports_count')->default(1);
+
             // Converted to snake_case (is_consolidated) to match Laravel database conventions
             $table->boolean('is_consolidated')->default(false);
             $table->timestamps();
+
+            $table->unique(['okud', 'period']);
         });
     }
 

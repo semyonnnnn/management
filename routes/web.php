@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 ////////////////////////////////////////
 use App\Http\Controllers\OldDepartmentsController;
-// use App\Http\Controllers\DepartmentsController;
+use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\UploadFilesController;
 use App\Http\Controllers\VersionsController;
 // use App\Http\Controllers\OldFormsController;
@@ -16,9 +16,9 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Route::get('/main', [DepartmentsController::class, 'index'])->name('main.index');
+    Route::get('/main', [DepartmentsController::class, 'index'])->name('main.index');
 
-    Route::get('/old_main', [OldDepartmentsController::class, 'index'])->name('old_main.index');
+    // Route::get('/old_main', [OldDepartmentsController::class, 'index'])->name('old_main.index');
 
     // Route::get('/uploadFiles', [UploadFilesController::class, 'index'])->name('uploadFiles.get');
     Route::post('/uploadFiles', [UploadFilesController::class, 'store'])->name('uploadFiles.upload');

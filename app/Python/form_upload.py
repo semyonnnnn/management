@@ -20,6 +20,8 @@ PERIOD_MAP = {
 
 DEFAULT_PERIOD = "месячная"
 
+OKUD_MAX_LEN = 10  # matches forms.okud CHAR(10)
+
 
 def sanitize(value):
     """Formula-injection guard for free-text fields (e.g. form name)."""
@@ -36,6 +38,40 @@ def clean_code(raw) -> str:
     if code.startswith("'"):
         code = code[1:]
     return code.strip()
+
+
+def parse_okud(raw, field: str, row_num: int, errors: list) -> str | None:
+    """
+    Preserve OKUD as a digit string (no leading-zero loss).
+
+    pandas may hand back a float-coerced value (e.g. "601011.0") when the
+    source cell was numeric rather than text-formatted -> strip the ".0"
+    suffix before validating. If the original spreadsheet cell was a real
+    numeric cell (not text-formatted), any leading zero was already lost
+    upstream in Excel itself and cannot be recovered here.
+    """
+    code = clean_code(raw)
+
+    if code.endswith(".0"):
+        code = code[:-2]
+
+    if not code:
+        errors.append({"row": row_num, "column": field, "message": "Поле ОКУД обязательно"})
+        return None
+
+    if not code.isdigit():
+        errors.append({"row": row_num, "column": field, "message": f"Ожидался числовой код, получено '{raw}'"})
+        return None
+
+    if len(code) > OKUD_MAX_LEN:
+        errors.append({
+            "row": row_num,
+            "column": field,
+            "message": f"Код ОКУД не должен превышать {OKUD_MAX_LEN} цифр, получено '{code}'",
+        })
+        return None
+
+    return code
 
 
 def parse_int(raw, field: str, row_num: int, errors: list) -> int | None:
@@ -86,10 +122,14 @@ async def import_forms(file: UploadFile = File(...)):
         # Row 1 = title, row 2 = headers -> skip both, no header row at all.
         # Columns by position:
         # 0 okud | 1 name | 2 period | 3 indicators | 4 k1 | 5 k2 | 6 k3 | 7 k4 | 8 k5 | 9 k6
+        #
+        # okud is read as dtype=str so pandas doesn't silently coerce a
+        # text-formatted "00601011" cell into a numeric 601011 before we
+        # ever see it.
         if ext == "csv":
-            df = pd.read_csv(io.BytesIO(content), skiprows=2, header=None)
+            df = pd.read_csv(io.BytesIO(content), skiprows=2, header=None, dtype={0: str})
         else:
-            df = pd.read_excel(io.BytesIO(content), skiprows=2, header=None)
+            df = pd.read_excel(io.BytesIO(content), skiprows=2, header=None, dtype={0: str})
     except Exception:
         raise HTTPException(400, "Could not parse file")
 
@@ -100,7 +140,7 @@ async def import_forms(file: UploadFile = File(...)):
     for i, r in df.iterrows():
         row_num = int(i) + 3  # +1 for 0-index, +2 for the two skipped rows
 
-        okud = parse_int(r[0], "okud", row_num, errors)
+        okud = parse_okud(r[0], "okud", row_num, errors)
         name = sanitize(str(r[1]).strip())
         period = normalize_period(r[2])  # defaults to месячная, never errors
         indicators = parse_int(r[3], "indicators", row_num, errors)

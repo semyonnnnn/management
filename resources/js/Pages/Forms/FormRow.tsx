@@ -13,6 +13,7 @@ interface LocalFormItem {
     k4: string;
     k5: string;
     k6: string;
+    reports_count: number;
     is_consolidated: boolean;
     created_at: string;
     updated_at: string;
@@ -73,6 +74,16 @@ export const FormRow = React.memo(function FormRow({
                 />
             </div>
 
+            {/* reports_count */}
+            <div className={`w-36 ${inputCellClasses} ${borderRightSlate300} bg-cyan-50 group-hover/row:bg-cyan-200/40 focus-within:bg-cyan-200/90`}>
+                <input
+                    type="text"
+                    value={form.reports_count}
+                    onChange={(e) => handleInputChange(form.id, 'reports_count', e.target.value)}
+                    className="w-full py-0.5 text-center focus:outline-none border-b border-cyan-300 focus:border-cyan-700 font-semibold text-xs text-cyan-950 transition-colors bg-transparent"
+                />
+            </div>
+
             {/* Period Column */}
             <div className={`w-40 shrink-0 ${inputCellClasses} ${borderRightSlate300} ${periodBg} group-hover/row:bg-emerald-200/40 focus-within:bg-emerald-200/90`}>
                 <CustomSelect
@@ -85,7 +96,7 @@ export const FormRow = React.memo(function FormRow({
             </div>
 
             {/* Indicators Column */}
-            <div className={`w-25.5 shrink-0 ${inputCellClasses} ${borderRightSlate200} ${indicatorsBg} group-hover/row:bg-rose-200/60 focus-within:bg-rose-200`}>
+            <div className={`w-40 shrink-0 ${inputCellClasses} ${borderRightSlate200} ${indicatorsBg} group-hover/row:bg-rose-200/60 focus-within:bg-rose-200`}>
                 <input
                     type="text"
                     value={form.indicators}

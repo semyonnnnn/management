@@ -31,7 +31,7 @@ class FormDistributionService
             });
         }
 
-        $forms = $formsQuery->paginate(12)->withQueryString();
+        $forms = $formsQuery->paginate(15)->withQueryString();
         $links = $forms->linkCollection()->toArray();
 
         $forms->through(fn($form) => [

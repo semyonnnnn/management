@@ -170,22 +170,22 @@ const ModalDetails = ({
                                 {forms.map(f => (
                                     <div key={f.id} className="flex items-center hover:bg-indigo-50/40 transition-colors text-sm font-mono text-gray-900 pr-2">
                                         {/* FIXED: Replaced flex-1 truncate with explicit bounding parameters matching header matrix */}
-                                        <div className="w-48 min-w-[192px] px-3 py-2 text-gray-900 truncate" title={f.name}>
+                                        <div className="w-48 min-w-48 px-3 py-2 text-gray-900 truncate" title={f.name}>
                                             {f.name}
                                         </div>
-                                        <div className="w-32 min-w-[128px] px-3 py-2 text-gray-600 bg-indigo-50/20 self-stretch flex items-center">
+                                        <div className="w-32 min-w-32 px-3 py-2 text-gray-600 bg-indigo-50/20 self-stretch flex items-center">
                                             {f.indicators}
                                         </div>
-                                        <div className="w-28 min-w-[112px] px-3 py-2 text-gray-600 self-stretch flex items-center">
+                                        <div className="w-28 min-w-28 px-3 py-2 text-gray-600 self-stretch flex items-center">
                                             {f.reports}
                                         </div>
-                                        <div className="w-36 min-w-[144px] px-3 py-2 text-gray-600 bg-indigo-50/20 self-stretch flex items-center">
+                                        <div className="w-36 min-w-36 px-3 py-2 text-gray-600 bg-indigo-50/20 self-stretch flex items-center">
                                             {f.coeff}
                                         </div>
-                                        <div className="w-24 min-w-[96px] px-3 py-2 font-bold text-gray-900 self-stretch flex items-center">
+                                        <div className="w-24 min-w-24 px-3 py-2 font-bold text-gray-900 self-stretch flex items-center">
                                             {f.final}
                                         </div>
-                                        <div className="w-24 min-w-[96px] px-3 py-2 text-gray-500 self-stretch flex items-center">
+                                        <div className="w-24 min-w-24 px-3 py-2 text-gray-500 self-stretch flex items-center">
                                             test
                                         </div>
                                     </div>

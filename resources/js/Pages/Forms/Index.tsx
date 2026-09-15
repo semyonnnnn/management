@@ -7,6 +7,8 @@ import { FlashMessage } from '@/components/custom/FlashMessage';
 import { Confirmation } from './Partials/Confirmation';
 import { EmptyActions } from '@/components/custom/EmptyAction';
 import { StateUploadButton } from '@/components/custom/StateUploadButton';
+import { Search } from '@/components/custom/Search';
+import { NotFound } from '@/components/custom/NotFound';
 
 interface FormItem {
     id: number;
@@ -21,6 +23,7 @@ interface FormItem {
     k5: number | null;
     k6: number | null;
     is_consolidated: boolean;
+    reports_count: number;
     created_at: string;
     updated_at: string;
 }
@@ -35,6 +38,7 @@ interface LocalFormItem extends Omit<FormItem, 'indicators' | 'k1' | 'k2' | 'k3'
     k4: string;
     k5: string;
     k6: string;
+    reports_count: number;
 }
 
 interface PaginationLink {
@@ -53,9 +57,10 @@ interface Props {
         search?: string;
     };
     periods: ('годовая' | 'полугодовая' | 'квартальная' | 'месячная')[];
+    isEmpty: boolean;
 }
 
-export default function Index({ forms, filters, periods }: Props) {
+export default function Index({ forms, filters, periods, isEmpty }: Props) {
     const [searchQuery, setSearchQuery] = useState<string>(filters.search || '');
     const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
     const [formToDelete, setFormToDelete] = useState<LocalFormItem | null>(null);
@@ -88,6 +93,7 @@ export default function Index({ forms, filters, periods }: Props) {
             k4: formatInitialValue(item.k4, true),
             k5: formatInitialValue(item.k5, true),
             k6: formatInitialValue(item.k6, true),
+            reports_count: item.reports_count,
             is_consolidated: !!item.is_consolidated,
         }));
     };
@@ -137,6 +143,7 @@ export default function Index({ forms, filters, periods }: Props) {
             parsePayloadValue(current.k4, true) !== original.k4 ||
             parsePayloadValue(current.k5, true) !== original.k5 ||
             parsePayloadValue(current.k6, true) !== original.k6 ||
+            current.reports_count !== original.reports_count ||
             current.is_consolidated !== !!original.is_consolidated
         );
     };
@@ -245,6 +252,9 @@ export default function Index({ forms, filters, periods }: Props) {
     const borderRightSlate300 = "border-r border-slate-300";
     const borderRightSlate200 = "border-r border-slate-200";
 
+
+    const displayQuery = searchQuery.length > 20 ? `${searchQuery.slice(0, 20)}…` : searchQuery;
+
     return (
         <AuthenticatedLayout>
             <div className="space-y-4">
@@ -262,28 +272,7 @@ export default function Index({ forms, filters, periods }: Props) {
                         <StateUploadButton route_path='forms.upload' />
                     </div>
 
-                    <div className="relative w-full flex items-center">
-                        <svg
-                            className="absolute left-2.5 w-3.5 h-3.5 text-slate-400 pointer-events-none"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 20 20"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                            />
-                        </svg>
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Поиск по форме..."
-                            className="w-full pl-8 pr-3 py-2 border border-slate-300 text-lg focus:outline-none focus:border-indigo-600 transition-colors"
-                        />
-                    </div>
+                    <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по форме' />
                 </div>
 
                 <div className="border border-slate-300 overflow-x-auto custom-scrollbar">
@@ -294,11 +283,14 @@ export default function Index({ forms, filters, periods }: Props) {
                         <div className={`flex-1 min-w-[320px] px-3 py-2 ${borderRightSlate300} bg-orange-200/70 text-orange-900`}>
                             Наименование формы
                         </div>
+                        <div className={`w-36 px-3 py-2 ${borderRightSlate300} bg-cyan-200/70 text-cyan-900`}>
+                            Показателей за год
+                        </div>
                         <div className={`w-40 shrink-0 p-2 ${borderRightSlate300} text-center bg-emerald-200/60 text-emerald-900`}>
                             Период
                         </div>
-                        <div className={`w-25.5 shrink-0 p-2 ${borderRightSlate300} text-center bg-rose-200/70 text-rose-900`}>
-                            Показатели
+                        <div className={`w-40 shrink-0 p-2 ${borderRightSlate300} text-center bg-rose-200/70 text-rose-900`}>
+                            Показателей в форме
                         </div>
 
                         {['K1', 'K2', 'K3', 'K4', 'K5', 'K6'].map((k) => (
@@ -313,25 +305,26 @@ export default function Index({ forms, filters, periods }: Props) {
                     </div>
 
                     <div className="min-w-max divide-y divide-slate-200">
-                        {filteredForms.length > 0 ? (
-                            filteredForms.map((form, rowIndex) => (
-                                <FormRow
-                                    key={form.id}
-                                    form={form}
-                                    rowIndex={rowIndex}
-                                    periods={periods}
-                                    handleInputChange={handleInputChange}
-                                    onDelete={handleDelete}
-                                    inputCellClasses={inputCellClasses}
-                                    borderRightSlate300={borderRightSlate300}
-                                    borderRightSlate200={borderRightSlate200}
-                                />
-                            ))
-                        ) :
-                            (<div className="flex min-h-162.5 items-center justify-center">
-                                {/* <StateUploadButton isPlaceholder={true} /> */}
-                                <EmptyActions route_path='forms.upload' warning="таблица форм пуста" onAddButtonClick={() => setIsAddModalOpen(true)} />
-                            </div>)}
+                        {filteredForms.map((form, rowIndex) => (
+                            <FormRow
+                                key={form.id}
+                                form={form}
+                                rowIndex={rowIndex}
+                                periods={periods}
+                                handleInputChange={handleInputChange}
+                                onDelete={handleDelete}
+                                inputCellClasses={inputCellClasses}
+                                borderRightSlate300={borderRightSlate300}
+                                borderRightSlate200={borderRightSlate200}
+                            />
+                        ))}
+                        {isEmpty && <div className="flex min-h-162.5 items-center justify-center">
+                            {/* <StateUploadButton isPlaceholder={true} /> */}
+                            <EmptyActions route_path='forms.upload' warning="таблица форм пуста" onAddButtonClick={() => setIsAddModalOpen(true)} />
+                        </div>}
+                        {(!isEmpty && filteredForms.length == 0) && (
+                            <NotFound warning={`форма '${displayQuery}' не найдена!`} />
+                        )}
                     </div>
                 </div>
 

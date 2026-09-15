@@ -20,6 +20,7 @@ class FormUpdateRequest extends FR
             'forms.*.okud' => 'required|digits_between:1,8',
             'forms.*.period' => 'required|string|min:3|max:255',
             'forms.*.indicators' => 'required|integer|min:1',
+            'forms.*.reports_count' => 'required|integer|min:0',
             'forms.*.is_consolidated' => 'required|boolean',
 
             'forms.*.k1' => 'required|numeric|gt:0',
@@ -49,6 +50,10 @@ class FormUpdateRequest extends FR
             'forms.*.indicators.required' => 'Поле "Показатели" обязательно для заполнения.',
             'forms.*.indicators.integer' => 'Поле "Показатели" должно быть целым числом.',
             'forms.*.indicators.min' => 'Поле "Показатели" должно быть не меньше 1.',
+
+            'forms.*.reports_count.required' => 'Поле "Показателей за год" обязательно для заполнения.',
+            'forms.*.reports_count.integer' => 'Поле "Показателей за год" должно быть целым числом.',
+            'forms.*.reports_count.min' => 'Поле "Показателей за год" должно быть не меньше 0.',
 
             'forms.*.is_consolidated.required' => 'Поле "Консолидированная" обязательно для заполнения.',
             'forms.*.is_consolidated.boolean' => 'Поле "Консолидированная" должно иметь логическое значение.',

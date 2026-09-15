@@ -9,6 +9,8 @@ class FormService
 {
     public function index(string $search, string $territory): array
     {
+
+        $isEmpty = !Form::exists();
         $forms = Form::query()
             ->filterTerritory($territory)
             ->search($search)
@@ -27,6 +29,7 @@ class FormService
             'k4' => (float) $form->k4,
             'k5' => (float) $form->k5,
             'k6' => (float) $form->k6,
+            'reports_count' => (int) $form->reports_count,
             'is_consolidated' => (bool) $form->is_consolidated,
             'created_at' => $form->created_at,
             'updated_at' => $form->updated_at,
@@ -38,7 +41,8 @@ class FormService
                 'search' => $search,
                 'territory' => $territory,
             ],
-            'periods' => PeriodEnum::values()
+            'periods' => PeriodEnum::values(),
+            'isEmpty' => $isEmpty,
         ];
     }
 }

@@ -12,6 +12,7 @@ import { FlashMessage } from '@/components/custom/FlashMessage';
 import { DatePicker } from '@/components/custom/DatePicker';
 import { StateUploadButton } from '@/components/custom/StateUploadButton';
 import { EmptyActions } from '@/components/custom/EmptyAction';
+import { Search } from '@/components/custom/Search';
 
 interface StatePageProps extends PageProps {
     departments: Department[] | null;
@@ -188,13 +189,14 @@ export default function Index({ departments, date: initialDate }: StatePageProps
                                 <StateUploadButton route_path='state.upload' />
                             </div>
                             <div className="relative flex-1 max-w-md">
-                                <input
+                                <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по отделу' />
+                                {/* <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="ПОИСК ПО ОТДЕЛУ..."
                                     className="w-full pl-2 pr-8 py-1 bg-gray-50/50 border border-gray-300 text-base font-mono font-bold text-gray-900 focus:outline-none focus:border-indigo-600 focus:ring-0 uppercase transition-colors"
-                                />
+                                /> */}
                             </div>
                         </div>
                         <div className="flex gap-0.5 bg-white border border-gray-300 p-0.5">

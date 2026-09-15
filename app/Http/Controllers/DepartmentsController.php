@@ -22,11 +22,14 @@ class DepartmentsController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
+        // dd($departments);
+
         // FIXED: Removed 'department_id', 'coeff', and 'final' as they do not exist in your table.
         $forms = DB::table('forms')
             ->select('id', 'name', 'indicators', 'reports')
             ->orderBy('name', 'asc')
             ->get();
+
 
         if ($departments->isEmpty()) {
             return Inertia::render('Dashboard/Index', [

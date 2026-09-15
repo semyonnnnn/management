@@ -41,6 +41,7 @@ class FormsController extends Controller
             'k4' => (float) $data['k4'],
             'k5' => (float) $data['k5'],
             'k6' => (float) $data['k6'],
+            'reports_count' => (float) $data['reports_count'],
             'is_consolidated' => (bool) ($data['is_consolidated'] ?? false),
         ]);
 
@@ -64,7 +65,7 @@ class FormsController extends Controller
             DB::transaction(function () use ($formData, $form) {
 
                 $form->update([
-                    'okud' => (int) $formData['okud'],
+                    'okud' => (string) $formData['okud'],
                     'name' => (string) $formData['name'],
                     'period' => (string) $formData['period'],
                     'indicators' => (int) $formData['indicators'],
@@ -74,6 +75,7 @@ class FormsController extends Controller
                     'k4' => (float) $formData['k4'],
                     'k5' => (float) $formData['k5'],
                     'k6' => (float) $formData['k6'],
+                    'reports_count' => (float) $formData['reports_count'],
                     'is_consolidated' => (bool) ($data['is_consolidated'] ?? false),
                 ]);
 

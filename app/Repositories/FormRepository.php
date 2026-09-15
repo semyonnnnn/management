@@ -10,8 +10,8 @@ class FormRepository
     {
         Form::upsert(
             $rows,
-            uniqueBy: ['id'],
-            update: ['okud', 'name', 'period', 'indicators', 'k1', 'k2', 'k3', 'k4', 'k5', 'k6', 'is_consolidated']
+            uniqueBy: ['okud', 'period'],
+            update: ['okud', 'name', 'period', 'indicators', 'k1', 'k2', 'k3', 'k4', 'k5', 'k6', 'reports_count', 'is_consolidated']
         );
 
         return count($rows);

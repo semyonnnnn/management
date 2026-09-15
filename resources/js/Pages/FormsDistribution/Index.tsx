@@ -8,6 +8,8 @@ import { ExtendedPageProps, PaginationLink } from '@/types';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { FormList } from './Partials/FormList';
 import { FlashMessage } from '@/components/custom/FlashMessage';
+import { Search } from '@/components/custom/Search';
+import { EmptyActions } from '@/components/custom/EmptyAction';
 
 // Helper to translate default Laravel pagination labels
 const translatePaginationLabel = (label: string): string => {
@@ -59,30 +61,10 @@ export default function Index({ departments, forms, filters, links }: ExtendedPa
         <AuthenticatedLayout>
             <div className="space-y-6" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                 {/* Search and Filters Header */}
-                <div className="bg-white border border-indigo-200/50 p-6 flex flex-col xl:flex-row gap-4 justify-between items-stretch xl:items-center shadow-sm">
-                    <div className="flex flex-row gap-4 items-center w-full">
-                        <div className="relative flex-1 w-full">
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Поиск по форме..."
-                                className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-300 text-sm font-mono font-bold text-gray-900 focus:outline-none focus:border-indigo-600 focus:ring-0 placeholder-gray-400/70 transition-colors"
-                            />
-                            {searchQuery && (
-                                <button
-                                    onClick={() => { setSearchQuery(''); applyFilters(''); }}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 font-mono text-xs uppercase font-bold cursor-pointer"
-                                >
-                                    ×
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по форме' />
 
                 {/* Accordion Forms List */}
-                <div className="space-y-3">
+                <div className="space-y-1 border border-slate-300 min-h-fit">
                     {sortedForms.map((form, index) => {
                         const isExpanded = expandedFormId === form.id;
 
@@ -97,6 +79,7 @@ export default function Index({ departments, forms, filters, links }: ExtendedPa
                             />
                         );
                     })}
+                    <EmptyActions route_path='forms.upload' warning="таблица распределения форм пуста" onAddButtonClick={() => { }} isManualOptional={true} />
                 </div>
 
                 {/* Pagination Controls */}
