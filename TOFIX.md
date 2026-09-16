@@ -3,7 +3,8 @@
 
 should i?:
 
-1. ...
+1. forms distribution page needs redo of accent colors
+   [probably bright indigo on hover and no color for main row on open]
 
 urgent:
 

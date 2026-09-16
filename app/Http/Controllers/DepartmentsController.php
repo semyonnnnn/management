@@ -33,17 +33,17 @@ class DepartmentsController extends Controller
         // 3. Conditional Form Mapping
         // Since 'department_id' does not exist in 'forms', we cannot group by it.
         // If your forms are not linked to departments in the DB, this logic must be empty or different.
-        $formsGroupedByName = collect([]);
 
         // 4. Build response
-        $departmentsWithForms = $departments->map(function ($dep) use ($formsGroupedByName) {
+        $departmentsWithForms = $departments->map(function ($dep) {
+            // dd($dep->forms);
             return [
                 'id' => (string) $dep->id,
                 'name' => $dep->name,
                 'territory' => $dep->territory,
                 'staff' => (int) $dep->staff,
                 'workload' => (int) $dep->workload,
-                'forms' => $formsGroupedByName->get($dep->name, collect([]))->values(),
+                'forms' => $dep->forms,
                 'state' => $dep->state
             ];
         })->values();
