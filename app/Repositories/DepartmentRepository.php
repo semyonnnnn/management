@@ -12,7 +12,7 @@ class DepartmentRepository
         Department::upsert(
             $rows,
             uniqueBy: ['code'],
-            update: ['name', 'territory', 'state']
+            update: ['name', 'territory', 'state', 'staff']
         );
 
         return count($rows);

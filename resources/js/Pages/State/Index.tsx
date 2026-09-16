@@ -13,6 +13,7 @@ import { DatePicker } from '@/components/custom/DatePicker';
 import { StateUploadButton } from '@/components/custom/StateUploadButton';
 import { EmptyActions } from '@/components/custom/EmptyAction';
 import { Search } from '@/components/custom/Search';
+import { NotFound } from '@/components/custom/NotFound';
 
 interface StatePageProps extends PageProps {
     departments: Department[] | null;
@@ -37,6 +38,9 @@ export default function Index({ departments, date: initialDate }: StatePageProps
         departments: [],
         date: null,
     });
+
+    const displayQuery = searchQuery.length > 20 ? `${searchQuery.slice(0, 20)}…` : searchQuery;
+    const isEmpty = !Array.isArray(departments);
 
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
@@ -220,8 +224,8 @@ export default function Index({ departments, date: initialDate }: StatePageProps
                             <div className="w-40 px-1.5 py-1 text-sm font-mono font-bold text-indigo-700 text-right">ТЕРРИТОРИЯ</div>
                             <div className="w-24"></div>
                         </div>
-                        <div className="flex flex-col">
-                            {filteredState.length > 0 ? (
+                        {/* <div className="flex flex-col"> */}
+                        {/* {
                                 filteredState.map((dept, index) => (
                                     <DepartmentRow
                                         key={dept.id}
@@ -230,13 +234,29 @@ export default function Index({ departments, date: initialDate }: StatePageProps
                                         onDeptChange={handleDepartmentChange}
                                         onDelete={handleDeleteClick}
                                         rowErrors={localErrors[dept.id]}
-                                    />
-                                ))
-                            ) : (
+                                    />));
+                            <div className="flex min-h-162.5 items-center justify-center">
+                                <EmptyActions route_path='state.upload' warning='ШТАТНОЕ РАСПИСАНИЕ ПУСТО' onAddButtonClick={() => setIsAdding(!isAdding)} />
+                            </div>
+                            } */}
+                        {/* </div> */}
+                        <div className="min-w-max divide-y divide-slate-200">
+                            {filteredState.map((dept, index) => (
+                                <DepartmentRow
+                                    key={dept.id}
+                                    dept={dept}
+                                    index={index}
+                                    onDeptChange={handleDepartmentChange}
+                                    onDelete={handleDeleteClick}
+                                    rowErrors={localErrors[dept.id]}
+                                />
+                            ))}
+                            {isEmpty &&
                                 <div className="flex min-h-162.5 items-center justify-center">
-                                    {/* <StateUploadButton isPlaceholder={true} /> */}
                                     <EmptyActions route_path='state.upload' warning='ШТАТНОЕ РАСПИСАНИЕ ПУСТО' onAddButtonClick={() => setIsAdding(!isAdding)} />
-                                </div>
+                                </div>}
+                            {!isEmpty && (filteredState.length == 0) && (
+                                <NotFound warning={`отдел '${displayQuery}' не найден!`} />
                             )}
                         </div>
                     </div>

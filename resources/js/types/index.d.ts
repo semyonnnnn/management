@@ -215,6 +215,7 @@ interface AddFormModalProps {
     onClose: () => void;
 }
 interface ExtendedPageProps extends PageProps {
+    isEmpty: boolean;
     departments: Department[];
     forms: PaginatedForms;
     links: PaginationLink[];

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
+/////////////////////////////////////
 use App\Services\UploadFilesService;
+use App\Models\Form;
+use App\Models\Department;
 
 class DepartmentsController extends Controller
 {
@@ -17,18 +19,8 @@ class DepartmentsController extends Controller
 
     public function index()
     {
-        $departments = DB::table('departments')
-            ->select('id', 'name', 'territory', 'staff', 'workload', 'state')
-            ->orderBy('name', 'asc')
-            ->get();
-
-        // dd($departments);
-
-        // FIXED: Removed 'department_id', 'coeff', and 'final' as they do not exist in your table.
-        $forms = DB::table('forms')
-            ->select('id', 'name', 'indicators', 'reports')
-            ->orderBy('name', 'asc')
-            ->get();
+        $departments = Department::all();
+        $forms = Form::all();
 
 
         if ($departments->isEmpty()) {

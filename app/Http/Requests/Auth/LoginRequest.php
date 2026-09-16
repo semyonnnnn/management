@@ -45,7 +45,7 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => 'Неверный логин или пароль',
+                'email' => 'Неверный логин или пароль.',
             ]);
         }
 
@@ -68,10 +68,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'email' => "Слишком много попыток входа. Повторите попытку через {$seconds} секунд.",
         ]);
     }
 
@@ -80,6 +77,22 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')) . '|' . $this->ip());
+        return Str::transliterate(
+            Str::lower($this->string('email')) . '|' . $this->ip()
+        );
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     */
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'Введите логин.',
+            'email.string' => 'Логин должен быть строкой.',
+            'email.email' => 'Введите корректный логин.',
+            'password.required' => 'Введите пароль.',
+            'password.string' => 'Пароль должен быть строкой.',
+        ];
     }
 }

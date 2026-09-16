@@ -10,6 +10,8 @@ import { FormList } from './Partials/FormList';
 import { FlashMessage } from '@/components/custom/FlashMessage';
 import { Search } from '@/components/custom/Search';
 import { EmptyActions } from '@/components/custom/EmptyAction';
+import { NotFound } from '@/components/custom/NotFound';
+import { Pagination } from '@/components/custom/Pagination';
 
 // Helper to translate default Laravel pagination labels
 const translatePaginationLabel = (label: string): string => {
@@ -18,7 +20,7 @@ const translatePaginationLabel = (label: string): string => {
     return label;
 };
 
-export default function Index({ departments, forms, filters, links }: ExtendedPageProps) {
+export default function Index({ departments, forms, filters, links, isEmpty }: ExtendedPageProps) {
     const [searchQuery, setSearchQuery] = useState<string>(filters.search || '');
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [selectedForm, setSelectedForm] = useState<any | null>(null);
@@ -57,6 +59,9 @@ export default function Index({ departments, forms, filters, links }: ExtendedPa
         return () => clearTimeout(delayDebounce);
     }, [searchQuery]);
 
+    const displayQuery = searchQuery.length > 20 ? `${searchQuery.slice(0, 20)}…` : searchQuery;
+    const canRenderPagination = (sortedForms.length > 0) && !isEmpty;
+
     return (
         <AuthenticatedLayout>
             <div className="space-y-6" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
@@ -79,39 +84,13 @@ export default function Index({ departments, forms, filters, links }: ExtendedPa
                             />
                         );
                     })}
-                    <EmptyActions route_path='forms.upload' warning="таблица распределения форм пуста" onAddButtonClick={() => { }} isManualOptional={true} />
+                    {isEmpty && <EmptyActions route_path='forms.upload' warning="таблица распределения форм пуста" onAddButtonClick={() => { }} isManualOptional={true} />}
+
+                    {!isEmpty && sortedForms.length === 0 && <NotFound warning={`форма '${displayQuery}' не найдена!`} />}
                 </div>
 
-                {/* Pagination Controls */}
-                {paginationLinks && paginationLinks.length > 3 && (
-                    <div className="bg-white border border-slate-300 p-2 flex justify-center items-center shadow-sm">
-                        <div className="flex gap-1">
-                            {paginationLinks.map((link: any, k: number) => {
-                                const translatedLabel = translatePaginationLabel(link.label);
-                                if (link.url === null) {
-                                    return (
-                                        <div
-                                            key={k}
-                                            className="px-3 py-1.5 text-xs font-bold text-slate-300 bg-slate-50 border border-slate-200 select-none flex items-center"
-                                            dangerouslySetInnerHTML={{ __html: translatedLabel }}
-                                        />
-                                    );
-                                }
-                                return (
-                                    <button
-                                        key={k}
-                                        onClick={() => router.get(link.url!, {}, { preserveState: true, preserveScroll: true })}
-                                        className={`px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer border ${link.active
-                                            ? 'bg-indigo-600 border-indigo-600 text-white'
-                                            : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
-                                            }`}
-                                        dangerouslySetInnerHTML={{ __html: translatedLabel }}
-                                    />
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
+
+                <Pagination links={forms.links} isVisible={canRenderPagination} />
 
                 <FlashMessage />
 

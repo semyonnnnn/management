@@ -9,6 +9,7 @@ import { EmptyActions } from '@/components/custom/EmptyAction';
 import { StateUploadButton } from '@/components/custom/StateUploadButton';
 import { Search } from '@/components/custom/Search';
 import { NotFound } from '@/components/custom/NotFound';
+import { Pagination } from '@/components/custom/Pagination';
 
 interface FormItem {
     id: number;
@@ -255,6 +256,8 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
 
     const displayQuery = searchQuery.length > 20 ? `${searchQuery.slice(0, 20)}…` : searchQuery;
 
+    const canRenderPagination = (filteredForms.length > 0) && !isEmpty;
+
     return (
         <AuthenticatedLayout>
             <div className="space-y-4">
@@ -328,36 +331,8 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
                     </div>
                 </div>
 
-                {/* Pagination Links Section */}
-                {forms.links && forms.links.length > 3 && (
-                    <div className="bg-white border border-slate-300 p-2 flex justify-center items-center shadow-sm">
-                        <div className="flex gap-1">
-                            {forms.links.map((link, k) => {
-                                const translatedLabel = translatePaginationLabel(link.label);
-                                if (link.url === null) {
-                                    return (
-                                        <div
-                                            key={k}
-                                            className="px-3 py-1.5 text-xs font-bold text-slate-300 bg-slate-50 border border-slate-200 select-none flex items-center"
-                                            dangerouslySetInnerHTML={{ __html: translatedLabel }}
-                                        />
-                                    );
-                                }
-                                return (
-                                    <button
-                                        key={k}
-                                        onClick={() => router.get(link.url!, {}, { preserveState: true, preserveScroll: true })}
-                                        className={`px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer border ${link.active
-                                            ? 'bg-indigo-600 border-indigo-600 text-white'
-                                            : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
-                                            }`}
-                                        dangerouslySetInnerHTML={{ __html: translatedLabel }}
-                                    />
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
+
+                <Pagination links={forms.links} isVisible={canRenderPagination} />
 
                 <FlashMessage />
 

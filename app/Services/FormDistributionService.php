@@ -41,6 +41,8 @@ class FormDistributionService
             'departments' => $form->departments->map(fn($d) => ['id' => $d->id, 'name' => $d->name, 'code' => $d->code, 'territory' => $d->territory, 'okveds' => $d->okveds,]),
         ]);
 
-        return ['forms' => $forms, 'departments' => $departments, 'links' => $links];
+        $isEmpty = Form::doesntExist();
+
+        return ['forms' => $forms, 'departments' => $departments, 'links' => $links, 'isEmpty' => $isEmpty];
     }
 }

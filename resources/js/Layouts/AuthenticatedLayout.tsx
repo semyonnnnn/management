@@ -15,12 +15,12 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
 
     // Function to check if a route is active
     const isActive = (routePath: string) => {
-        // if (routePath === 'main.index' && (url.endsWith('/main') || url.includes('/main/'))) {
-        //     return true;
-        // }
-        if (routePath === 'main.index' && (url === '/' || url === '/old_main')) {
+        if (routePath === 'main.index' && (url.endsWith('/main') || url.includes('/main/'))) {
             return true;
         }
+        // if (routePath === 'main.index' && (url === '/' || url === '/old_main')) {
+        //     return true;
+        // }
         // if (routePath === 'uploadFiles.get' && url.includes('/upload')) {
         //     return true;
         // }
@@ -33,7 +33,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
         if (routePath === 'forms_distribution.index' && url.includes('/forms_distribution')) {
             return true;
         }
-        if (routePath === 'forms.index' && (url.endsWith('/forms') || url.includes('/forms/'))) {
+        if (routePath === 'forms.index' && (url.endsWith('/forms') || url.includes('/forms')) && !url.includes('forms_distribution')) {
             return true;
         }
         if (routePath === 'state.index' && url.includes('/state')) {

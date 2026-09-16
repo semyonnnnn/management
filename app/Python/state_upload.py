@@ -72,6 +72,7 @@ async def import_departments(file: UploadFile = File(...)):
                 "name": sanitize(str(r[1]).strip()),
                 "territory": territory,
                 "state": int(r[2]),
+                "staff": int(r[2]),
             })
         except Exception as e:
             # +3 because: 0-indexed -> +1, then +2 for the two skipped rows
