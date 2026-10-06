@@ -36,13 +36,18 @@ class DepartmentsController extends Controller
 
         // 4. Build response
         $departmentsWithForms = $departments->map(function ($dep) {
-            // dd($dep->forms);
+            $workload = $dep->forms->map(function ($form) {
+
+                $result = $form->reports_count * $form->indicators * $form->k1 * $form->k2 * $form->k3 * $form->k4 * $form->k5 * $form->k6;
+                return $result;
+            })->sum();
+
             return [
                 'id' => (string) $dep->id,
                 'name' => $dep->name,
                 'territory' => $dep->territory,
                 'staff' => (int) $dep->staff,
-                'workload' => (int) $dep->workload,
+                'workload' => $workload,
                 'forms' => $dep->forms,
                 'state' => $dep->state
             ];

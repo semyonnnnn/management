@@ -93,4 +93,23 @@ class FormsDistributionController extends Controller
 
         return redirect()->back()->with('success', "Отдел \"{$deptName}\" успешно откреплён от формы \"{$formName}\"!");
     }
+
+    public function upload(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls',
+        ]);
+
+        $file = $request->file('file');
+
+        $response = \Illuminate\Support\Facades\Http::timeout(10)
+            ->attach(
+                'file',
+                file_get_contents($file->getRealPath()),
+                $file->getClientOriginalName()
+            )
+            ->post('http://python:8000/forms_distribution/import');
+
+        dd($response->json());
+    }
 }

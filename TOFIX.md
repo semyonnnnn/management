@@ -10,3 +10,4 @@ urgent:
 
 1. search by okud
 2. placeholder for not found
+3. 0.0.0.0 for db/cloudbeaver 🥀

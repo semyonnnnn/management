@@ -37,6 +37,8 @@ export default function Index({ departments }: PageProps & { departments: any[] 
         return totalStaff > 0 ? totalWorkload / totalStaff : 0;
     }, [departments]);
 
+    console.log("departments", departments);
+
     // Calculate Card Data: Mapping "Optimal" to 50% visual width
     const loads: LoadItem[] = useMemo(() => {
         const getStats = (territoryKey?: string) => {
@@ -63,6 +65,9 @@ export default function Index({ departments }: PageProps & { departments: any[] 
             { id: "krg", label: "Курган", value: Math.round(krg.workload), percent: krg.percent, load_per_person: krg.avg },
         ];
     }, [departments, localStaff, fixedOptimalLoad]);
+
+    console.log("loads:", loads);
+    console.log("departments:", departments);
 
     const processedDepartments: DeptData[] = useMemo(() => {
         return departments.map((dept) => {
