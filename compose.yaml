@@ -21,6 +21,7 @@ services:
             TDSVER: '7.2'
         volumes:
             - '.:/var/www/html'
+            - './docker/freetds.conf:/etc/freetds/freetds.conf:ro'
         networks:
             - sail
         depends_on:

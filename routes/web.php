@@ -10,6 +10,7 @@ use App\Http\Controllers\VersionsController;
 use App\Http\Controllers\FormsDistributionController;
 use App\Http\Controllers\FormsController;
 use App\Http\Controllers\StatePageController;
+use App\Http\Controllers\SqlServerController;
 
 Route::get('/', function () {
     return redirect('/main');
@@ -17,6 +18,8 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/main', [DepartmentsController::class, 'index'])->name('main.index');
+
+    Route::get('/test', [SqlServerController::class, 'index'])->name('test.index');
 
     // Route::get('/old_main', [OldDepartmentsController::class, 'index'])->name('old_main.index');
 
