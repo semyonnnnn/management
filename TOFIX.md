@@ -10,4 +10,6 @@ urgent:
 
 1. search by okud
 2. placeholder for not found
-3. 0.0.0.0 for db/cloudbeaver 🥀
+3. after deleting department and reuploading whole file of state ordering is wrong.
+   Newest appears at the bottom.
+   Ordering should be based on code.

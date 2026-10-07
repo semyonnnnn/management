@@ -9,22 +9,10 @@ class SqlServerController extends Controller
 {
     public function index()
     {
-        try {
-            // Test raw connection by executing SELECT @@VERSION
-            $version = DB::connection('sqlsrv')->select('SELECT @@VERSION as version');
-            
-            // Example table dump (replace 'your_table' with an actual table name)
-            // $data = DB::connection('sqlsrv')->table('your_table')->limit(5)->get();
-
-            dd([
-                'status' => 'Connection successful!',
-                'server_version' => $version[0]->version ?? $version,
-            ]);
-        } catch (\Exception $e) {
-            dd([
-                'status' => 'Connection failed!',
-                'error' => $e->getMessage(),
-            ]);
-        }
+        // TOP works on 2005; the ? is a bound parameter, never concatenate user input
+        $rows = DB::connection('sqlsrv')->select(
+            'SELECT TOP 100 * FROM dbo.smart_ecco_2026'
+        );
+        dd($rows);
     }
 }
