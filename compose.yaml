@@ -11,7 +11,7 @@ services:
             - 'host.docker.internal:host-gateway'
         ports:
             - '${APP_PORT}:80'
-            - '5173:5173'
+            - '${LAN_BIND}:${VITE_PORT}:5173'
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
@@ -30,9 +30,9 @@ services:
 
     mariadb:
         image: 'mariadb:11'
-        ports:
-            # localhost only unless LOCAL_BIND says otherwise
-            - '${LOCAL_BIND:-127.0.0.1}:${FORWARD_DB_PORT}:3306'
+        # ports:
+        # localhost only unless LOCAL_BIND says otherwise
+        # - '${LOCAL_BIND:-127.0.0.1}:${FORWARD_DB_PORT}:3306'
         environment:
             MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
             MYSQL_ROOT_HOST: '%'
@@ -48,6 +48,17 @@ services:
             test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
             retries: 3
             timeout: 5s
+
+    mariadb-gate:
+        image: nginx:alpine
+        ports:
+            - '${LAN_BIND}:3306:3306'
+        volumes:
+            - './docker/mariadb-nginx.conf:/etc/nginx/nginx.conf:ro'
+        depends_on:
+            - mariadb
+        networks:
+            - sail
 
     cloudbeaver:
         image: dbeaver/cloudbeaver:latest
@@ -65,7 +76,7 @@ services:
         ports:
             # this is the only published CloudBeaver port; the allow-list
             # inside the nginx config decides who gets through
-            - '${CLOUDBEAVER_BIND:LOCAL_BIND}:${CLOUDBEAVER_PORT}:80'
+            - '${LAN_BIND:-127.0.0.1}:${CLOUDBEAVER_PORT}:80'
         volumes:
             - './docker/cloudbeaver-nginx.conf:/etc/nginx/conf.d/default.conf:ro'
         depends_on:

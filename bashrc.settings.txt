@@ -47,12 +47,6 @@ alias saildown='sudo $DEV_COMPOSE down --remove-orphans'
 alias sailnpm='docker exec -it $CONTAINER npm'
 
 # Workflow Aliases
-###NB
-#sail npm run dev sometimes gives me '5173 not starting' error
-#port 5173 might be already allocated by stray process, so:
-#sudo fuser -k 5173/tcp
-
-#`npm run dev` and `sail npm run dev` are interchangeable
 alias saildev='sailup && sailnpm run dev'
 alias resaildev='sail down && sail up -d && sail npm run dev'
 alias resail='clean_up && sailup'
@@ -61,6 +55,9 @@ alias sailprod='sail down && rm -f public/hot && sail up -d && sail npm run buil
 # Docker Monitoring
 alias dockerps="docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Ports}}'"
 alias dockerpsa="docker ps -a --format 'table {{.ID}}\t{{.Names}}\t{{.Ports}}'"
+
+alias sailpsa="sail ps -a --format 'table {{.ID}}\t{{.Names}}\t{{.Ports}}'"
+alias sailps="sail ps --format 'table {{.ID}}\t{{.Names}}\t{{.Ports}}'"
 
 # Clean Rebuilds
 alias redocker="clean_up && sudo $DEV_COMPOSE up -d"
@@ -140,3 +137,7 @@ if ! shopt -oq posix; then
   fi
 fi
 export LS_COLORS=$LS_COLORS:'di=01;96:'
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

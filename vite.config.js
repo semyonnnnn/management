@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
 
   // Number(): .env values are always strings, and Vite's port must be a number
   const vitePort = Number(env.VITE_PORT)
+  const viteHost = env.LAN_BIND ?? env.LOCAL_BIND ?? '127.0.0.1';
 
   return {
     plugins: [
@@ -27,7 +28,7 @@ export default defineConfig(({ mode }) => {
       // otherwise the browser reaches a port nothing listens on
       port: vitePort,
       hmr: {
-        host: '10.166.20.85',
+        host: viteHost,
         // Port the browser connects to for hot reload: the published (outside) port
         port: vitePort,
       },
