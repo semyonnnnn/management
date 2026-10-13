@@ -4,10 +4,10 @@ namespace App\Models\ERIS;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Ekb_Users extends Model
+class Krg_Deps extends Model
 {
     // Points to your connection array in database.php
-    protected $connection = 'smart_ecco';
+    protected $connection = 'smart_ecco_kurgan';
 
     public function __construct(array $attributes = [])
     {

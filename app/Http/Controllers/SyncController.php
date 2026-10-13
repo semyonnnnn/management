@@ -3,17 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Services\DepartmentSyncService;
+use App\Models\ERIS\Ekb_Forms;
 
 class SyncController extends Controller
 {
-    public function index(DepartmentSyncService $syncService)
+    public function index(DepartmentSyncService $depSyncService)
     {
-        $totalSynced = $syncService->sync();
+        dd(Ekb_Forms::take(1000)->get()->toArray());
+        $depSyncService->sync();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Departments synchronized successfully.',
-            'total_synced' => $totalSynced,
-        ]);
+        return back()->with(
+            'success',
+            'Базы успешно синхронизированы.'
+        );
     }
 }
