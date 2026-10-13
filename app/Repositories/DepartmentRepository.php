@@ -4,6 +4,7 @@
 namespace App\Repositories;
 
 use App\Models\Department;
+use Illuminate\Support\Collection;
 
 class DepartmentRepository
 {
@@ -16,5 +17,20 @@ class DepartmentRepository
         );
 
         return count($rows);
+    }
+
+    public function upsertBatch(Collection $departments): void
+    {
+        foreach ($departments as $departmentData) {
+            Department::updateOrCreate(
+                ['code' => $departmentData['code']], // The unique lookup constraint
+                [
+                    'name' => $departmentData['name'],
+                    'territory' => $departmentData['territory'],
+                    'state' => $departmentData['state'],
+                    'staff' => $departmentData['state']
+                ]
+            );
+        }
     }
 }
