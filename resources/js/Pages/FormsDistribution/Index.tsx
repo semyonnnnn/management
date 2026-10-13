@@ -12,7 +12,7 @@ import { Search } from '@/components/custom/Search';
 import { EmptyActions } from '@/components/custom/EmptyAction';
 import { NotFound } from '@/components/custom/NotFound';
 import { Pagination } from '@/components/custom/Pagination';
-import { StateUploadButton } from '@/components/custom/StateUploadButton';
+import { SyncButton } from '@/components/custom/SyncButton';
 
 // Helper to translate default Laravel pagination labels
 const translatePaginationLabel = (label: string): string => {
@@ -68,7 +68,7 @@ export default function Index({ departments, forms, filters, links, isEmpty }: E
             <div className="space-y-6" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                 {/* Search and Filters Header */}
                 <div className='flex gap-10'>
-                    <StateUploadButton route_path='forms_distribution.upload' />
+                    <SyncButton route_path='forms_distribution.upload' />
                     <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по форме' />
                 </div>
 

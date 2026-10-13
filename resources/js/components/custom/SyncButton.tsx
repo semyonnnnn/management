@@ -1,13 +1,13 @@
 import { useRef } from "react";
 import { router } from "@inertiajs/react";
-import { UploadIcon } from "@/components/custom/UploadIcon";
+import { SyncIcon } from "@/components/custom/SyncIcon";
 
 interface StateUploadButtonProps {
     isPlaceholder?: boolean;
     route_path: string;
 }
 
-export function StateUploadButton({
+export function SyncButton({
     isPlaceholder = false,
     route_path,
 }: StateUploadButtonProps) {
@@ -77,7 +77,7 @@ export function StateUploadButton({
                     </button>
                 </div>
             ) : (
-                <UploadIcon
+                <SyncIcon
                     color="#3949AB"
                     onClick={handleClick}
                 />

@@ -1,4 +1,4 @@
-import { StateUploadButton } from "@/components/custom/StateUploadButton";
+import { SyncButton } from "@/components/custom/SyncButton";
 import { AddButtonPlaceholder } from "@/components/custom/AddButtonPlaceholder";
 
 interface EmptyActionsProps {
@@ -21,7 +21,7 @@ export function EmptyActions({
             </p>
 
             <div className="flex items-center justify-center gap-12">
-                <StateUploadButton route_path={route_path} isPlaceholder />
+                <SyncButton route_path={route_path} isPlaceholder />
 
                 {!isManualOptional &&
                     <>

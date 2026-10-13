@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useForm, router } from '@inertiajs/react';
+/////////////////////////////////////////////////////
 import { AddFormModal } from './AddFormModal';
 import { FormRow } from './FormRow';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { FlashMessage } from '@/components/custom/FlashMessage';
 import { Confirmation } from './Partials/Confirmation';
 import { EmptyActions } from '@/components/custom/EmptyAction';
-import { StateUploadButton } from '@/components/custom/StateUploadButton';
+import { SyncButton } from '@/components/custom/SyncButton';
 import { Search } from '@/components/custom/Search';
 import { NotFound } from '@/components/custom/NotFound';
 import { Pagination } from '@/components/custom/Pagination';
@@ -272,7 +273,7 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
                         >
                             + Создать форму
                         </button>
-                        <StateUploadButton route_path='forms.upload' />
+                        <SyncButton route_path='forms.upload' />
                     </div>
 
                     <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по форме' />
@@ -322,11 +323,11 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
                             />
                         ))}
                         {isEmpty && <div className="flex min-h-162.5 items-center justify-center">
-                            {/* <StateUploadButton isPlaceholder={true} /> */}
+                            {/* <SyncButton isPlaceholder={true} /> */}
                             <EmptyActions route_path='forms.upload' warning="таблица форм пуста" onAddButtonClick={() => setIsAddModalOpen(true)} />
                         </div>}
                         {(!isEmpty && filteredForms.length == 0) && (
-                            <NotFound warning={`форма '${displayQuery}' не найдена!`} />
+                            <NotFound warning={`форма с таким названием или ОКУД '${displayQuery}' не найдена!`} />
                         )}
                     </div>
                 </div>

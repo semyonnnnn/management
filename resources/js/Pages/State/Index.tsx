@@ -10,7 +10,7 @@ import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { DepartmentRow } from './DepartmentRow';
 import { FlashMessage } from '@/components/custom/FlashMessage';
 import { DatePicker } from '@/components/custom/DatePicker';
-import { StateUploadButton } from '@/components/custom/StateUploadButton';
+import { SyncButton } from '@/components/custom/SyncButton';
 import { EmptyActions } from '@/components/custom/EmptyAction';
 import { Search } from '@/components/custom/Search';
 import { NotFound } from '@/components/custom/NotFound';
@@ -190,7 +190,7 @@ export default function Index({ departments, date: initialDate }: StatePageProps
                                     ШТАТНОЕ <span className="text-indigo-600">[{filteredState.length}]</span>
                                 </div>
                                 <DatePicker date={localDate} setDate={handleDateChange} className='w-fit!' />
-                                <StateUploadButton route_path='state.upload' />
+                                <SyncButton route_path='state.upload' />
                             </div>
                             <div className="relative flex-1 max-w-md">
                                 <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по отделу' />

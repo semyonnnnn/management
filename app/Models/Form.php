@@ -53,7 +53,7 @@ class Form extends Model
             $q->where('name', 'like', '%' . $search . '%')
                 ->orWhereHas('departments', function ($subQuery) use ($search) {
                     $subQuery->where('name', 'like', '%' . $search . '%');
-                });
+                })->orWhere('okud', 'like', '%' . $search . '%');
         });
     }
 }
