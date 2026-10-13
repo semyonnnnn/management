@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Services\UploadFilesService;
 use App\Models\Form;
 use App\Models\Department;
+use App\Models\Schedule;
 
 class DepartmentsController extends Controller
 {
@@ -57,5 +58,17 @@ class DepartmentsController extends Controller
             'departments' => $departmentsWithForms,
             'forms' => $forms,
         ]);
+    }
+    public function delete(int $id)
+    {
+        $department = Department::find($id);
+        $depName = $department->name;
+        $department->delete();
+
+        if (!Department::exists()) {
+            Schedule::first()->delete();
+        }
+
+        return redirect()->back()->with('success', "Отдел '$depName' успешно удалён!");
     }
 }

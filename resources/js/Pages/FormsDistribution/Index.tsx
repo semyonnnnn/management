@@ -68,7 +68,7 @@ export default function Index({ departments, forms, filters, links, isEmpty }: E
             <div className="space-y-6" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                 {/* Search and Filters Header */}
                 <div className='flex gap-10'>
-                    <SyncButton route_path='forms_distribution.upload' />
+                    <SyncButton />
                     <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по форме' />
                 </div>
 

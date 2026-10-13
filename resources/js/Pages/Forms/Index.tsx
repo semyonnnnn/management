@@ -273,7 +273,7 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
                         >
                             + Создать форму
                         </button>
-                        <SyncButton route_path='forms.upload' />
+                        <SyncButton />
                     </div>
 
                     <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по форме' />

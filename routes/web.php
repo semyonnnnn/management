@@ -2,15 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 ////////////////////////////////////////
-use App\Http\Controllers\OldDepartmentsController;
 use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\UploadFilesController;
-use App\Http\Controllers\VersionsController;
 // use App\Http\Controllers\OldFormsController;
 use App\Http\Controllers\FormsDistributionController;
 use App\Http\Controllers\FormsController;
 use App\Http\Controllers\StatePageController;
 use App\Http\Controllers\SqlServerController;
+use App\Http\Controllers\SyncController;
 
 Route::get('/', function () {
     return redirect('/main');
@@ -48,9 +47,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/state', [StatePageController::class, 'index'])->name('state.index');
     Route::post('/state', [StatePageController::class, 'create'])->name('state.create');
-    Route::post('/state/upload', [StatePageController::class, 'upload'])->name('state.upload');
     Route::put('/state', [StatePageController::class, 'update'])->name('state.update');
-    Route::delete('/state/{id}', [StatePageController::class, 'delete'])->name('state.delete');
+    Route::delete('/state/{id}', [DepartmentsController::class, 'delete'])->name('state.delete');
+
+    Route::post('/sync', [SyncController::class, 'index'])->name('sync.index');
 });
 
 require __DIR__ . '/auth.php';

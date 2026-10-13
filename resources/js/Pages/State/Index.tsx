@@ -190,7 +190,7 @@ export default function Index({ departments, date: initialDate }: StatePageProps
                                     ШТАТНОЕ <span className="text-indigo-600">[{filteredState.length}]</span>
                                 </div>
                                 <DatePicker date={localDate} setDate={handleDateChange} className='w-fit!' />
-                                <SyncButton route_path='state.upload' />
+                                <SyncButton />
                             </div>
                             <div className="relative flex-1 max-w-md">
                                 <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по отделу' />

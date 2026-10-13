@@ -21,7 +21,7 @@ export function EmptyActions({
             </p>
 
             <div className="flex items-center justify-center gap-12">
-                <SyncButton route_path={route_path} isPlaceholder />
+                <SyncButton isPlaceholder />
 
                 {!isManualOptional &&
                     <>

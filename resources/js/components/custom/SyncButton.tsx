@@ -4,43 +4,14 @@ import { SyncIcon } from "@/components/custom/SyncIcon";
 
 interface StateUploadButtonProps {
     isPlaceholder?: boolean;
-    route_path: string;
 }
 
 export function SyncButton({
     isPlaceholder = false,
-    route_path,
 }: StateUploadButtonProps) {
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const handleFileChange = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        const file = e.target.files?.[0];
-
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append("file", file);
-
-        router.post(route(route_path), formData, {
-            forceFormData: true,
-
-            onSuccess: () => {
-                // refresh / toast
-            },
-
-            onError: (errors) => {
-                console.error(errors);
-            },
-        });
-
-        // Allow selecting the same file again
-        e.target.value = "";
-    };
 
     const handleClick = () => {
-        fileInputRef.current?.click();
+        router.post(route('sync.index'));
     };
 
     return (
@@ -62,10 +33,9 @@ export function SyncButton({
                             text-[#3949AB]
                             transition
                             hover:bg-[#3949AB]/5
-                            hover:scale-105
-                        "
+                            hover:scale-105"
                     >
-                        <UploadIcon color="#3949AB" />
+                        <SyncIcon color="#3949AB" />
 
                         <span className="text-lg font-semibold">
                             Загрузить файл
@@ -82,14 +52,6 @@ export function SyncButton({
                     onClick={handleClick}
                 />
             )}
-
-            <input
-                ref={fileInputRef}
-                type="file"
-                accept=".xlsx,.xls,.csv"
-                className="hidden"
-                onChange={handleFileChange}
-            />
         </>
     );
 }

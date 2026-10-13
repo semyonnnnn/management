@@ -98,11 +98,21 @@ return [
             'sslmode' => 'prefer',
         ],
 
-        'sqlsrv' => [
+        'smart_ecco' => [
             'driver' => 'sqlsrv', // Uses pdo_dblib / FreeTDS
             'host' => env('DB_ERIS_HOST', 'eris'),
             'port' => env('DB_ERIS_PORT', '1433'),
-            'database' => env('DB_ERIS_DATABASE', ''),
+            'database' => env('DB_ERIS_MAIN', ''),
+            'username' => env('DB_ERIS_USERNAME', ''),
+            'password' => env('DB_ERIS_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+        ],
+        'smart_ecco_kurgan' => [
+            'driver' => 'sqlsrv', // Uses pdo_dblib / FreeTDS
+            'host' => env('DB_ERIS_HOST', 'eris'),
+            'port' => env('DB_ERIS_PORT', '1433'),
+            'database' => env('DB_ERIS_KURGAN', ''),
             'username' => env('DB_ERIS_USERNAME', ''),
             'password' => env('DB_ERIS_PASSWORD', ''),
             'charset' => 'utf8',
