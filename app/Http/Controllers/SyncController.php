@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Services\DepartmentSyncService;
-use App\Models\ERIS\Ekb_Forms;
+use App\Models\ERIS\Ekb\Ekb_Forms;
 
 class SyncController extends Controller
 {
     public function index(DepartmentSyncService $depSyncService)
     {
+        dd(Ekb_Forms::take(1000)->get()->toArray());
         $depSyncService->sync();
 
         return back()->with(

@@ -9,6 +9,7 @@ import { EmptyActions } from '@/components/custom/EmptyAction';
 import { Search } from '@/components/custom/Search';
 import { NotFound } from '@/components/custom/NotFound';
 import { Pagination } from '@/components/custom/Pagination';
+import { SyncButton } from '@/components/custom/SyncButton';
 
 interface FormItem {
     id: number;
@@ -294,6 +295,7 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
                             + Создать форму
                         </button>
 
+                        <SyncButton />
                         <input
                             ref={fileInputRef}
                             type="file"
