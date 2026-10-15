@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->char('okud', 10);
             $table->string('name');
             $table->enum('period', ['годовая', 'полугодовая', 'квартальная', 'месячная']);
-            $table->integer('indicators');
+            $table->integer('indicators')->default(1);
 
             $table->decimal('k1', 8, 2)->default(1.0);
             $table->decimal('k2', 8, 2)->default(1.0);

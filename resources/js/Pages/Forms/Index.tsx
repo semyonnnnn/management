@@ -1,13 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm, router } from '@inertiajs/react';
-/////////////////////////////////////////////////////
 import { AddFormModal } from './AddFormModal';
 import { FormRow } from './FormRow';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { FlashMessage } from '@/components/custom/FlashMessage';
 import { Confirmation } from './Partials/Confirmation';
 import { EmptyActions } from '@/components/custom/EmptyAction';
-import { SyncButton } from '@/components/custom/SyncButton';
 import { Search } from '@/components/custom/Search';
 import { NotFound } from '@/components/custom/NotFound';
 import { Pagination } from '@/components/custom/Pagination';
@@ -72,6 +70,28 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
     const { setData, put, processing, reset, delete: destroy } = useForm<{ forms: any[] }>({
         forms: [],
     });
+
+    // Separate useForm instance for the upload — kept independent from the
+    // row-editing 'forms' useForm above so uploading a file can never
+    // collide with (or get wiped by) in-progress row edits.
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const { setData: setUploadData, post: postUpload, processing: uploadProcessing } = useForm<{ file: File | null }>({
+        file: null,
+    });
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] ?? null;
+        if (!file) return;
+
+        // Use router.post directly to pass the file payload synchronously
+        router.post(route('forms.upload'), { file }, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                if (fileInputRef.current) fileInputRef.current.value = '';
+            },
+        });
+    };
 
     const formatInitialValue = (val: number | null | undefined, isFloat = false): string => {
         if (val === null || val === undefined) return '';
@@ -273,7 +293,23 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
                         >
                             + Создать форму
                         </button>
-                        <SyncButton />
+
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".xlsx,.xls,.csv"
+                            className="hidden"
+                            onChange={handleFileChange}
+                            disabled={uploadProcessing}
+                        />
+                        <button
+                            type="button"
+                            disabled={uploadProcessing}
+                            onClick={() => fileInputRef.current?.click()}
+                            className="px-3 py-2 text-nowrap bg-emerald-600 text-white text-md font-bold uppercase hover:bg-emerald-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {uploadProcessing ? 'Загрузка...' : 'Импорт из файла'}
+                        </button>
                     </div>
 
                     <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по форме' />
@@ -323,11 +359,11 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
                             />
                         ))}
                         {isEmpty && <div className="flex min-h-162.5 items-center justify-center">
-                            {/* <SyncButton isPlaceholder={true} /> */}
+                            {/* <StateUploadButton isPlaceholder={true} /> */}
                             <EmptyActions route_path='forms.upload' warning="таблица форм пуста" onAddButtonClick={() => setIsAddModalOpen(true)} />
                         </div>}
                         {(!isEmpty && filteredForms.length == 0) && (
-                            <NotFound warning={`форма с таким названием или ОКУД '${displayQuery}' не найдена!`} />
+                            <NotFound warning={`форма '${displayQuery}' не найдена!`} />
                         )}
                     </div>
                 </div>

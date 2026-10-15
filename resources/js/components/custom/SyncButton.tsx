@@ -38,7 +38,7 @@ export function SyncButton({
                         <SyncIcon color="#3949AB" />
 
                         <span className="text-lg font-semibold">
-                            Загрузить файл
+                            Синхронизировать базы
                         </span>
 
                         <span className="text-sm opacity-60">

@@ -9,7 +9,6 @@ class SyncController extends Controller
 {
     public function index(DepartmentSyncService $depSyncService)
     {
-        dd(Ekb_Forms::take(1000)->get()->toArray());
         $depSyncService->sync();
 
         return back()->with(

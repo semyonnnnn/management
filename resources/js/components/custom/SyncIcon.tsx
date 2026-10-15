@@ -4,7 +4,7 @@ import { MouseEventHandler } from "react";
 export interface SyncIconProps {
     color?: string;
     className?: string;
-    onClick?: MouseEventHandler<HTMLButtonElement>;
+    onClick?: MouseEventHandler<HTMLDivElement>;
 }
 
 const SyncIcon = ({
@@ -13,8 +13,7 @@ const SyncIcon = ({
     onClick,
 }: SyncIconProps) => {
     return (
-        <button
-            type="button"
+        <div
             onClick={onClick}
             className={`flex shrink-0 items-center justify-center
         bg-transparent border-none p-0
@@ -55,7 +54,7 @@ const SyncIcon = ({
                     </g>
                 </g>
             </svg>
-        </button>
+        </div>
     );
 };
 
