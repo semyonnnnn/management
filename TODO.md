@@ -1,5 +1,7 @@
 # Secret Synchronization & Snapshot Pipeline Architecture
 
+## 0. Form-related stuff.
+
 ## 1. Temporal Window & Anchor Logic
 
 - [ ] **Anchor Identification**: Query the primary target partition for the maximum `DateStampUpd` entry to establish the synchronization baseline timestamp.

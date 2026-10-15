@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\ERIS;
 
-use App\Models\ERIS\Ekb_Deps;
-use App\Models\ERIS\Krg_Deps;
-use App\Repositories\DepartmentRepository;
+use App\Models\ERIS\Ekb\Ekb_Deps;
+use App\Models\ERIS\Krg\Krg_Deps;
+use App\Repositories\ERIS\FormRepository;
 
-class DepartmentSyncService
+class FormsSyncService
 {
-    private array $krg_in_ekb_kodes = [20, 7, 9];
-    private DepartmentRepository $departmentRepository;
+    private FormRepository $formRepository;
 
     public function __construct(DepartmentRepository $departmentRepository)
     {

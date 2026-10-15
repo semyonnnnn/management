@@ -2,31 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\DepartmentSyncService;
+use App\Services\ERIS\DepartmentSyncService;
 use App\Models\ERIS\Ekb\Ekb_Forms;
-use App\Models\Form;
+use App\Models\ERIS\Krg\Krg_Forms;
 
 class SyncController extends Controller
 {
     public function index(DepartmentSyncService $depSyncService)
     {
-        $ekb_form_array = Ekb_Forms::distinct()->pluck('okud')->toArray();
-        $local_forms = Form::distinct()->pluck('okud')->toArray();
+        $anchorEkb = Ekb_Forms::latest('DateStampUpd')->value('DateStampUpd');
+        $anchorKrg = Krg_Forms::latest('DateStampUpd')->value('DateStampUpd');
 
-        // 1. Values present in $ekb_form_array but MISSING in $local_forms
-        $only_in_ekb = array_diff($ekb_form_array, $local_forms);
-
-        // 2. Values present in $local_forms but MISSING in $ekb_form_array
-        $only_in_local = array_diff($local_forms, $ekb_form_array);
-
-        // 3. Values common to both arrays
-        $common_values = array_intersect($ekb_form_array, $local_forms);
-
-        dd([
-            'Only in EKB' => $only_in_ekb,
-            'Only in Local' => $only_in_local,
-            'Common' => $common_values,
-        ]);
+        // Find the latest (maximum) date between the two
+        $anchor = collect([$anchorEkb, $anchorKrg])->filter()->max();
+        dd($anchor);
 
         $depSyncService->sync();
 
