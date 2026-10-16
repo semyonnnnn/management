@@ -38,7 +38,7 @@ abstract class Base extends Model
     /**
      * Query against the year_start table
      */
-    public static function fromStart()
+    public static function startFormTable()
     {
         $instance = new static();
         if (!$instance->startTable) {
@@ -50,7 +50,7 @@ abstract class Base extends Model
     /**
      * Query against the year_end table
      */
-    public static function fromEnd()
+    public static function endFormTable()
     {
         $instance = new static();
         if (!$instance->endTable) {

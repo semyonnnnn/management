@@ -326,7 +326,7 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
                             Наименование формы
                         </div>
                         <div className={`w-36 px-3 py-2 ${borderRightSlate300} bg-cyan-200/70 text-cyan-900`}>
-                            Показателей за год
+                            Количество отчётов
                         </div>
                         <div className={`w-40 shrink-0 p-2 ${borderRightSlate300} text-center bg-emerald-200/60 text-emerald-900`}>
                             Период
