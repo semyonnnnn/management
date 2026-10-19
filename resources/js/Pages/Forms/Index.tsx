@@ -10,6 +10,7 @@ import { Search } from '@/components/custom/Search';
 import { NotFound } from '@/components/custom/NotFound';
 import { Pagination } from '@/components/custom/Pagination';
 import { SyncButton } from '@/components/custom/SyncButton';
+import { SyncTimestamp } from '@/components/custom/SyncTimestamp';
 
 interface FormItem {
     id: number;
@@ -59,9 +60,10 @@ interface Props {
     };
     periods: ('годовая' | 'полугодовая' | 'квартальная' | 'месячная')[];
     isEmpty: boolean;
+    timestamp: string;
 }
 
-export default function Index({ forms, filters, periods, isEmpty }: Props) {
+export default function Index({ forms, filters, periods, isEmpty, timestamp }: Props) {
     const [searchQuery, setSearchQuery] = useState<string>(filters.search || '');
     const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
     const [formToDelete, setFormToDelete] = useState<LocalFormItem | null>(null);
@@ -296,6 +298,10 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
                         </button>
 
                         <SyncButton />
+                        <SyncTimestamp
+                            timestamp={timestamp}
+                            timezone="Asia/Yekaterinburg"
+                        />
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -304,14 +310,14 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
                             onChange={handleFileChange}
                             disabled={uploadProcessing}
                         />
-                        {/* <button
+                        <button
                             type="button"
                             disabled={uploadProcessing}
                             onClick={() => fileInputRef.current?.click()}
                             className="px-3 py-2 text-nowrap bg-emerald-600 text-white text-md font-bold uppercase hover:bg-emerald-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {uploadProcessing ? 'Загрузка...' : 'Импорт из файла'}
-                        </button> */}
+                        </button>
                     </div>
 
                     <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по форме' />

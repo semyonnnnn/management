@@ -9,14 +9,14 @@ use App\Services\ERIS\DistributionService;
 class SyncController extends Controller
 {
     public function index(
-        DepartmentSyncService $depSyncService,
         FormSyncService $formSyncService,
+        DepartmentSyncService $depSyncService,
         DistributionService $distributionService
     ) {
 
-        // $distributionService->sync();
         $depSyncService->sync();
         $formSyncService->sync();
+        $distributionService->sync();
 
         return back()->with(
             'success',

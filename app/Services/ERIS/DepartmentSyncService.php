@@ -9,6 +9,10 @@ use App\Repositories\DepartmentRepository;
 class DepartmentSyncService
 {
     private array $krg_in_ekb_kodes = [20, 7, 9];
+    public function getKrgInEkbKodes(): array
+    {
+        return $this->krg_in_ekb_kodes;
+    }
     private DepartmentRepository $departmentRepository;
 
     public function __construct(DepartmentRepository $departmentRepository)

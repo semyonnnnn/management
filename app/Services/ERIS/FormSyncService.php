@@ -5,6 +5,7 @@ namespace App\Services\ERIS;
 use App\Models\ERIS\Ekb\Ekb_Forms;
 use App\Models\ERIS\Krg\Krg_Forms;
 use App\Models\Form;
+use App\Models\SyncLogs;
 class FormSyncService
 {
     private $latestRecordTime;
@@ -27,6 +28,16 @@ class FormSyncService
 
             $form->save();
         }
+
+        // Record or update the sync log entry
+        SyncLogs::updateOrCreate(
+            ['id' => 1], // Keeps a single unified log row, or remove if you want history logs
+            [
+                'synced_when' => now(),
+                'start_table_timestamp' => $this->oneYearAgo,
+                'end_table_timestamp' => $this->latestRecordTime,
+            ]
+        );
 
         return back()->with('success', 'Формы успешно синхронизированы.');
     }

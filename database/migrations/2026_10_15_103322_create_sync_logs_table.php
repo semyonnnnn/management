@@ -10,8 +10,8 @@ return new class extends Migration {
         Schema::create('sync_logs', function (Blueprint $table) {
             $table->id();
             $table->timestamp('synced_when');
-            $table->timestamp('start');
-            $table->timestamp('end');
+            $table->timestamp('start_table_timestamp');
+            $table->timestamp('end_table_timestamp');
             $table->timestamps();
         });
     }

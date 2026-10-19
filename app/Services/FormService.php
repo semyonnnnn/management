@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Form;
 use App\Enum\PeriodEnum;
+use App\Models\SyncLogs;
 
 class FormService
 {
@@ -43,6 +44,7 @@ class FormService
             ],
             'periods' => PeriodEnum::values(),
             'isEmpty' => $isEmpty,
+            'timestamp' => SyncLogs::value('synced_when') ?? 'пусто'
         ];
     }
 }
