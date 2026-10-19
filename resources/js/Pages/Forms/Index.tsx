@@ -304,14 +304,14 @@ export default function Index({ forms, filters, periods, isEmpty }: Props) {
                             onChange={handleFileChange}
                             disabled={uploadProcessing}
                         />
-                        <button
+                        {/* <button
                             type="button"
                             disabled={uploadProcessing}
                             onClick={() => fileInputRef.current?.click()}
                             className="px-3 py-2 text-nowrap bg-emerald-600 text-white text-md font-bold uppercase hover:bg-emerald-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {uploadProcessing ? 'Загрузка...' : 'Импорт из файла'}
-                        </button>
+                        </button> */}
                     </div>
 
                     <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по форме' />

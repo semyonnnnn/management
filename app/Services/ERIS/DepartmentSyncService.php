@@ -32,7 +32,7 @@ class DepartmentSyncService
         $krg_in_ekb = Ekb_Deps::whereIn('Kod', $this->krg_in_ekb_kodes)->get()->map(function ($item) {
             return [
                 'name' => $item->Otdel ?? '',
-                'code' => $item->Kod,
+                'code' => $item->Kod . 'ке',
                 'territory' => 'krg',
                 'state' => $item->cnt_shtat ?? 0,
             ];
@@ -42,7 +42,7 @@ class DepartmentSyncService
         $deps_Krg = Krg_Deps::all()->map(function ($item) {
             return [
                 'name' => $item->Otdel ?? '',
-                'code' => $item->Kod,
+                'code' => $item->Kod . 'к',
                 'territory' => 'krg',
                 'state' => $item->cnt_shtat ?? 0,
             ];

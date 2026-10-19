@@ -14,7 +14,7 @@ class SyncController extends Controller
         DistributionService $distributionService
     ) {
 
-        $distributionService->sync();
+        // $distributionService->sync();
         $depSyncService->sync();
         $formSyncService->sync();
 
