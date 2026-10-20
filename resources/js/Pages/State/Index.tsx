@@ -14,13 +14,15 @@ import { SyncButton } from '@/components/custom/SyncButton';
 import { EmptyActions } from '@/components/custom/EmptyAction';
 import { Search } from '@/components/custom/Search';
 import { NotFound } from '@/components/custom/NotFound';
+import { SyncTimestamp } from '@/components/custom/SyncTimestamp';
 
 interface StatePageProps extends PageProps {
     departments: Department[] | null;
     date: string | null;
+    timestamp: string;
 }
 
-export default function Index({ departments, date: initialDate }: StatePageProps) {
+export default function Index({ departments, date: initialDate, timestamp }: StatePageProps) {
     const [localDepartments, setLocalDepartments] = useState<Department[]>([]);
     const [localDate, setLocalDate] = useState<string | null>(initialDate || null);
     const [selectedTerritory, setSelectedTerritory] = useState<string>("all");
@@ -191,6 +193,9 @@ export default function Index({ departments, date: initialDate }: StatePageProps
                                 </div>
                                 <DatePicker date={localDate} setDate={handleDateChange} className='w-fit!' />
                                 <SyncButton />
+                                <SyncTimestamp
+                                    timestamp={timestamp}
+                                />
                             </div>
                             <div className="relative flex-1 max-w-md">
                                 <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по отделу' />

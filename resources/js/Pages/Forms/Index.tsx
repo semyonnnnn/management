@@ -300,7 +300,6 @@ export default function Index({ forms, filters, periods, isEmpty, timestamp }: P
                         <SyncButton />
                         <SyncTimestamp
                             timestamp={timestamp}
-                            timezone="Asia/Yekaterinburg"
                         />
                         <input
                             ref={fileInputRef}

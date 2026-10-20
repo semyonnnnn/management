@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 /////////////////////////////////
 use App\Models\Department;
 use App\Models\Schedule;
@@ -14,6 +12,7 @@ use App\Http\Requests\FileUploadRequest;
 use App\Services\DepartmentImportService;
 use App\Repositories\DepartmentRepository;
 use App\Exceptions\DepartmentImportException;
+use App\Models\SyncLogs;
 class StatePageController extends Controller
 {
     public function index()
@@ -25,6 +24,7 @@ class StatePageController extends Controller
         return Inertia::render('State/Index', [
             'departments' => $departments->isNotEmpty() ? $departments : null,
             'date' => Schedule::first()->date ?? null,
+            'timestamp' => SyncLogs::value('synced_when') ?? 'пусто'
         ]);
     }
 

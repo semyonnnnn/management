@@ -11,7 +11,7 @@ use App\Services\FormDistributionService;
 use App\Http\Requests\Forms\FormDistributionRequest;
 use App\Models\Form;
 use App\Models\Department;
-
+use App\Models\SyncLogs;
 class FormsDistributionController extends Controller
 {
     public function index(Request $request, FormDistributionService $formService): Response
@@ -25,7 +25,8 @@ class FormsDistributionController extends Controller
             'filters' => [
                 'search' => $search,
                 'territory' => $territory
-            ]
+            ],
+            'timestamp' => SyncLogs::value('synced_when') ?? 'пусто'
         ]));
     }
 

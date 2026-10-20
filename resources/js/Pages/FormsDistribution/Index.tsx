@@ -13,6 +13,7 @@ import { EmptyActions } from '@/components/custom/EmptyAction';
 import { NotFound } from '@/components/custom/NotFound';
 import { Pagination } from '@/components/custom/Pagination';
 import { SyncButton } from '@/components/custom/SyncButton';
+import { SyncTimestamp } from '@/components/custom/SyncTimestamp';
 
 // Helper to translate default Laravel pagination labels
 const translatePaginationLabel = (label: string): string => {
@@ -21,7 +22,7 @@ const translatePaginationLabel = (label: string): string => {
     return label;
 };
 
-export default function Index({ departments, forms, filters, links, isEmpty }: ExtendedPageProps) {
+export default function Index({ departments, forms, filters, links, isEmpty, timestamp }: ExtendedPageProps) {
     const [searchQuery, setSearchQuery] = useState<string>(filters.search || '');
     const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
     const [selectedForm, setSelectedForm] = useState<any | null>(null);
@@ -69,6 +70,9 @@ export default function Index({ departments, forms, filters, links, isEmpty }: E
                 {/* Search and Filters Header */}
                 <div className='flex gap-10'>
                     <SyncButton />
+                    <SyncTimestamp
+                        timestamp={timestamp}
+                    />
                     <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder='поиск по форме' />
                 </div>
 

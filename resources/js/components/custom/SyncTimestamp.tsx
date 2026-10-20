@@ -7,7 +7,7 @@ interface SyncTimestampProps {
 
 export const SyncTimestamp: React.FC<SyncTimestampProps> = ({
     timestamp,
-    timezone = 'Asia/Yekaterinburg'
+    // timezone
 }) => {
     const formattedTimestamp = useMemo(() => {
         if (!timestamp || timestamp === 'пусто') return 'пусто';
@@ -22,7 +22,7 @@ export const SyncTimestamp: React.FC<SyncTimestampProps> = ({
 
         try {
             const formatter = new Intl.DateTimeFormat('en-CA', {
-                timeZone: timezone,
+                // timeZone: timezone,
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
@@ -38,7 +38,7 @@ export const SyncTimestamp: React.FC<SyncTimestampProps> = ({
         } catch (e) {
             return 'пусто';
         }
-    }, [timestamp, timezone]);
+    }, [timestamp]);
 
     return (
         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 rounded text-xs font-semibold tracking-wider text-indigo-900 shadow-sm uppercase select-none shrink-0">

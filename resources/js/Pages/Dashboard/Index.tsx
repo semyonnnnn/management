@@ -8,7 +8,7 @@ import { TotalLoadCard } from "./Partials/TotalLoadCard";
 import { DeptTable } from "./Partials/DeptTable";
 import Modal from "@/components/custom/Modal";
 
-export default function Index({ departments }: PageProps & { departments: any[] }) {
+export default function Index({ departments, timestamp }: PageProps & { departments: any[], timestamp: string }) {
     const [localStaff, setLocalStaff] = useState<Record<string, number>>({});
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -139,6 +139,7 @@ export default function Index({ departments }: PageProps & { departments: any[] 
             <div className="container mx-auto p-3 space-y-6 pb-32">
                 <TotalLoadCard loads={loads} />
                 <DeptTable
+                    timestamp={timestamp}
                     departments={processedDepartments}
                     changeStaff={changeStaff}
                     fixedOptimalLoad={fixedOptimalLoad}

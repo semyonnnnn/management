@@ -223,6 +223,7 @@ interface ExtendedPageProps extends PageProps {
         territory?: string;
         search?: string;
     };
+    timestamp: string;
 }
 export interface Department {
     id: string;

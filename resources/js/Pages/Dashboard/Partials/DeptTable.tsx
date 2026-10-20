@@ -1,15 +1,19 @@
 import React, { useState } from "react";
 import { DeptTableProps } from "@/types";
 import { ModalDetails } from "./ModalDetails";
+import { SyncButton } from "@/components/custom/SyncButton";
+import { SyncTimestamp } from "@/components/custom/SyncTimestamp";
 
 interface ExtendedProps extends DeptTableProps {
     fixedOptimalLoad: number;
+    timestamp: string;
 }
 
 const DeptTable: React.FC<ExtendedProps> = ({
     departments,
     changeStaff,
     fixedOptimalLoad,
+    timestamp
 }) => {
     const [showModal, setShowModal] = useState(false);
     const [selectedDept, setSelectedDept] = useState<any>(null);
@@ -58,6 +62,12 @@ const DeptTable: React.FC<ExtendedProps> = ({
                         </svg>
                     </div>
                     <div>средняя нагрузка на человека: <span className="text-lg font-mono font-bold text-gray-900 tracking-tighter uppercase">{Math.round(fixedOptimalLoad).toLocaleString()} </span></div>
+                </div>
+                <div className="flex gap-10">
+                    <SyncButton />
+                    <SyncTimestamp
+                        timestamp={timestamp}
+                    />
                 </div>
                 <div className="flex gap-2">
                     {["all", "ekb", "krg"].map((t) => (

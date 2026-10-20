@@ -8,6 +8,7 @@ use App\Services\UploadFilesService;
 use App\Models\Form;
 use App\Models\Department;
 use App\Models\Schedule;
+use App\Models\SyncLogs;
 
 class DepartmentsController extends Controller
 {
@@ -28,6 +29,7 @@ class DepartmentsController extends Controller
             return Inertia::render('Dashboard/Index', [
                 'departments' => [],
                 'forms' => [],
+                'timestamp' => SyncLogs::value('synced_when') ?? 'пусто'
             ]);
         }
 
@@ -57,6 +59,7 @@ class DepartmentsController extends Controller
         return Inertia::render('Dashboard/Index', [
             'departments' => $departmentsWithForms,
             'forms' => $forms,
+            'timestamp' => SyncLogs::value('synced_when') ?? 'пусто'
         ]);
     }
     public function delete(int $id)
