@@ -21,13 +21,7 @@ class FormsDistributionController extends Controller
 
         $data = $formService->index($search, $territory);
 
-        return Inertia::render('FormsDistribution/Index', array_merge($data, [
-            'filters' => [
-                'search' => $search,
-                'territory' => $territory
-            ],
-            'timestamp' => SyncLogs::value('synced_when') ?? 'пусто'
-        ]));
+        return Inertia::render('FormsDistribution/Index', $data);
     }
 
     //FormDistributionRequest

@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\Form;
 use App\Models\Department;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use App\Models\SyncLogs;
 
 class FormDistributionService
 {
@@ -43,6 +43,16 @@ class FormDistributionService
 
         $isEmpty = Form::doesntExist();
 
-        return ['forms' => $forms, 'departments' => $departments, 'links' => $links, 'isEmpty' => $isEmpty];
+        return [
+            'forms' => $forms,
+            'departments' => $departments,
+            'links' => $links,
+            'isEmpty' => $isEmpty,
+            'filters' => [
+                'search' => $search,
+                'territory' => $territory
+            ],
+            'timestamp' => SyncLogs::value('synced_when') ?? 'пусто'
+        ];
     }
 }
