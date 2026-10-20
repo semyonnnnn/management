@@ -28,7 +28,7 @@ class DepartmentRepository
                     'name' => $departmentData['name'],
                     'territory' => $departmentData['territory'],
                     'state' => $departmentData['state'],
-                    'staff' => $departmentData['state']
+                    'staff' => $departmentData['staff']
                 ]
             );
         }

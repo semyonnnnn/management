@@ -20,6 +20,7 @@ class Department extends Model
         'name',
         'territory',
         'state',
+        'staff',
         'okveds',
     ];
 

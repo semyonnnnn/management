@@ -102,7 +102,7 @@ const DeptTable: React.FC<ExtendedProps> = ({
                         {filteredDepartments.map((dept, index) => {
                             const workloadPercent = calcWorkloadRawPercent(dept);
                             const levelClass = getLevelClass(workloadPercent);
-                            const loadPerStaff = dept.staff > 0 ? Math.floor(dept.totalLoad / dept.staff) : 0;
+                            const loadPerStaff = dept.staff > 0 ? Math.floor(dept.workload / dept.staff) : 0;
 
                             // Visual logic: 200% load = 100% width. So we divide by 2.
                             const barWidth = Math.min(workloadPercent / 2, 100);
@@ -126,7 +126,7 @@ const DeptTable: React.FC<ExtendedProps> = ({
                                         />
                                     </td>
                                     <td className="text-right px-3 font-mono text-md font-bold">{dept.state}</td>
-                                    <td className="text-right px-3 font-mono text-md font-bold">{dept.totalLoad.toLocaleString()}</td>
+                                    <td className="text-right px-3 font-mono text-md font-bold">{Math.round(dept.workload).toLocaleString()}</td>
                                     <td className="text-right px-3 font-mono text-md text-gray-600">{loadPerStaff.toLocaleString()}</td>
                                     <td className="align-middle pl-5 w-10">
                                         <div className="inline-flex items-center gap-2">

@@ -105,7 +105,7 @@ export interface DeptData {
     dataTerritory: 'ekb' | 'krg';
     staff: number;
     state: number;
-    totalLoad: number;
+    workload: number;
     avgLoad: number;
     levelPercent: number;
     levelClass: 'low' | 'medium' | 'high';

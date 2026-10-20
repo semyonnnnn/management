@@ -43,6 +43,13 @@ class Form extends Model
         });
     }
 
+    public function computeWorkload(): float
+    {
+        return $this->reports_count * $this->indicators
+            * $this->k1 * $this->k2 * $this->k3
+            * $this->k4 * $this->k5 * $this->k6;
+    }
+
     public function scopeSearch(Builder $query, string $search): void
     {
         if ($search === '') {
