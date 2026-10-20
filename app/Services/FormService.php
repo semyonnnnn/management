@@ -32,11 +32,19 @@ class FormService
             'k6' => (float) $form->k6,
             'reports_count' => (int) $form->reports_count,
             'is_consolidated' => (bool) $form->is_consolidated,
+            'departments' => $form->departments()->get()->map(function ($department) {
+                return [
+                    'name' => $department->name,
+                    'code' => $department->code,
+                    'territory' => $department->territory,
+                ];
+            }),
             'created_at' => $form->created_at,
             'updated_at' => $form->updated_at,
         ]);
 
-        return [
+
+        $data = [
             'forms' => $forms,
             'filters' => [
                 'search' => $search,
@@ -46,5 +54,7 @@ class FormService
             'isEmpty' => $isEmpty,
             'timestamp' => SyncLogs::value('synced_when') ?? 'пусто'
         ];
+
+        return $data;
     }
 }

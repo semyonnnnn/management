@@ -1,23 +1,7 @@
 import React from 'react';
 import { CustomSelect } from '@/components/custom/CustomSelect';
-
-interface LocalFormItem {
-    id: number;
-    okud: string;
-    name: string;
-    period: string;
-    indicators: string;
-    k1: string;
-    k2: string;
-    k3: string;
-    k4: string;
-    k5: string;
-    k6: string;
-    reports_count: number;
-    is_consolidated: boolean;
-    created_at: string;
-    updated_at: string;
-}
+// `import type` is erased at build time, so there is no runtime cycle with Index.tsx
+import type { LocalFormItem } from './Index';
 
 interface FormRowProps {
     form: LocalFormItem;
@@ -25,6 +9,7 @@ interface FormRowProps {
     periods: ('годовая' | 'полугодовая' | 'квартальная' | 'месячная')[];
     handleInputChange: (id: number, field: keyof LocalFormItem, rawValue: string) => void;
     onDelete: (form: LocalFormItem) => void;
+    onShowDepartments: (id: number) => void;
     inputCellClasses: string;
     borderRightSlate300: string;
     borderRightSlate200: string;
@@ -36,6 +21,7 @@ export const FormRow = React.memo(function FormRow({
     periods,
     handleInputChange,
     onDelete,
+    onShowDepartments,
     inputCellClasses,
     borderRightSlate300,
     borderRightSlate200,
@@ -45,8 +31,16 @@ export const FormRow = React.memo(function FormRow({
 
     const okudBg = isEven ? 'bg-sky-50/70' : 'bg-sky-100/50';
     const nameBg = isEven ? 'bg-orange-50/70' : 'bg-orange-100/50';
+    const deptsBg = isEven ? 'bg-orange-50/40' : 'bg-orange-100/30';
     const periodBg = isEven ? 'bg-emerald-50/70' : 'bg-emerald-100/50';
     const indicatorsBg = isEven ? 'bg-rose-50/70' : 'bg-rose-100/60';
+
+    const deptCount = form.departments.length;
+    // A form with no departments contributes to nobody's workload, so it is
+    // painted red to stand out from normal (orange) buttons
+    const deptButtonColors = deptCount === 0
+        ? 'border-red-300 bg-red-50 text-red-600 hover:bg-red-100'
+        : 'border-orange-300 bg-white/60 text-orange-900 hover:bg-orange-200/60';
 
     return (
         <div
@@ -72,6 +66,32 @@ export const FormRow = React.memo(function FormRow({
                     onChange={(e) => handleInputChange(form.id, 'name', e.target.value)}
                     className="w-full py-0.5 focus:outline-none border-b border-orange-300 focus:border-orange-700 font-semibold text-xs text-orange-950 transition-colors bg-transparent"
                 />
+            </div>
+
+            {/* Departments Column: a div acting as a button (icon on top, count below) */}
+            <div className={`w-24 shrink-0 ${inputCellClasses} ${borderRightSlate300} ${deptsBg} group-hover/row:bg-orange-200/40`}>
+                <div
+                    // role + tabIndex + key handler make a div behave like a real button
+                    // for keyboard users (Enter / Space)
+                    role="button"
+                    tabIndex={0}
+                    title="Показать отделы формы"
+                    onClick={() => onShowDepartments(form.id)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault(); // Space would otherwise scroll the page
+                            onShowDepartments(form.id);
+                        }
+                    }}
+                    className={`flex flex-col items-center justify-center gap-0.5 py-0.5 border cursor-pointer transition-colors focus:outline-none focus:ring-1 focus:ring-orange-500 ${deptButtonColors}`}
+                >
+                    {/* same "building" icon the departments table uses in its header */}
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    {/* "отд." avoids Russian plural forms (1 отдел / 2 отдела / 5 отделов) */}
+                    <span className="text-[9px] leading-none font-mono font-bold uppercase">{deptCount} отд.</span>
+                </div>
             </div>
 
             {/* reports_count */}

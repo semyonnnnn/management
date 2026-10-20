@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm, router } from '@inertiajs/react';
 import { AddFormModal } from './AddFormModal';
 import { FormRow } from './FormRow';
+import { DepartmentsModal } from './DepartmentsModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { FlashMessage } from '@/components/custom/FlashMessage';
 import { Confirmation } from './Partials/Confirmation';
@@ -12,25 +13,34 @@ import { Pagination } from '@/components/custom/Pagination';
 import { SyncButton } from '@/components/custom/SyncButton';
 import { SyncTimestamp } from '@/components/custom/SyncTimestamp';
 
-interface FormItem {
-    id: number;
-    okud: string | null;
+export interface FormDepartment {
+    code: string;                // string, not number: values like "9к" and "20ке" exist
     name: string;
-    period: string | null;
-    indicators: number | null;
-    k1: number | null;
-    k2: number | null;
-    k3: number | null;
-    k4: number | null;
-    k5: number | null;
-    k6: number | null;
-    is_consolidated: boolean;
+    territory: 'ekb' | 'krg';    // same two values DeptTable uses for its badge colors
+}
+
+export interface FormItem {
+    id: number;
+    okud: string;
+    name: string;
+    period: 'годовая' | 'полугодовая' | 'квартальная' | 'месячная';
+    indicators: number;
+    k1: number;
+    k2: number;
+    k3: number;
+    k4: number;
+    k5: number;
+    k6: number;
     reports_count: number;
-    created_at: string;
+    is_consolidated: boolean;
+    departments: FormDepartment[];  // empty array when the form has no departments
+    created_at: string;             // ISO strings, because JSON has no Date type
     updated_at: string;
 }
 
-interface LocalFormItem extends Omit<FormItem, 'indicators' | 'k1' | 'k2' | 'k3' | 'k4' | 'k5' | 'k6'> {
+// Exported so FormRow and DepartmentsModal use this exact type instead of keeping copies.
+// Every field redeclared below with a different type must be listed in Omit.
+export interface LocalFormItem extends Omit<FormItem, 'period' | 'indicators' | 'k1' | 'k2' | 'k3' | 'k4' | 'k5' | 'k6'> {
     okud: string;
     period: string;
     indicators: string;
@@ -57,6 +67,7 @@ interface Props {
     };
     filters: {
         search?: string;
+        territory?: string;
     };
     periods: ('годовая' | 'полугодовая' | 'квартальная' | 'месячная')[];
     isEmpty: boolean;
@@ -70,6 +81,11 @@ export default function Index({ forms, filters, periods, isEmpty, timestamp }: P
     const [localForms, setLocalForms] = useState<LocalFormItem[]>([]);
     const [initialForms, setInitialForms] = useState<FormItem[]>(forms.data);
 
+    // Store only the id of the form whose departments are open, not the form object.
+    // An object copy would go stale after edits or a reload; an id is re-resolved
+    // from localForms on every render (see selectedForm below).
+    const [selectedFormId, setSelectedFormId] = useState<number | null>(null);
+
     const { setData, put, processing, reset, delete: destroy } = useForm<{ forms: any[] }>({
         forms: [],
     });
@@ -78,7 +94,7 @@ export default function Index({ forms, filters, periods, isEmpty, timestamp }: P
     // row-editing 'forms' useForm above so uploading a file can never
     // collide with (or get wiped by) in-progress row edits.
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { setData: setUploadData, post: postUpload, processing: uploadProcessing } = useForm<{ file: File | null }>({
+    const { processing: uploadProcessing } = useForm<{ file: File | null }>({
         file: null,
     });
 
@@ -107,7 +123,7 @@ export default function Index({ forms, filters, periods, isEmpty, timestamp }: P
 
     const mapToLocalState = (items: FormItem[]): LocalFormItem[] => {
         return items.map(item => ({
-            ...item,
+            ...item, // carries `departments` along into local state
             okud: item.okud !== null && item.okud !== undefined ? String(item.okud) : '',
             name: item.name || '',
             period: item.period || '',
@@ -131,7 +147,11 @@ export default function Index({ forms, filters, periods, isEmpty, timestamp }: P
     const applyFilters = (search: string) => {
         router.get(
             window.location.pathname,
-            { search: search || undefined },
+            {
+                search: search || undefined,
+                // keep the territory filter: undefined values are omitted from the URL by Inertia
+                territory: filters.territory || undefined,
+            },
             { preserveState: true, replace: true }
         );
     };
@@ -181,7 +201,8 @@ export default function Index({ forms, filters, periods, isEmpty, timestamp }: P
                 if (!original) return false;
                 return isFormChanged(current, original);
             })
-            .map(form => ({
+            // `departments` is display-only, so it is stripped from the PUT /forms payload
+            .map(({ departments, ...form }) => ({
                 ...form,
                 okud: form.okud.trim() === '' ? null : form.okud,
                 period: form.period.trim() === '' ? null : form.period,
@@ -251,6 +272,10 @@ export default function Index({ forms, filters, periods, isEmpty, timestamp }: P
         (form.okud !== null && form.okud !== undefined && String(form.okud).includes(searchQuery.trim()))
     );
 
+    // Resolved from the id on every render. If the form disappears (deleted, page
+    // changed), this becomes null and the modal closes by itself.
+    const selectedForm = localForms.find(f => f.id === selectedFormId) ?? null;
+
     const handleSubmit = () => {
         put('/forms', {
             preserveScroll: true,
@@ -263,20 +288,9 @@ export default function Index({ forms, filters, periods, isEmpty, timestamp }: P
         setData('forms', []);
     };
 
-    const translatePaginationLabel = (label: string) => {
-        if (label.includes('Previous') || label.includes('&laquo;')) {
-            return label.replace(/Previous/gi, 'Назад');
-        }
-        if (label.includes('Next') || label.includes('&raquo;')) {
-            return label.replace(/Next/gi, 'Вперед');
-        }
-        return label;
-    };
-
     const inputCellClasses = "px-1.5 py-1 transition-colors duration-150";
     const borderRightSlate300 = "border-r border-slate-300";
     const borderRightSlate200 = "border-r border-slate-200";
-
 
     const displayQuery = searchQuery.length > 20 ? `${searchQuery.slice(0, 20)}…` : searchQuery;
 
@@ -330,6 +344,10 @@ export default function Index({ forms, filters, periods, isEmpty, timestamp }: P
                         <div className={`flex-1 min-w-[320px] px-3 py-2 ${borderRightSlate300} bg-orange-200/70 text-orange-900`}>
                             Наименование формы
                         </div>
+                        {/* Departments header: w-24 must match the cell width in FormRow */}
+                        <div className={`w-24 shrink-0 p-2 ${borderRightSlate300} text-center bg-orange-100/80 text-orange-900`}>
+                            отделы
+                        </div>
                         <div className={`w-36 px-3 py-2 ${borderRightSlate300} bg-cyan-200/70 text-cyan-900`}>
                             Количество отчётов
                         </div>
@@ -360,13 +378,15 @@ export default function Index({ forms, filters, periods, isEmpty, timestamp }: P
                                 periods={periods}
                                 handleInputChange={handleInputChange}
                                 onDelete={handleDelete}
+                                // the state setter is stable between renders, which matters
+                                // because FormRow's memo comparator ignores handler props
+                                onShowDepartments={setSelectedFormId}
                                 inputCellClasses={inputCellClasses}
                                 borderRightSlate300={borderRightSlate300}
                                 borderRightSlate200={borderRightSlate200}
                             />
                         ))}
                         {isEmpty && <div className="flex min-h-162.5 items-center justify-center">
-                            {/* <StateUploadButton isPlaceholder={true} /> */}
                             <EmptyActions route_path='forms.upload' warning="таблица форм пуста" onAddButtonClick={() => setIsAddModalOpen(true)} />
                         </div>}
                         {(!isEmpty && filteredForms.length == 0) && (
@@ -375,12 +395,17 @@ export default function Index({ forms, filters, periods, isEmpty, timestamp }: P
                     </div>
                 </div>
 
-
                 <Pagination links={forms.links} isVisible={canRenderPagination} />
 
                 <FlashMessage />
 
                 <AddFormModal periods={periods} isConsolidated={true} isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
+
+                {/* One modal for the whole table, not one per row */}
+                <DepartmentsModal
+                    form={selectedForm}
+                    onClose={() => setSelectedFormId(null)}
+                />
 
                 <Confirmation
                     show={!!formToDelete}
