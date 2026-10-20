@@ -29,6 +29,7 @@ class DepartmentSyncService
                 'code' => $item->Kod,
                 'territory' => 'ekb',
                 'state' => $item->cnt_shtat ?? 0,
+                'staff' => $item->cnt_shtat ?? 0,
             ];
         });
 
@@ -39,6 +40,7 @@ class DepartmentSyncService
                 'code' => $item->Kod . 'ке',
                 'territory' => 'krg',
                 'state' => $item->cnt_shtat ?? 0,
+                'staff' => $item->cnt_shtat ?? 0,
             ];
         });
 
@@ -49,6 +51,7 @@ class DepartmentSyncService
                 'code' => $item->Kod . 'к',
                 'territory' => 'krg',
                 'state' => $item->cnt_shtat ?? 0,
+                'staff' => $item->cnt_shtat ?? 0,
             ];
         });
 

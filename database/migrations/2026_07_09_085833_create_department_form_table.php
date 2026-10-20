@@ -14,6 +14,10 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('form_id')->constrained()->onDelete('cascade');
             $table->foreignId('department_id')->constrained()->onDelete('cascade');
+
+            // This ensures a form and department can only ever be linked once!
+            $table->unique(['form_id', 'department_id']);
+
             $table->timestamps();
         });
     }

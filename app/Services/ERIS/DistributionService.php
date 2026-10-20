@@ -32,13 +32,30 @@ class DistributionService
         // 2. Map Krg records using a static string suffix
         $krgRes = $this->getRes(Krg_Distr::all(), $formMap, 'к', $depMap);
 
-        $res = $ekbRes->concat($krgRes);
+        // 3. Concatenate and force strict uniqueness using keyBy()
+        $res = $ekbRes->concat($krgRes)->keyBy(function ($item) {
+            return $item['form_id'] . '_' . $item['department_id'];
+        })->values();
 
-        DepartmentForm::upsert(
-            $res->toArray(),
-            ['form_id', 'department_id'],
-            []
-        );
+        // 4. Use insertOrIgnore in safe chunks to silently bypass existing database duplicates
+        $res->chunk(100)->each(function ($chunk) {
+            DepartmentForm::insertOrIgnore($chunk->values()->toArray());
+        });
+
+        // 5. Deletion Part: Remove local records that no longer exist in the fresh remote snapshot
+        // We extract all valid composite keys present in the current sync payload
+        $validKeys = $res->map(function ($item) {
+            return $item['form_id'] . '-' . $item['department_id'];
+        });
+
+        // Fetch all current local relations and prune any that aren't in the valid payload
+        DepartmentForm::all()->each(function ($departmentForm) use ($validKeys) {
+            $currentKey = $departmentForm->form_id . '-' . $departmentForm->department_id;
+
+            if (!$validKeys->contains($currentKey)) {
+                $departmentForm->delete();
+            }
+        });
 
         return $res;
     }
