@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\Form;
 use App\Models\Department;
-use Illuminate\Support\Facades\DB;
 use App\Models\SyncLogs;
+use Illuminate\Support\Facades\DB;
 
 class FormDistributionService
 {
@@ -14,20 +14,20 @@ class FormDistributionService
         $departments = Department::all();
 
         $formsQuery = Form::query()
-            ->with(['departments']);
+            ->with(['departments' => fn($q) => $q->withPivot('okveds')])
+            ->whereHas('departments', function ($q) use ($territory) {
+                $q->whereNotNull('department_form.okveds')
+                    ->where('department_form.okveds', '!=', '');
 
-        if ($territory !== 'all') {
-            $formsQuery->whereHas('departments', function ($query) use ($territory) {
-                $query->where(DB::raw('LOWER(TRIM(territory))'), $territory);
+                if ($territory !== 'all') {
+                    $q->where(DB::raw('LOWER(TRIM(territory))'), $territory);
+                }
             });
-        }
 
         if ($search !== '') {
-            $formsQuery->where(function ($query) use ($search) {
-                $query->where('name', 'like', '%' . $search . '%')
-                    ->orWhereHas('departments', function ($subQuery) use ($search) {
-                        $subQuery->where('name', 'like', '%' . $search . '%');
-                    });
+            $formsQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhereHas('departments', fn($subQ) => $subQ->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -38,21 +38,26 @@ class FormDistributionService
             'id' => $form->id,
             'okud' => $form->okud,
             'name' => $form->name,
-            'departments' => $form->departments->map(fn($d) => ['id' => $d->id, 'name' => $d->name, 'code' => $d->code, 'territory' => $d->territory, 'okveds' => $d->okveds,]),
+            'departments' => $form->departments->map(fn($d) => [
+                'id' => $d->id,
+                'name' => $d->name,
+                'code' => $d->code,
+                'territory' => $d->territory,
+                'okveds' => $d->pivot->okveds ?? null,
+            ]),
+            'okveds' => $form->departments->pluck('pivot.okveds')->filter()->implode(', '),
         ]);
-
-        $isEmpty = Form::doesntExist();
 
         return [
             'forms' => $forms,
             'departments' => $departments,
             'links' => $links,
-            'isEmpty' => $isEmpty,
+            'isEmpty' => Form::doesntExist(),
             'filters' => [
                 'search' => $search,
-                'territory' => $territory
+                'territory' => $territory,
             ],
-            'timestamp' => SyncLogs::value('synced_when') ?? 'пусто'
+            'timestamp' => SyncLogs::value('synced_when') ?? 'пусто',
         ];
     }
 }
