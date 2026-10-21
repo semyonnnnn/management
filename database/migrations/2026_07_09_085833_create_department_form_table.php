@@ -18,6 +18,8 @@ return new class extends Migration {
             // This ensures a form and department can only ever be linked once!
             $table->unique(['form_id', 'department_id']);
 
+            $table->string('okveds')->default('');
+
             $table->timestamps();
         });
     }

@@ -21,7 +21,6 @@ class Department extends Model
         'territory',
         'state',
         'staff',
-        'okveds',
     ];
 
     /**

@@ -22,33 +22,44 @@ class DistributionService
         $formMap = Form::pluck('id', 'okud');
         $depMap = Department::pluck('id', 'code');
 
+        $ekbDistr = Ekb_Distr::all();
+        $krgDistr = Krg_Distr::all();
+
         $krgInEkbKodes = $this->departmentSyncService->getKrgInEkbKodes();
 
         // 1. Map Ekb records dynamically using a closure for the suffix
-        $ekbRes = $this->getRes(Ekb_Distr::all(), $formMap, function ($item) use ($krgInEkbKodes) {
+        $ekbRes = $this->getOkveds($ekbDistr, $formMap, function ($item) use ($krgInEkbKodes) {
             return in_array($item['Otdel_kod'], $krgInEkbKodes) ? 'ке' : '';
         }, $depMap);
 
         // 2. Map Krg records using a static string suffix
-        $krgRes = $this->getRes(Krg_Distr::all(), $formMap, 'к', $depMap);
+        $krgRes = $this->getOkveds($krgDistr, $formMap, 'к', $depMap);
 
         // 3. Concatenate and force strict uniqueness using keyBy()
         $res = $ekbRes->concat($krgRes)->keyBy(function ($item) {
             return $item['form_id'] . '_' . $item['department_id'];
         })->values();
 
+
         // 4. Use insertOrIgnore in safe chunks to silently bypass existing database duplicates
         $res->chunk(100)->each(function ($chunk) {
-            DepartmentForm::insertOrIgnore($chunk->values()->toArray());
+            $now = now();
+
+            $payload = $chunk->map(function ($item) use ($now) {
+                return array_merge($item, [
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            })->values()->toArray();
+
+            DepartmentForm::insertOrIgnore($payload);
         });
 
         // 5. Deletion Part: Remove local records that no longer exist in the fresh remote snapshot
-        // We extract all valid composite keys present in the current sync payload
         $validKeys = $res->map(function ($item) {
             return $item['form_id'] . '-' . $item['department_id'];
         });
 
-        // Fetch all current local relations and prune any that aren't in the valid payload
         DepartmentForm::all()->each(function ($departmentForm) use ($validKeys) {
             $currentKey = $departmentForm->form_id . '-' . $departmentForm->department_id;
 
@@ -60,12 +71,11 @@ class DistributionService
         return $res;
     }
 
-    private function getRes($remoteCollection, $formMap, string|callable $suffixResolver, $depMap)
+    private function getOkveds($remoteCollection, $formMap, string|callable $suffixResolver, $depMap)
     {
         return $remoteCollection->map(function ($item) use ($suffixResolver, $formMap, $depMap) {
             $form_id = $formMap->get(trim($item['okud'] ?? ''));
 
-            // Resolve whether the suffix is a static string or requires dynamic evaluation
             $suffix = is_callable($suffixResolver)
                 ? $suffixResolver($item)
                 : $suffixResolver;
@@ -74,11 +84,13 @@ class DistributionService
 
             return [
                 'form_id' => $form_id,
-                'department_id' => $dep_id
+                'department_id' => $dep_id,
+                'okveds' => $item['okved2list'] ?? null,
             ];
         })->filter(function ($item) {
-            // Drop any rows lacking essential foreign key relationships
-            return !is_null($item['form_id']) && !is_null($item['department_id']);
+            return !is_null($item['form_id'])
+                && !is_null($item['department_id'])
+                && $item['okveds'] !== '';
         });
     }
 }
