@@ -1,17 +1,38 @@
-import ApplicationLogo from '@/components/custom/ApplicationLogo';
+import { PropsWithChildren, ReactNode, useState, useEffect } from 'react';
 import { router, Link, usePage } from '@inertiajs/react';
-import ResponsiveNavLink from '@/components/custom/ResponsiveNavLink';
-import { PropsWithChildren, ReactNode, useState } from 'react';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
-// Import the font weights you need
 import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/700.css";
+///////////////////////////////////////////////////////////////
+import ApplicationLogo from '@/components/custom/ApplicationLogo';
+import ResponsiveNavLink from '@/components/custom/ResponsiveNavLink';
+import { Waiting } from '@/components/custom/Waiting';
+// Import the font weights you need
 
 export default function Authenticated({ header, children }: PropsWithChildren<{ header?: ReactNode }>) {
     const user = usePage().props.auth.user;
     const { url } = usePage();
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [showingMainDropdown, setShowingMainDropdown] = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    useEffect(() => {
+        const removeStart = router.on('start', (event) => {
+            // Check if the current request is the sync route
+            if (event.detail.visit.url.pathname.includes('/sync')) {
+                setIsSyncing(true);
+            }
+        });
+
+        const removeFinish = router.on('finish', () => {
+            setIsSyncing(false);
+        });
+
+        return () => {
+            removeStart();
+            removeFinish();
+        };
+    }, []);
 
     // Function to check if a route is active
     const isActive = (routePath: string) => {
@@ -44,6 +65,7 @@ export default function Authenticated({ header, children }: PropsWithChildren<{ 
 
     return (
         <div className="min-h-screen bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+            {isSyncing && <Waiting />}
             <nav className="bg-white/80 backdrop-blur-sm border-b border-indigo-200/50">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between items-center">

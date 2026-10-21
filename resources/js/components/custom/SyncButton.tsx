@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { router } from "@inertiajs/react";
 import { SyncIcon } from "@/components/custom/SyncIcon";
 
