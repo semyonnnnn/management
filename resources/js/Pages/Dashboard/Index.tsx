@@ -19,7 +19,6 @@ export default function Index({ departments, timestamp }: PageProps & { departme
         version: "",
     });
 
-    console.log(departments);
 
     useEffect(() => {
         const initial = departments.reduce((acc, d) => {
@@ -37,7 +36,6 @@ export default function Index({ departments, timestamp }: PageProps & { departme
         return totalStaff > 0 ? totalWorkload / totalStaff : 0;
     }, [departments]);
 
-    console.log("departments", departments);
 
     // Calculate Card Data: Mapping "Optimal" to 50% visual width
     const loads: LoadItem[] = useMemo(() => {
@@ -66,8 +64,6 @@ export default function Index({ departments, timestamp }: PageProps & { departme
         ];
     }, [departments, localStaff, fixedOptimalLoad]);
 
-    console.log("loads:", loads);
-    console.log("departments:", departments);
 
     const processedDepartments: DeptData[] = useMemo(() => {
         return departments.map((dept) => {

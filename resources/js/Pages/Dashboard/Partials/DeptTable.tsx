@@ -105,7 +105,7 @@ const DeptTable: React.FC<ExtendedProps> = ({
                             const loadPerStaff = dept.staff > 0 ? Math.floor(dept.workload / dept.staff) : 0;
 
                             // Visual logic: 200% load = 100% width. So we divide by 2.
-                            const barWidth = Math.min(workloadPercent / 2, 100);
+                            const barWidth = Math.min(workloadPercent, 100);
 
                             return (
                                 <tr key={dept.id} className={`border-b border-indigo-900/40 transition-all ${index % 2 === 0 ? 'bg-indigo-200/40' : ''}`}>
@@ -163,7 +163,7 @@ const DeptTable: React.FC<ExtendedProps> = ({
                         departmentName={selectedDept.name}
                         staffCount={selectedDept.staff}
                         totalLoad={selectedDept.totalLoad}
-                        loadPerStaff={selectedDept.staff > 0 ? Math.floor(selectedDept.totalLoad / selectedDept.staff) : 0}
+                        loadPerStaff={selectedDept.staff > 0 ? Math.floor(selectedDept.workload / selectedDept.staff) : 0}
                         levelPercent={calcWorkloadRawPercent(selectedDept)}
                         levelClass={getLevelClass(calcWorkloadRawPercent(selectedDept)) as any}
                         territory={selectedDept.territory}

@@ -30,8 +30,8 @@ const ModalDetailsSummary = ({
         <div className="flex flex-col space-y-6">
             {/* Top Grid: Core Info & Visual Progress Indicator */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div className="md:col-span-2 relative overflow-hidden border border-indigo-200/50 bg-gradient-to-br from-indigo-50/70 via-white to-indigo-50/30">
-                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-indigo-400/70 via-indigo-300/40 to-transparent" />
+                <div className="md:col-span-2 relative overflow-hidden border border-indigo-200/50 bg-linear-to-br from-indigo-50/70 via-white to-indigo-50/30">
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-linear-to-r from-indigo-400/70 via-indigo-300/40 to-transparent" />
                     <div className="flex flex-col h-full">
                         <div className="flex flex-1 border-b border-indigo-200/40">
                             <div className="flex-1 px-4 py-3 min-w-0 flex flex-col justify-center">
@@ -73,10 +73,10 @@ const ModalDetailsSummary = ({
                             </div>
                         </div>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-200 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-indigo-200 to-transparent" />
                 </div>
 
-                <div className="relative flex items-center justify-center border border-indigo-200/50 bg-gradient-to-br from-indigo-50/40 to-white p-5">
+                <div className="relative flex items-center justify-center border border-indigo-200/50 bg-linear-to-br from-indigo-50/40 to-white p-5">
                     <div className="absolute inset-0 bg-indigo-100/20 blur-2xl opacity-40" />
                     <CircularProgress percent={levelPercent} size={120} strokeWidth={10} />
                 </div>
