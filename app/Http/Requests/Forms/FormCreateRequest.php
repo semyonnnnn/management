@@ -21,6 +21,8 @@ class FormCreateRequest extends FR
             'indicators' => 'required|integer|min:1',
             'is_consolidated' => 'required|boolean',
 
+            'reports_count' => 'required|integer|min:1',
+
             'k1' => 'required|numeric|gt:0',
             'k2' => 'required|numeric|gt:0',
             'k3' => 'required|numeric|gt:0',
@@ -48,6 +50,10 @@ class FormCreateRequest extends FR
             'indicators.required' => 'Поле "Показатели" обязательно для заполнения.',
             'indicators.integer' => 'Поле "Показатели" должно быть целым числом.',
             'indicators.min' => 'Поле "Показатели" должно быть не меньше 1.',
+
+            'reports_count.required' => 'Поле "Количество отчётов" обязательно для заполнения.',
+            'reports_count.integer' => 'Поле "Количество отчётов" должно быть целым числом.',
+            'reports_count.min' => 'Поле "Количество отчётов" должно быть не меньше 1.',
 
             'is_consolidated.required' => 'Поле "Консолидированная" обязательно для заполнения.',
             'is_consolidated.boolean' => 'Поле "Консолидированная" должно иметь логическое значение.',

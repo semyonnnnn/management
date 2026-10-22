@@ -13,11 +13,10 @@ class SyncController extends Controller
         DepartmentSyncService $depSyncService,
         DistributionService $distributionService
     ) {
-        //todo! move distr to bottom
 
-        $distributionService->sync();
         $depSyncService->sync();
         $formSyncService->sync();
+        $distributionService->sync();
 
         return back()->with(
             'success',

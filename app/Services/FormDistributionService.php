@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Form;
 use App\Models\Department;
+use App\Models\DepartmentForm;
 use App\Models\SyncLogs;
 use Illuminate\Support\Facades\DB;
 
@@ -52,7 +53,7 @@ class FormDistributionService
             'forms' => $forms,
             'departments' => $departments,
             'links' => $links,
-            'isEmpty' => Form::doesntExist(),
+            'isEmpty' => DepartmentForm::doesntExist(),
             'filters' => [
                 'search' => $search,
                 'territory' => $territory,

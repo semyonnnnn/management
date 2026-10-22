@@ -15,6 +15,7 @@ const FIELD_TRANSLATIONS: Record<string, string> = {
     'okud': 'ОКУД',
     'period': 'Период',
     'indicators': 'Показатели',
+    'reports_count': 'Количество отчетов',
     'k1': 'Коэффициент K1',
     'k2': 'Коэффициент K2',
     'k3': 'Коэффициент K3',
@@ -30,6 +31,7 @@ export const AddFormModal = ({ isOpen, onClose, isConsolidated, periods }: Exten
         okud: '',
         period: '',
         indicators: '',
+        reports_count: '',
         k1: '1.0',
         k2: '1.0',
         k3: '1.0',
@@ -92,6 +94,7 @@ export const AddFormModal = ({ isOpen, onClose, isConsolidated, periods }: Exten
         transform((currentData) => ({
             ...currentData,
             indicators: parseInt(currentData.indicators, 10) || 0,
+            reports_count: parseInt(currentData.reports_count, 10) || 0,
             k1: parseFloat(currentData.k1) || 0,
             k2: parseFloat(currentData.k2) || 0,
             k3: parseFloat(currentData.k3) || 0,
@@ -161,7 +164,7 @@ export const AddFormModal = ({ isOpen, onClose, isConsolidated, periods }: Exten
 
                             {/* BLOCK 3: Core Metrics */}
                             <div className="bg-emerald-50/80 border border-emerald-200 p-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-4 mb-4">
                                     <div>
                                         <label className={`block text-sm font-bold uppercase mb-2 ${errors.period ? 'text-red-700' : 'text-emerald-900/80'}`}>Период</label>
                                         <CustomSelect
@@ -169,7 +172,7 @@ export const AddFormModal = ({ isOpen, onClose, isConsolidated, periods }: Exten
                                             value={data.period}
                                             onChange={(val) => setData('period', val)}
                                             options={periods.map((p) => ({ name: p }))}
-                                            defaultText="— Выберите период —"
+                                            defaultText="— Выберите —"
                                             className={`w-full px-3.5 py-2.5 bg-white border text-base font-bold focus:outline-none transition-colors ${errors.period
                                                 ? 'border-red-500 text-red-950 focus:border-red-600 bg-red-50/30'
                                                 : 'border-emerald-300 text-emerald-950 focus:border-emerald-400 focus:ring focus:ring-emerald-400 focus:bg-emerald-100'
@@ -188,6 +191,37 @@ export const AddFormModal = ({ isOpen, onClose, isConsolidated, periods }: Exten
                                                 : 'border-emerald-300 text-emerald-950 focus:border-emerald-400 focus:ring focus:ring-emerald-400 focus:bg-emerald-100'
                                                 }`}
                                         />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className={`block text-sm font-bold uppercase mb-2 ${errors.reports_count ? 'text-red-700' : 'text-emerald-900/80'}`}>Количество отчетов</label>
+                                        <input
+                                            type="text"
+                                            value={data.reports_count}
+                                            onChange={e => handleIntegerChange('reports_count', e.target.value)}
+                                            placeholder="0"
+                                            className={`w-full px-3 py-2.5 bg-white border text-base font-bold focus:outline-none transition-colors text-center ${errors.reports_count
+                                                ? 'border-red-500 text-red-950 focus:border-red-600 bg-red-50/30'
+                                                : 'border-emerald-300 text-emerald-950 focus:border-emerald-400 focus:ring focus:ring-emerald-400 focus:bg-emerald-100'
+                                                }`}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className={`block text-sm font-bold uppercase mb-2 ${errors.is_consolidated ? 'text-red-700' : 'text-emerald-900/80'}`}>Консолидир.</label>
+                                        <div className={`flex items-center h-[46px] px-3 bg-white border ${errors.is_consolidated ? 'border-red-500 bg-red-50/30' : 'border-emerald-300'}`}>
+                                            <label className="flex items-center space-x-2 cursor-pointer w-full select-none">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={data.is_consolidated}
+                                                    onChange={e => setData('is_consolidated', e.target.checked)}
+                                                    className="rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4 cursor-pointer"
+                                                />
+                                                <span className={`text-sm font-bold ${errors.is_consolidated ? 'text-red-950' : 'text-emerald-950'}`}>
+                                                    {data.is_consolidated ? 'Да' : 'Нет'}
+                                                </span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
